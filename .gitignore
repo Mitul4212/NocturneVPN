@@ -1,15 +1,48 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Built application files
+/build/
+**/build/
+
+# Local configuration files (signing keys, IDE configs, etc.)
 local.properties
+*.jks
+*.keystore
+
+# Android Studio & IntelliJ project files
+*.iml
+.idea/
+!.idea/codeStyles/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# External build folders
+.gradle/
+.cxx/
+.externalNativeBuild/
+
+# Captures folder
+captures/
+
+# Log files and temporary files
+*.log
+*.tmp
+
+# Navigation Editor temp files
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Mac indexing
+.idea/modules.xml
+.idea/workspace.xml
+.idea/libraries/
+
+# Optional: ignore generated Proguard and output
+*.apk
+*.ap_
+
+# Optional: ignore crashlytics/analytics generated files (if used)
+fabric.properties
+
+# Kotlin/Java build cache
+.kotlinc/
