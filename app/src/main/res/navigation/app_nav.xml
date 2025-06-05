@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_nav"
+    app:startDestination="@id/homeFragment">
+
+
+    <fragment
+        android:id="@id/profileFragment"
+        android:name="com.example.nocturnevpn.view.fragment.profileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_premiumFragment"
+            app:destination="@id/premiumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@id/homeFragment"
+        android:name="com.example.nocturnevpn.view.fragment.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_premiumFragment"
+            app:destination="@id/premiumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@id/settingFragment3"
+        android:name="com.example.nocturnevpn.view.fragment.settingFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" >
+
+        <action
+            android:id="@+id/action_settingFragment3_to_advanceSetttingFragment"
+            app:destination="@id/advanceSetttingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/advanceSetttingFragment"
+        android:name="com.example.nocturnevpn.view.fragment.AdvanceSetttingFragment"
+        android:label="fragment_advance_settting"
+        tools:layout="@layout/fragment_advance_settting" />
+    <fragment
+        android:id="@+id/premiumFragment"
+        android:name="com.example.nocturnevpn.view.fragment.PremiumFragment"
+        android:label="fragment_premium"
+        tools:layout="@layout/fragment_premium" />
+
+</navigation>

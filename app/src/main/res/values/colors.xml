@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="strong_violet">#6622CC</color>
+    <color name="gray">#B5AEBE</color>
+    <color name="track_color">#ADADAD</color>
+    <color name="black_overlay">#000000</color>
+    <color name="btn_background">#F7F7F7</color>
+    <color name="discoint">#FFFFFF</color>
+    <color name="tryButton">#FFFFFF</color>
+    <color name="custom_white">#F7F7F7</color>
+    <color name="up_arrow">#22CCC2</color>
+    <color name="highlighted_card_color">#80C4C3C3</color>
+
+
+
+
+    <color name="pointer_color">#6622CC</color>
+    <color name="switch_checked">#6723CC</color>
+    <color name="switch_defulte">#C8C9C9</color>
+    <color name="discount_text">#486FC8</color>
+    <color name="try_premium">#4478C7</color>
+
+</resources>

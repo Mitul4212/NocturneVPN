@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><vector xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android" android:height="27dp" android:viewportHeight="27.0" android:viewportWidth="20.0" android:width="20dp">
+<path android:pathData="M 10.0 2.0 C 14.418277998646348 2.0 18.0 5.581722001353652 18.0 10.0 C 18.0 14.418277998646348 14.418277998646348 18.0 10.0 18.0 C 5.581722001353652 18.0 2.0 14.418277998646348 2.0 10.0 C 2.0 5.581722001353652 5.581722001353652 2.0 10.0 2.0 Z" android:strokeColor="@color/pointer_color" android:strokeWidth="4.0"/>
+<path android:fillColor="@color/pointer_color" android:pathData="M 10.0 8.0 C 11.104569499661586 8.0 12.0 8.895430500338414 12.0 10.0 C 12.0 11.104569499661586 11.104569499661586 12.0 10.0 12.0 C 8.895430500338414 12.0 8.0 11.104569499661586 8.0 10.0 C 8.0 8.895430500338414 8.895430500338414 8.0 10.0 8.0 Z"/>
+<path android:fillColor="@color/pointer_color" android:pathData="M 10.0 19.0 L 10.0 19.0 Q 11.0 19.0 11.0 20.0 L 11.0 26.0 Q 11.0 27.0 10.0 27.0 L 10.0 27.0 Q 9.0 27.0 9.0 26.0 L 9.0 20.0 Q 9.0 19.0 10.0 19.0 Z"/>
+<group android:translateX="14" android:translateY="25">
+<group android:rotation="90">
+<group android:translateX="-14.0" android:translateY="-25.0">
+<path android:fillColor="@color/pointer_color" android:pathData="M 15.0 25.0 L 15.0 25.0 Q 16.0 25.0 16.0 26.0 L 16.0 32.0 Q 16.0 33.0 15.0 33.0 L 15.0 33.0 Q 14.0 33.0 14.0 32.0 L 14.0 26.0 Q 14.0 25.0 15.0 25.0 Z"/>
+</group>
+</group>
+</group>
+</vector>

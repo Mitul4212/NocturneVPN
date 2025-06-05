@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Transparent Globe</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: transparent;
+    }
+    canvas {
+      background-color: transparent !important;
+    }
+
+
+    /* Move the default navigation and globe controls lower */
+    /*.maplibregl-ctrl-top-right { */
+     /* top: 140px !important; */
+      /*right: 24px !important; */
+    /*} */
+
+
+
+
+     /* Button stack container */
+    .custom-map-buttons {
+      position: absolute;
+      top: 140px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1000;
+    }
+
+    .custom-map-button {
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+
+    #myLocationBtn {
+      position: absolute;
+      top: 140px;
+      left: 24px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<button id="myLocationBtn">
+    <i class="fas fa-location-crosshairs"></i> My Location
+</button>  <! 📍 My Location – –>
+
+<!-- Custom button stack -->
+<div class="custom-map-buttons">
+    <button id="zoomInBtn" class="custom-map-button">
+        <i class="fas fa-plus"></i>
+    </button>  <! + – –>
+    <button id="zoomOutBtn" class="custom-map-button">
+        <i class="fas fa-minus"></i>
+    </button>  <! − – –>
+    <button id="resetNorthBtn" class="custom-map-button">
+        <i class="fas fa-compass"></i>
+    </button>  <! 🧭 – –>
+    <button id="toggleGlobeBtn" class="custom-map-button" title="Toggle Globe">
+        <i class="fas fa-globe"></i>
+    </button>
+</div>
+
+
+<script>
+    let currentSelectionLat = null;
+    let currentSelectionLon = null;
+    let trueInitialLat = null;
+    let isGlobe = true;
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://appassets.androidplatform.net/assets/cst.json',
+    center: [12, 53],
+    zoom: 1,
+    antialias: true
+   // attributionControl: false  // ADD THIS to hide info button
+  });
+
+  map.on('load', () => {
+  // Remove attribution control element manually
+  const attribEl = document.querySelector('.maplibregl-ctrl-attrib');
+  if (attribEl) attribEl.style.display = 'none';
+
+  map.setProjection({ type: 'globe' });
+});
+
+
+
+  // map.addControl(new maplibregl.NavigationControl());
+ // map.addControl(new maplibregl.GlobeControl());
+
+  map.on('style.load', () => {
+    map.setProjection({ type: 'globe' });
+  });
+
+  function selection(lat, lon) {
+    console.log("Selection function called with:", lat, lon);
+    // You can communicate back to Android if needed
+  }
+
+  function setLocation(lat, lon, isInitial = false) {
+
+  if (isInitial && trueInitialLat === null) {
+    trueInitialLat = lat;
+    trueInitialLon = lon;
+  }
+
+  console.log("Initial or updated location set:", lat, lon);
+
+  // Always update current selection coordinates
+  currentSelectionLat = lat;
+  currentSelectionLon = lon;
+
+  map.flyTo({ center: [lon, lat], zoom: 1 });
+
+  if (window.userMarker) window.userMarker.remove();
+
+  window.userMarker = new maplibregl.Marker({ color: "#FF0000" })
+    .setLngLat([lon, lat])
+    .addTo(map);
+
+  selection(lat, lon);
+}
+
+// My Location button flies back to the current selected location (latest)
+document.getElementById("myLocationBtn").addEventListener("click", () => {
+  if (currentSelectionLat !== null && currentSelectionLon !== null) {
+    console.log("Returning to current selection location:", currentSelectionLat, currentSelectionLon);
+
+// Reset the view to north and flat (bearing=0, pitch=0)
+    map.easeTo({
+      center: [currentSelectionLon, currentSelectionLat],
+      zoom: 1,
+      bearing: 0,
+      pitch: 0,
+      essential: true
+    });
+
+    // Also reset marker
+    if (window.userMarker) window.userMarker.remove();
+
+    window.userMarker = new maplibregl.Marker({ color: "#FF0000" }) //#6622CC
+      .setLngLat([currentSelectionLon, currentSelectionLat])
+      .addTo(map);
+
+
+    // setLocation(currentSelectionLat, currentSelectionLon);
+  } else {
+    alert("Location not set.");
+  }
+});
+
+// Hook up zoom in, zoom out, and reset buttons
+  document.getElementById("zoomInBtn").addEventListener("click", () => {
+    map.zoomIn();
+  });
+
+  document.getElementById("zoomOutBtn").addEventListener("click", () => {
+    map.zoomOut();
+  });
+
+   document.getElementById("resetNorthBtn").addEventListener("click", () => {
+      map.easeTo({
+        bearing: 0,
+        pitch: 0,
+        duration: 1000,
+        essential: true
+      });
+    });
+
+    document.getElementById("toggleGlobeBtn").addEventListener("click", () => {
+  if (isGlobe) {
+    map.setProjection('mercator'); // Switch to flat
+  } else {
+    map.setProjection({ type: 'globe' }); // Switch to 3D globe
+  }
+  isGlobe = !isGlobe;
+});
+
+<!--  function switchToMode(mode) {-->
+<!--    const backgroundColor = mode === "dark" ? "#ffffff" : "#C7B4E3";-->
+<!--    const waterColor = mode === "dark" ? "#a7c7e7" : "#f5f2fa";-->
+<!--    const glacierColor = mode === "dark" ? "#d0e3f5" : "#C7B4E3";-->
+<!--    const boundry_3Color = mode === "dark" ? "#b3b3b3" : "#808080"-->
+<!--    const boundry_2Color = mode === "dark" ? "#a4a2ae" : "#838385"-->
+
+<!--    // const backgroundColor = mode === "dark" ? "#1c1c1c" : "#ffffff";-->
+<!--    // const waterColor = mode === "dark" ? "#2a2f33" : "#a7c7e7";-->
+<!--    // const glacierColor = mode === "dark" ? "#3b3f45" : "#d0e3f5";-->
+
+<!--    try {-->
+<!--      map.setPaintProperty("background", "background-color", backgroundColor);-->
+<!--      map.setPaintProperty("water", "fill-color", waterColor);-->
+<!--      map.setPaintProperty("landcover-glacier", "fill-color", glacierColor);-->
+<!--      map.setPaintProperty("boundary_3", "line-color", boundry_3Color);-->
+<!--      map.setPaintProperty("boundary_2", "line-color", boundry_2Color);-->
+<!--      console.log("Switched to mode:", mode);-->
+<!--    } catch (err) {-->
+<!--      console.error("Failed to switch mode:", err);-->
+<!--    }-->
+<!--  }-->
+
+
+
+
+
+
+  // Optional: Simulate Android calling this on load
+  // setLocation(28.6139, 77.2090); // Delhi, for example
+</script>
+</body>
+</html>

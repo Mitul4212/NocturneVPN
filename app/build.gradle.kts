@@ -1,0 +1,92 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.example.nocturnevpn"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.example.nocturnevpn"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled = true
+        buildConfigField("String", "VPN_GATE_API", "\"http://www.vpngate.net/api/iphone/\"")
+
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures{
+        dataBinding = true
+        viewBinding = true
+        buildConfig = true
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+dependencies {
+
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+
+
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation ("androidx.activity:activity-ktx:1.7.2")
+
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("org.chromium.net:cronet-embedded:119.6045.31")
+    implementation("androidx.webkit:webkit:1.13.0")
+    implementation ("androidx.work:work-runtime-ktx:2.9.0")
+
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
+
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    implementation(project(":vpnLib"))
+
+
+    implementation ("com.github.ibrahimsn98:SmoothBottomBar:1.7.9")
+
+    implementation ("androidx.cardview:cardview:1.0.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.badoo.mobile:android-weak-handler:1.1")
+//    implementation("com.android.support:multidex:1.0.3")
+
+    implementation("androidx.multidex:multidex:2.0.1")
+
+}

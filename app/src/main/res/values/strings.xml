@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">NocturneVPN</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Nocturne">Nocturne</string>
+    <string name="vpn">VPN</string>
+    <string name="go_pro">Go Pro</string>
+    <string name="us">United States</string>
+    <string name="ip">IP</string>
+    <string name="sip_address">79.110.53.95</string>
+    <string name="download">28.5 KB/S</string>
+    <string name="speed_ind">KB/S</string>
+    <string name="upload">21.6 KB/S</string>
+    <string name="not_signin">Looks like You’re not signed in yet.</string>
+    <string name="user_id">User ID</string>
+    <string name="user_num">284529462</string>
+    <string name="base_plan">Base Plan</string>
+    <string name="upgrade">UPGRADE</string>
+    <string name="restore">Restore</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="advance_settings">Advance Settings</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="hide_your_ip_with_n_anonymous_surfing">Hide your ip with \nanonymous surfing</string>
+    <string name="_seven_day_free_trial_then_9_99_month">7-day free trial. Then 9.99 $/month</string>
+    <string name="up_to_1000_mb_s_nbandwidth_to_explore">Up to 1000 Mb/s \nbandwidth to explore</string>
+    <string name="enjoy_the_app_nwithout_annoying_ads">Enjoy the app \nwithout annoying ads</string>
+    <string name="transfer_traffic_via_nencrypted_tunnel">Transfer traffic via\nencrypted tunnel</string>
+    <string name="disconnect_first">In order to change the server, please disconnect the VPN first</string>
+    <string name="connection_close_confirm">Would you like to cancel the current VPN Connection?</string>
+    <string name="no">NO</string>
+    <string name="yes">YES</string>
+    <string name="country_name">No Server Selected</string>
+    <string name="IP_address">Server IP Address</string>
+    <string name="default_server_text">Server Default Icon</string>
+    <string name="country_name_text">Country Name</string>
+    <string name="speed_text">Speed</string>
+    <string name="tcp_text">TCP</string>
+    <string name="ping_text">Ping</string>
+    <string name="format_ip_address">%1$s:%2$d</string>
+    <string name="format_ping">Ping: %s ms</string>
+    <string name="format_speed">%s</string>
+
+
+
+</resources>
