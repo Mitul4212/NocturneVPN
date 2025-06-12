@@ -20,12 +20,16 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".view.activitys.ChangeServerActivity"
+            android:name=".view.activitys.AppAuthActivity"
             android:exported="false" />
         <activity
-            android:name=".ServerActivity"
+            android:name=".view.activitys.ChangeServerActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
+<!--        <activity-->
+<!--            android:name=".ServerActivity"-->
+<!--            android:exported="false"-->
+<!--            android:screenOrientation="portrait" />-->
         <activity
             android:name=".view.activitys.HomeActivity"
             android:exported="true"

@@ -47,83 +47,120 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     public boolean serverExists(SQLiteDatabase db, String ipAddress) {
-        Cursor cursor = db.query(
-                ServerEntry.TABLE_NAME,
-                new String[]{ServerEntry.COLUMN_NAME_IP_ADDRESS},
-                ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?",
-                new String[]{ipAddress},
-                null, null, null
-        );
+        Cursor cursor = null;
+        try {
 
-        boolean exists = (cursor != null && cursor.moveToFirst());
-        if (cursor != null) cursor.close();
-        return exists;
+            cursor = db.query(
+                    ServerEntry.TABLE_NAME,
+                    new String[]{ServerEntry.COLUMN_NAME_IP_ADDRESS},
+                    ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?",
+                    new String[]{ipAddress},
+                    null, null, null
+            );
+            return (cursor != null && cursor.moveToFirst());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+
+//        boolean exists = (cursor != null && cursor.moveToFirst());
+//        if (cursor != null) cursor.close();
+//        return exists;
     }
 
     public void save(List<Server> servers, Context context) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = null;
 
-        db.beginTransaction();
+        try {
+            db = this.getWritableDatabase();
+            db.beginTransaction();
 
-        // Get selected server IP from SharedPreferences
-        SharedPreference prefs = new SharedPreference(context);
-        Server currentServer = prefs.getServer();
-        String currentIp = currentServer != null ? currentServer.ipAddress : "";
+            // Get selected server IP from SharedPreferences
+            SharedPreference prefs = new SharedPreference(context);
+            Server currentServer = prefs.getServer();
+            String currentIp = currentServer != null ? currentServer.ipAddress : "";
 
+            deleteOld(db);
 
-        deleteOld(db);
-
-        for (Server server : servers) {
+            for (Server server : servers) {
 //            ContentValues values = getContentValues(server);
 //            db.insert(ServerEntry.TABLE_NAME, null, values);
-            if (!serverExists(db, server.ipAddress)) {
                 ContentValues values = getContentValues(server);
-                db.insert(ServerEntry.TABLE_NAME, null, values);
-            } else {
-                // Optional: update existing record if needed
-                ContentValues values = getContentValues(server);
-                db.update(ServerEntry.TABLE_NAME, values,
-                        ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?",
-                        new String[]{server.ipAddress});
+
+                if (!serverExists(db, server.ipAddress)) {
+                    db.insert(ServerEntry.TABLE_NAME, null, values);
+                } else {
+                    // Optional: update existing record if needed
+                    db.update(ServerEntry.TABLE_NAME, values,
+                            ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?",
+                            new String[]{server.ipAddress});
+                }
             }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null && db.inTransaction()) {
+                db.endTransaction();
+            }
+            // Do NOT close the DB manually
         }
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        db.close();
+
+
+//        db.endTransaction();
+//        db.close();
     }
 
     /** Deletes all servers except for starred */
     public void deleteOld(SQLiteDatabase db) {
-        db.delete(ServerEntry.TABLE_NAME,
-                ServerEntry.COLUMN_NAME_IS_STARRED + " = 0",
-                null);
+        try {
+            db.delete(ServerEntry.TABLE_NAME,
+                    ServerEntry.COLUMN_NAME_IS_STARRED + " = 0",
+                    null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void setStarred(String ipAddress, boolean isStarred) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = null;
+        try {
+            db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(ServerEntry.COLUMN_NAME_IS_STARRED, isStarred ? 1 : 0);
-        db.update(ServerEntry.TABLE_NAME, values,
-                ServerContract.ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?", new String[]{ipAddress});
+            ContentValues values = new ContentValues();
+            values.put(ServerEntry.COLUMN_NAME_IS_STARRED, isStarred ? 1 : 0);
+            db.update(ServerEntry.TABLE_NAME, values,
+                    ServerContract.ServerEntry.COLUMN_NAME_IP_ADDRESS + " = ?", new String[]{ipAddress});
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public List<Server> getAll() {
-        SQLiteDatabase db = this.getWritableDatabase();
-
         List<Server> servers = new ArrayList<>();
-        Cursor cursor = db.query(ServerContract.ServerEntry.TABLE_NAME,
-                ServerContract.ServerEntry.ALL_COLUMNS, null, null, null, null, null, null);
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                servers.add(cursorToServer(cursor));
-                cursor.moveToNext();
+        try {
+            db = this.getWritableDatabase();
+            cursor = db.query(ServerContract.ServerEntry.TABLE_NAME,
+                    ServerContract.ServerEntry.ALL_COLUMNS, null, null, null, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    servers.add(cursorToServer(cursor));
+                } while ( cursor.moveToNext());
             }
-            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) cursor.close();
         }
-        db.close();
+
+//        db.close();
 
         return servers;
     }
@@ -174,7 +211,5 @@ public class DbHelper extends SQLiteOpenHelper {
         server.isStarred = cursor.getInt(19) == 1;
         return server;
     }
-
-
 
 }

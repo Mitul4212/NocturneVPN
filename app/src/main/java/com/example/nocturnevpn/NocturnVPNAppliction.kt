@@ -24,8 +24,8 @@ class NocturnVPNAppliction : Application() {
                 .build()
 
             // Set to 30 minutes for both debug and release
-            val repeatInterval = 30L
-            val flexInterval = 10L
+            val repeatInterval = 15L
+            val flexInterval = 5L
 
             val workRequest = PeriodicWorkRequestBuilder<ServerFetchWorker>(
                 repeatInterval, TimeUnit.MINUTES,

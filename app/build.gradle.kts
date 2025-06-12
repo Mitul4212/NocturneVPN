@@ -89,4 +89,7 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
+    implementation ("com.github.murgupluoglu:flagkit-android:1.0.5")
+    implementation ("com.facebook.shimmer:shimmer:0.5.0")
+
 }

@@ -40,7 +40,7 @@
     <string name="format_ip_address">%1$s:%2$d</string>
     <string name="format_ping">Ping: %s ms</string>
     <string name="format_speed">%s</string>
-
+    <string name="flag_image">flag image</string>
 
 
 </resources>

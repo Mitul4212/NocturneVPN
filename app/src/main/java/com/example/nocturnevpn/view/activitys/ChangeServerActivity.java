@@ -1,31 +1,35 @@
 package com.example.nocturnevpn.view.activitys;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.badoo.mobile.util.WeakHandler;
 import com.example.nocturnevpn.BuildConfig;
 import com.example.nocturnevpn.R;
 import com.example.nocturnevpn.SharedPreference;
+import com.example.nocturnevpn.adapter.ExpandableServerAdapter;
 import com.example.nocturnevpn.adapter.ServerAdapter;
 import com.example.nocturnevpn.databinding.ActivityChangeServerBinding;
 import com.example.nocturnevpn.db.DbHelper;
+import com.example.nocturnevpn.model.CountryServerGroup;
 import com.example.nocturnevpn.model.Server;
 import com.example.nocturnevpn.utils.CsvParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -40,9 +44,18 @@ public class ChangeServerActivity extends AppCompatActivity {
     private WeakHandler handler;
     private OkHttpClient okHttpClient = new OkHttpClient();
     private List<Server> servers = new ArrayList<>();
+    private List<CountryServerGroup> groupedServers = new ArrayList<>();
+
+    private final List<CountryServerGroup> fullGroupList = new ArrayList<>();
+
+
     private Request request;
+    private SearchView searchView;
     private Call mCall;
-    private ServerAdapter adapter;
+//    private ServerAdapter adapter;
+
+    private ExpandableServerAdapter adapter;
+
     private DbHelper dbHelper;
 
     private SharedPreference sharedPreference;
@@ -89,7 +102,60 @@ public class ChangeServerActivity extends AppCompatActivity {
             finish();
         });
 
+        searchView = binding.serverSearchView;
 
+        // Force SearchView to expand (iconifiedByDefault = false)
+        searchView.setIconifiedByDefault(false);
+
+        EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        if (searchEditText != null) {
+            searchEditText.setBackgroundResource(R.drawable.search_background);
+            searchEditText.setPadding(24, 16, 24, 16); // optional
+        } else {
+            Log.e("ChangeServerActivity", "EditText inside SearchView is null!");
+        }
+
+
+        // Search filter logic
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filterServers(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterServers(newText);
+                return true;
+            }
+        });
+
+    }
+
+    private void filterServers(String query) {
+        String lowerQuery = query.toLowerCase().trim();
+        List<CountryServerGroup> filteredGroups = new ArrayList<>();
+
+        for (CountryServerGroup group : fullGroupList) {
+            List<Server> filteredServers = new ArrayList<>();
+            for (Server server : group.getServers()) {
+                if (server.getCountryLong().toLowerCase().contains(query.toLowerCase()) ||
+                        server.getIpAddress().toLowerCase().contains(query.toLowerCase()) ||
+                        server.getProtocol().toLowerCase().contains(query.toLowerCase()) ||
+                        server.getHostName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredServers.add(server);
+                }
+            }
+            if (!filteredServers.isEmpty()) {
+                filteredGroups.add(new CountryServerGroup(group.getCountryName(), group.getCountryCode(), filteredServers));
+            }
+        }
+
+        groupedServers.clear();
+        groupedServers.addAll(filteredGroups);
+        adapter.updateList(filteredGroups);  // Adapter should reflect changes here
+//        adapter.updateList(filteredGroups);
     }
 
     @Override
@@ -133,24 +199,72 @@ public class ChangeServerActivity extends AppCompatActivity {
     }
 
 
+//    private void setupRecyclerView() {
+//        adapter = new ServerAdapter(servers, serverClickCallback);
+//
+//        // ✅ Load saved selected IP
+//        String savedIp = getSharedPreferences("vpn_prefs", MODE_PRIVATE)
+//                .getString("selected_ip", "");
+//        adapter.setSelectedServer(savedIp);
+//
+//        RecyclerView.ItemDecoration itemDecoration = new
+//                DividerItemDecoration(ChangeServerActivity.this, 0);
+//        binding.recyclerView.setHasFixedSize(true);
+//        binding.recyclerView.addItemDecoration(itemDecoration);
+//        binding.recyclerView.setLayoutManager(new LinearLayoutManager(binding.recyclerView.getContext()));
+//        binding.recyclerView.setAdapter(adapter);
+//    }
+
     private void setupRecyclerView() {
-        adapter = new ServerAdapter(servers, serverClickCallback);
+        adapter = new ExpandableServerAdapter(groupedServers, server -> {
+            // Save selected server to shared preferences
+            sharedPreference.saveServer(server);
 
-        // ✅ Load saved selected IP
-        String savedIp = getSharedPreferences("vpn_prefs", MODE_PRIVATE)
-                .getString("selected_ip", "");
-        adapter.setSelectedServer(savedIp);
+            getSharedPreferences("vpn_prefs", MODE_PRIVATE)
+                    .edit()
+                    .putString("selected_ip", server.getIpAddress())
+                    .apply();
 
-        RecyclerView.ItemDecoration itemDecoration = new
-                DividerItemDecoration(ChangeServerActivity.this, 0);
+            // Send result back to previous activity
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("serverextra", server);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setHasFixedSize(true);
-        binding.recyclerView.addItemDecoration(itemDecoration);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(binding.recyclerView.getContext()));
         binding.recyclerView.setAdapter(adapter);
     }
 
+    private void showSkeletonPlaceholders() {
+        binding.recyclerView.setVisibility(View.GONE);
+        binding.skeletonContainer.setVisibility(View.VISIBLE);
+        binding.skeletonContainer.removeAllViews();
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int i = 0; i < 9; i++) {
+            View skeletonView = inflater.inflate(R.layout.server_list_skeleton, binding.skeletonContainer, false);
+            binding.skeletonContainer.addView(skeletonView);
+        }
+    }
+
+    private void hideSkeletonPlaceholders() {
+        binding.skeletonContainer.setVisibility(View.GONE);
+        binding.recyclerView.setVisibility(View.VISIBLE);
+    }
+
+
     private void loadServerList(List<Server> serverList) {
-        adapter.setServerList(serverList);
+        List<CountryServerGroup> grouped = groupServersByCountry(serverList);
+
+        // Always keep a fresh copy of full list
+        fullGroupList.clear();
+        fullGroupList.addAll(grouped);
+
+        groupedServers.clear();
+        groupedServers.addAll(grouped);
+        adapter.updateList(grouped);  // Make sure you implement this in ExpandableServerAdapter
 
         Server savedServer = sharedPreference.getServer();
         if (savedServer != null) {
@@ -166,6 +280,7 @@ public class ChangeServerActivity extends AppCompatActivity {
     private void populateServerList() {
         binding.swipeRefresh.setRefreshing(true);
         binding.recyclerView.setVisibility(View.INVISIBLE);
+        showSkeletonPlaceholders(); // Show skeletons
 
         mCall = okHttpClient.newCall(request);
         mCall.enqueue(new Callback() {
@@ -176,6 +291,8 @@ public class ChangeServerActivity extends AppCompatActivity {
                     public void run() {
                         binding.swipeRefresh.setRefreshing(false);
                         binding.recyclerView.setVisibility(View.VISIBLE);
+                        hideSkeletonPlaceholders(); // Hide on fail
+
                     }
                 });
             }
@@ -191,11 +308,32 @@ public class ChangeServerActivity extends AppCompatActivity {
                             loadServerList(servers);
                             binding.swipeRefresh.setRefreshing(false);
                             binding.recyclerView.setVisibility(View.VISIBLE);
+                            hideSkeletonPlaceholders(); // Hide on success
+
                         }
                     });
                 }
             }
         });
+    }
+
+    private List<CountryServerGroup> groupServersByCountry(List<Server> servers) {
+        Map<String, List<Server>> groupedMap = new LinkedHashMap<>();
+        Map<String, String> countryCodeMap = new LinkedHashMap<>();
+
+        for (Server server : servers) {
+            groupedMap.computeIfAbsent(server.getCountryLong(), k -> new ArrayList<>()).add(server);
+            countryCodeMap.put(server.getCountryLong(), server.getCountryShort());
+        }
+
+        List<CountryServerGroup> groupedList = new ArrayList<>();
+        for (Map.Entry<String, List<Server>> entry : groupedMap.entrySet()) {
+            String countryName = entry.getKey();
+            String countryCode = countryCodeMap.get(countryName);
+            groupedList.add(new CountryServerGroup(countryName, countryCode, entry.getValue()));
+        }
+
+        return groupedList;
     }
 
     private final ServerAdapter.ServerClickCallback serverClickCallback =

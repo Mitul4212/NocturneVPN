@@ -17,7 +17,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -310,40 +309,81 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     }
 
 
+//    private fun setupGlobe() {
+//        val webSettings: WebSettings = binding!!.globeWebView.settings
+//        webSettings.javaScriptEnabled = true
+//        webSettings.domStorageEnabled = true
+//        webSettings.allowFileAccess = true
+//        webSettings.allowContentAccess = true
+////        webSettings.allowFileAccessFromFileURLs = true
+////        webSettings.allowUniversalAccessFromFileURLs = true
+////        binding.globeWebView.setBackgroundColor(Color.TRANSPARENT)
+////        binding.globeWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+//
+//
+//
+//        // Enable remote debugging in Chrome
+//        WebView.setWebContentsDebuggingEnabled(true)
+//
+//        // Setup WebViewAssetLoader to serve assets from assets folder
+//        val assetLoader = WebViewAssetLoader.Builder()
+//            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(requireContext()))
+//            .build()
+//
+//        // Load your local globe.html file from assets
+////        binding.globeWebView.loadUrl("file:///android_asset/globe.html")      //when file loade with loacl save
+//        binding!!.globeWebView.loadUrl("https://appassets.androidplatform.net/assets/globe.html")  //If globe.html loads JSON or other resources, change their URLs from relative or file:///android_asset/... paths to
+//
+//
+//        //old code
+//        // Ensure getIPLocationAndUpdateGlobe() is only called after the page has loaded
+////        binding.globeWebView.webViewClient = object : android.webkit.WebViewClient() {
+////            override fun onPageFinished(view: WebView?, url: String?) {
+////                super.onPageFinished(view, url)
+////                getIPLocationAndUpdateGlobe() // ✅ JS can be safely called now
+////            }
+////        }
+//
+//        binding!!.globeWebView.webViewClient = object : WebViewClientCompat() {
+//            override fun shouldInterceptRequest(
+//                view: WebView,
+//                request: android.webkit.WebResourceRequest
+//            ): android.webkit.WebResourceResponse? {
+//                return assetLoader.shouldInterceptRequest(request.url)
+//            }
+//
+//            override fun onPageFinished(view: WebView?, url: String?) {
+//                super.onPageFinished(view, url)
+//
+////                applyMapTheme()
+//
+//                // Safe to call JS after page load
+//                getIPLocationAndUpdateGlobe()
+//            }
+//        }
+//
+////        binding.globeWebView.settings.javaScriptEnabled = true
+////        binding.globeWebView.loadUrl("file:///android_asset/globe.html")
+//    }
+
     private fun setupGlobe() {
-        val webSettings: WebSettings = binding!!.globeWebView.settings
+        val webSettings = binding!!.globeWebView.settings
         webSettings.javaScriptEnabled = true
         webSettings.domStorageEnabled = true
         webSettings.allowFileAccess = true
         webSettings.allowContentAccess = true
-//        webSettings.allowFileAccessFromFileURLs = true
-//        webSettings.allowUniversalAccessFromFileURLs = true
-//        binding.globeWebView.setBackgroundColor(Color.TRANSPARENT)
-//        binding.globeWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
+        // Optional: Allow CORS from file:// only if your HTML/JS uses local JSON or textures
+        // webSettings.allowFileAccessFromFileURLs = true
+        // webSettings.allowUniversalAccessFromFileURLs = true
 
-
-        // Enable remote debugging in Chrome
+        // ✅ Debugging enabled (only for development)
         WebView.setWebContentsDebuggingEnabled(true)
 
-        // Setup WebViewAssetLoader to serve assets from assets folder
+        // 🌐 Use WebViewAssetLoader for secure asset loading
         val assetLoader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(requireContext()))
             .build()
-
-        // Load your local globe.html file from assets
-//        binding.globeWebView.loadUrl("file:///android_asset/globe.html")      //when file loade with loacl save
-        binding!!.globeWebView.loadUrl("https://appassets.androidplatform.net/assets/globe.html")  //If globe.html loads JSON or other resources, change their URLs from relative or file:///android_asset/... paths to
-
-
-        //old code
-        // Ensure getIPLocationAndUpdateGlobe() is only called after the page has loaded
-//        binding.globeWebView.webViewClient = object : android.webkit.WebViewClient() {
-//            override fun onPageFinished(view: WebView?, url: String?) {
-//                super.onPageFinished(view, url)
-//                getIPLocationAndUpdateGlobe() // ✅ JS can be safely called now
-//            }
-//        }
 
         binding!!.globeWebView.webViewClient = object : WebViewClientCompat() {
             override fun shouldInterceptRequest(
@@ -356,16 +396,21 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
 
-//                applyMapTheme()
-
-                // Safe to call JS after page load
-                getIPLocationAndUpdateGlobe()
+                // ✅ Use a small delay to ensure all JS/3D context is loaded before injecting JS
+                view?.postDelayed({
+                    try {
+                        getIPLocationAndUpdateGlobe()
+                    } catch (e: Exception) {
+                        Log.e("WebView", "JavaScript call failed", e)
+                    }
+                }, 500)
             }
         }
 
-//        binding.globeWebView.settings.javaScriptEnabled = true
-//        binding.globeWebView.loadUrl("file:///android_asset/globe.html")
+        // ✅ Load globe.html from asset path via WebViewAssetLoader
+        binding!!.globeWebView.loadUrl("https://appassets.androidplatform.net/assets/globe.html")
     }
+
 
 //    fun applyMapTheme() {
 //        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
@@ -383,6 +428,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             binding?.serverFlagDes?.text = server.getIpAddress()           // Assuming getIpAddress() returns the server IP address
             binding?.connectionIp?.text = server.getIpAddress()          // Update the second IP TextView (if necessary)
 
+
             // Mark the server as selected
             isServerSelected = true
         } else {
@@ -390,7 +436,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             binding?.serverFlagName?.text = "No server selected"
             binding?.serverFlagDes?.text = "N/A"
             binding?.connectionIp?.text = "N/A"
+
+
         }
+
+
     }
 
     private fun isServiceRunning() {
