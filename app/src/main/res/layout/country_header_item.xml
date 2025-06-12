@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/groupCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="18dp"
+    card_view:cardElevation="4dp">
+
+    <LinearLayout
+        android:id="@+id/server_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/btn_background"
+        android:orientation="vertical"
+        >
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:background="@drawable/ripple"
+            android:padding="12dp"
+            android:layout_gravity="center">
+
+
+
+            <ImageView
+                android:id="@+id/flagImageView"
+                android:layout_width="48dp"
+                android:layout_height="32dp"
+                android:background="@drawable/rounded_flag_bg"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/flag_image"
+                android:clipToOutline="true" />
+
+
+
+            <!-- Header (Country) -->
+            <TextView
+                android:id="@+id/tvCountry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="Country Name"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/arrowIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:rotation="0"
+                android:src="@drawable/ic_right"
+                android:layout_gravity="center"/>
+
+
+        </LinearLayout>
+
+
+        <!-- Expandable Child Container -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/childContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <!-- Dynamically add child server views -->
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>
