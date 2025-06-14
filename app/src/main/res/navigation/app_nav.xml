@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_settingFragment3_to_advanceSetttingFragment"
             app:destination="@id/advanceSetttingFragment" />
+        <action
+            android:id="@+id/action_settingFragment3_to_appIconFragment"
+            app:destination="@id/appIconFragment" />
     </fragment>
     <fragment
         android:id="@+id/advanceSetttingFragment"
@@ -45,5 +48,10 @@
         android:name="com.example.nocturnevpn.view.fragment.PremiumFragment"
         android:label="fragment_premium"
         tools:layout="@layout/fragment_premium" />
+    <fragment
+        android:id="@+id/appIconFragment"
+        android:name="com.example.nocturnevpn.view.fragment.appIconFragment"
+        android:label="fragment_app_icon"
+        tools:layout="@layout/fragment_app_icon" />
 
 </navigation>

@@ -41,6 +41,17 @@
     <string name="format_ping">Ping: %s ms</string>
     <string name="format_speed">%s</string>
     <string name="flag_image">flag image</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="enter_full_name">Enter Full Name</string>
+    <string name="email">Email</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="password">Password</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register">Register</string>
+    <string name="app_icon">App Icon</string>
+    <string name="nocturne_vpn">Nocturne VPN</string>
+    <string name="nocturne_vpn_3d_icons">Nocturne VPN 3D Icons</string>
 
 
 </resources>

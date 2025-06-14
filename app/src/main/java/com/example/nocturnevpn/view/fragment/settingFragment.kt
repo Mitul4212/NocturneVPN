@@ -37,6 +37,12 @@ class settingFragment : Fragment() {
            this.findNavController().navigate(R.id.action_settingFragment3_to_advanceSetttingFragment)
        }
 
+        binding.appIcon.setOnClickListener{
+           this.findNavController().navigate(R.id.action_settingFragment3_to_appIconFragment)
+       }
+
+
+
         binding.backArrow.setOnClickListener{
             findNavController().navigateUp()
         }

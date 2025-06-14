@@ -4,4 +4,11 @@
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
+
+    <style name="RoundedCornerImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">35dp</item> <!-- Change radius as needed -->
+        <item name="strokeColor">@color/gray</item>
+    </style>
+
 </resources>
