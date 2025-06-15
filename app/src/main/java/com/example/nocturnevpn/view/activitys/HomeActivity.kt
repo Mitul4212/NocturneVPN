@@ -1,14 +1,21 @@
 package com.example.nocturnevpn.view.activitys
 
+import android.Manifest
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.ActivityHomeBinding
 import me.ibrahimsn.lib.SmoothBottomBar
+
 
 class HomeActivity : AppCompatActivity() {
 
@@ -39,6 +46,8 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        askNotificationPermission()
+
         // Initialize bottom navigation bar
         bottomNavigation = binding.bottomBar
 
@@ -52,6 +61,17 @@ class HomeActivity : AppCompatActivity() {
         // Set up navigation logic for bottom navigation bar
         setupNavigation()
     }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
 
     private fun setupNavigation() {
         // Define the fragments where the bottom navigation should be visible
@@ -96,4 +116,17 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    // Notification permission launcher
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }

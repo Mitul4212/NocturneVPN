@@ -52,6 +52,9 @@
     <string name="app_icon">App Icon</string>
     <string name="nocturne_vpn">Nocturne VPN</string>
     <string name="nocturne_vpn_3d_icons">Nocturne VPN 3D Icons</string>
+    <string name="info_text_description"><![CDATA[🔐 TCP Protocol (Secure & Reliable)\n📥 Slower, but stable and safe.\n💼 Best for banking, browsing, login.\n\n⚡ UDP Protocol (Fast & Light)\n🚀 Super fast, but may drop some data.\n🎬 Great for videos, streaming, gaming.\n\n🤔 Not Sure?\n➡️ Use 🛡️ TCP for safety.\n➡️ Use ⚡ UDP for speed.\n\n✅ Choose what suits your need!]]></string>
+    <string name="got_it">👌 Got it!</string>
+    <string name="choose_your_server_protocol">ℹ️ Choose Your Server Protocol</string>
 
 
 </resources>

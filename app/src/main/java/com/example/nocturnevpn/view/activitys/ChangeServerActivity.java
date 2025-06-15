@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -101,6 +103,14 @@ public class ChangeServerActivity extends AppCompatActivity {
         binding.backArrow.setOnClickListener(view -> {
             finish();
         });
+
+        binding.infoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInfoDialog();
+            }
+        });
+
 
         searchView = binding.serverSearchView;
 
@@ -392,6 +402,32 @@ public class ChangeServerActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void showInfoDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.info_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        Button okButton = dialog.findViewById(R.id.info_dialog_btn);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialog.show();
+    }
+
 
 //    private void setIntentResult(Server server) {
 //        Intent resultIntent = new Intent();
