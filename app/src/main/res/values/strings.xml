@@ -55,6 +55,14 @@
     <string name="info_text_description"><![CDATA[🔐 TCP Protocol (Secure & Reliable)\n📥 Slower, but stable and safe.\n💼 Best for banking, browsing, login.\n\n⚡ UDP Protocol (Fast & Light)\n🚀 Super fast, but may drop some data.\n🎬 Great for videos, streaming, gaming.\n\n🤔 Not Sure?\n➡️ Use 🛡️ TCP for safety.\n➡️ Use ⚡ UDP for speed.\n\n✅ Choose what suits your need!]]></string>
     <string name="got_it">👌 Got it!</string>
     <string name="choose_your_server_protocol">ℹ️ Choose Your Server Protocol</string>
+    <string name="settings">Settings</string>
+    <string name="support">Support</string>
+    <string name="help_center">Help Center</string>
+    <string name="report_an_issue">Report an Issue</string>
+    <string name="rate_nocturnevpn">Rate NocturneVPN</string>
+    <string name="sign_out">Sign out</string>
+    <string name="notifictions">Notifictions</string>
+    <string name="advance_settiing">Advance Settiing</string>
 
 
 </resources>

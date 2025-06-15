@@ -26,68 +26,42 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="38dp"
-                android:layout_marginTop="14dp"
-                android:text="Settings"
+                android:text="@string/settings"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="0.004"
                 app:layout_constraintStart_toEndOf="@+id/back_arrow"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/back_arrow" />
 
-            <ImageView
+            <LinearLayout
                 android:id="@+id/back_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_marginTop="14dp"
+                android:background="@drawable/rounded_ripple"
                 android:clickable="true"
                 android:focusable="auto"
-                android:foregroundGravity="center"
-                android:padding="10dp"
-                android:src="@drawable/ic_arrow"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:foregroundGravity="center"
+                    android:padding="15dp"
+                    android:src="@drawable/ic_arrow"
+                    android:contentDescription="back arrow" />
+
+            </LinearLayout>
+
+
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="38dp"
-            android:layout_marginTop="24dp"
-            android:text="Settings"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/back_arrow1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <ImageView
-            android:id="@+id/back_arrow1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:clickable="true"
-            android:focusable="auto"
-            android:foregroundGravity="center"
-            android:src="@drawable/ic_arrow"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <ScrollView
             android:id="@+id/scrollView2"
@@ -122,13 +96,15 @@
                     android:id="@+id/account"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="24dp"
+
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/Account">
@@ -172,13 +148,15 @@
                     android:id="@+id/notificton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="24dp"
+
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/passwordText">
@@ -193,7 +171,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="Notifictions"
+                        android:text="@string/notifictions"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -204,13 +182,15 @@
                     android:id="@+id/app_icon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
+
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -226,7 +206,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="App icon"
+                        android:text="@string/app_icon"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -237,13 +217,15 @@
                     android:id="@+id/advance_setting"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="22dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
+
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -260,7 +242,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="38dp"
-                        android:text="Advance Settiing"
+                        android:text="@string/advance_settiing"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -268,13 +250,13 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/confirmPasswordText"
+                    android:id="@+id/SupportText"
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="16dp"
                     android:gravity="center"
-                    android:text="General"
+                    android:text="@string/support"
                     android:textColor="@color/gray"
                     android:textSize="14sp"
                     app:layout_constraintStart_toStartOf="parent"
@@ -284,17 +266,18 @@
                     android:id="@+id/help_center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="24dp"
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/confirmPasswordText">
+                    app:layout_constraintTop_toBottomOf="@+id/SupportText">
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -306,7 +289,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="Help Center"
+                        android:text="@string/help_center"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -317,13 +300,14 @@
                     android:id="@+id/report_issue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -339,7 +323,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="Report an Issue"
+                        android:text="@string/report_an_issue"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -349,13 +333,14 @@
                     android:id="@+id/rate_app"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -371,7 +356,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="Rate NocturneVPN "
+                        android:text="@string/rate_nocturnevpn"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
@@ -382,14 +367,15 @@
                     android:id="@+id/sign_out"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="46dp"
-                    android:layout_marginEnd="24dp"
+                    android:layout_marginTop="37dp"
                     android:layout_marginBottom="16dp"
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
-                    android:padding="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:padding="15dp"
+                    android:background="@drawable/ripple"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -406,7 +392,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="36dp"
-                        android:text="Sign out "
+                        android:text="@string/sign_out"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 

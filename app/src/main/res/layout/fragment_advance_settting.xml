@@ -24,32 +24,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="38dp"
-                android:layout_marginTop="13dp"
                 android:text="@string/advance_settings"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
 
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/back_arrow"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
+            <LinearLayout
                 android:id="@+id/back_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_marginTop="14dp"
-                android:padding="10dp"
-                android:layout_marginBottom="3dp"
+                android:background="@drawable/rounded_ripple"
                 android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/ic_arrow"
+                android:focusable="auto"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:foregroundGravity="center"
+                    android:padding="15dp"
+                    android:src="@drawable/ic_arrow"
+                    android:contentDescription="back arrow" />
+
+            </LinearLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,32 +30,47 @@
             app:layout_constraintStart_toEndOf="@+id/back_arrow"
             app:layout_constraintTop_toTopOf="@+id/back_arrow" />
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/back_arrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/rounded_ripple"
             android:clickable="true"
             android:focusable="auto"
-            android:foregroundGravity="center"
-            android:padding="15dp"
-            android:src="@drawable/ic_arrow"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foregroundGravity="center"
+                android:padding="15dp"
+                android:src="@drawable/ic_arrow"
+                android:contentDescription="back arrow" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
             android:id="@+id/info_Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_info"
-            android:padding="15dp"
+            android:background="@drawable/rounded_ripple"
             android:clickable="true"
             android:focusable="auto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_info"
+                android:padding="15dp"
+                android:contentDescription="info button" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

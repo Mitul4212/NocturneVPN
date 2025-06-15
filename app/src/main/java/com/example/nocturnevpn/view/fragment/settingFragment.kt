@@ -32,6 +32,7 @@ class settingFragment : Fragment() {
         return binding.root // Use binding.root, not binding.roots
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
