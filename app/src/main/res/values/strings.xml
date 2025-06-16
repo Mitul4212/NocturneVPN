@@ -8,9 +8,9 @@
     <string name="us">United States</string>
     <string name="ip">IP</string>
     <string name="sip_address">79.110.53.95</string>
-    <string name="download">28.5 KB/S</string>
+    <string name="download">00.0 KB/S</string>
     <string name="speed_ind">KB/S</string>
-    <string name="upload">21.6 KB/S</string>
+    <string name="upload">00.0 KB/S</string>
     <string name="not_signin">Looks like You’re not signed in yet.</string>
     <string name="user_id">User ID</string>
     <string name="user_num">284529462</string>

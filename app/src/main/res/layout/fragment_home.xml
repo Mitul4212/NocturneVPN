@@ -180,13 +180,15 @@
 
                 <ImageView
                     android:id="@+id/country_flag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="48dp"
+                    android:layout_height="32dp"
                     android:layout_gravity="center"
-                    android:padding="10dp"
                     android:src="@drawable/ic_us"
+                    android:layout_marginStart="12dp"
                     android:contentDescription="@string/flag_image"
                     android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:background="@drawable/rounded_flag_bg"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -198,6 +200,7 @@
                     android:layout_gravity="center"
                     android:orientation="vertical"
                     android:padding="0dp"
+                    android:layout_marginStart="10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/country_flag"
                     app:layout_constraintTop_toTopOf="parent">

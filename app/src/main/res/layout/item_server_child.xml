@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:alpha="1.0"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#00000000"
     android:orientation="horizontal"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp">
