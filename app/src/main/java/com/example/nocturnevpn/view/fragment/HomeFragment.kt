@@ -771,7 +771,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             .setContentTitle(if (isConnected) "Connected to $serverCountry" else "Disconnected")
             .setContentText("Download: $downloadSpeed\nUpload: $uploadSpeed")
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("Connected to $serverCountry\nDownload: $downloadSpeed\nUpload: $uploadSpeed"))
+                .bigText("Download: $downloadSpeed Upload: $uploadSpeed"))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(isConnected)
             .setAutoCancel(false)
