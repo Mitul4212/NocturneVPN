@@ -63,6 +63,7 @@
     <string name="sign_out">Sign out</string>
     <string name="notifictions">Notifictions</string>
     <string name="advance_settiing">Advance Settiing</string>
+    <string name="_00_00_00">00:00:00</string>
 
 
 </resources>

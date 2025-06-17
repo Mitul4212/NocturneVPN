@@ -400,6 +400,7 @@
             app:layout_constraintTop_toTopOf="@+id/guideline9">
 
             <ImageView
+                android:id="@+id/connection_button_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/connect_button_bnt"
@@ -414,7 +415,7 @@
                 android:layout_gravity="center"
                 android:gravity="bottom|center"
                 android:paddingTop="60dp"
-                android:text="00:13:53"
+                android:text="@string/_00_00_00"
                 android:textColor="@color/black"
                 android:textSize="12sp" />
 
