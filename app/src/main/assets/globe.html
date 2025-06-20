@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
     <style>
     html, body {
       margin: 0;
@@ -15,6 +16,7 @@
       background: transparent;
       overflow: hidden;
     }
+
     #map {
       position: absolute;
       top: 0;
@@ -22,44 +24,81 @@
       width: 100%;
       background: transparent;
     }
+
     canvas {
       background-color: transparent !important;
     }
 
+    /* Hide default map controls and attribution */
+    .maplibregl-ctrl-attrib,
+    .maplibregl-ctrl-bottom-right,
+    .maplibregl-ctrl-bottom-left,
+    .maplibregl-ctrl-top-right,
+    .maplibregl-ctrl-top-left {
+      display: none !important;
+    }
 
-    /* Move the default navigation and globe controls lower */
-    /*.maplibregl-ctrl-top-right { */
-     /* top: 140px !important; */
-      /*right: 24px !important; */
-    /*} */
+    /* Hide any attribution links or info buttons */
+    .maplibregl-ctrl-attrib-button,
+    .maplibregl-ctrl-attrib-inner,
+    .maplibregl-ctrl-attrib-close {
+      display: none !important;
+    }
 
-
-
-
-     /* Button stack container */
-    .custom-map-buttons {
+    #debugInfo {
       position: absolute;
-      top: 140px;
-      right: 24px;
+      top: 180px;
+      left: 24px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 1001;
+      display: none;
+      transition: all 0.3s ease;
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+
+    #debugInfo.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    #loadingIndicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 1002;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      z-index: 1000;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
     }
 
-    .custom-map-button {
-      background-color: rgba(0, 0, 0, 0.6);
-      color: white;
-      border: none;
+    .spinner {
       width: 30px;
       height: 30px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
 
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
     #myLocationBtn {
       position: absolute;
@@ -76,179 +115,505 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateX(0);
+      animation: float 3s ease-in-out infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    #myLocationBtn:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+      transform: translateX(5px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
+      animation-play-state: paused;
+    }
+
+    #myLocationBtn:active {
+      transform: translateX(2px) scale(0.98);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Floating animation for My Location button */
+    @keyframes float {
+      0%, 100% { 
+        transform: translateY(0px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+      50% { 
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    /* Pulse glow effect for My Location button */
+    @keyframes locationPulse {
+      0% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(255, 255, 255, 0.4);
+      }
+      70% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(255, 255, 255, 0);
+      }
+      100% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(255, 255, 255, 0);
+      }
+    }
+
+    #myLocationBtn.pulse-glow {
+      animation: locationPulse 2s infinite;
+    }
+
+    /* Icon animation for My Location button */
+    #myLocationBtn i {
+      transition: all 0.3s ease;
+      animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes iconBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    #myLocationBtn:hover i {
+      animation: none;
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    /* Success animation when location is set */
+    @keyframes locationSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); background-color: rgba(102, 34, 204, 0.3); }
+      100% { transform: scale(1); }
+    }
+
+    #myLocationBtn.success {
+      animation: locationSuccess 0.6s ease-in-out;
+    }
+
+    /* Container for menu + buttons */
+    #menuContainer {
+      position: absolute;
+      top: 140px;
+      right: 24px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      padding: 10px;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      max-height: 64px;
+      opacity: 1;
+      transform: scale(1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    #menuContainer.expanded {
+      max-height: 320px;
+      transform: scale(1.05);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    #menuContainer.collapsed {
+      max-height: 36px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      transform: scale(1);
+    }
+
+    #menuSliderBtn {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotate(0deg);
+    }
+
+    #menuSliderBtn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1) rotate(0deg);
+    }
+
+    #menuContainer.expanded #menuSliderBtn {
+      transform: rotate(90deg);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    #menuSliderBtn i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .custom-map-button {
+      margin-top: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(0) scale(1);
+    }
+
+    .custom-map-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-map-button:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    #menuContainer.collapsed .custom-map-button {
+      opacity: 0;
+      pointer-events: none;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      transform: translateY(-10px) scale(0.8);
+    }
+
+    /* Staggered animation for buttons */
+    .custom-map-button:nth-child(2) { transition-delay: 0.05s; }
+    .custom-map-button:nth-child(3) { transition-delay: 0.1s; }
+    .custom-map-button:nth-child(4) { transition-delay: 0.15s; }
+    .custom-map-button:nth-child(5) { transition-delay: 0.2s; }
+    .custom-map-button:nth-child(6) { transition-delay: 0.25s; }
+    .custom-map-button:nth-child(7) { transition-delay: 0.3s; }
+
+    /* Pulse animation for attention */
+    @keyframes attentionPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+
+    .attention-pulse {
+      animation: attentionPulse 2s ease-in-out infinite;
     }
   </style>
 </head>
+
 <body>
-
 <div id="map"></div>
-<button id="myLocationBtn">
-    <i class="fas fa-location-crosshairs"></i> My Location
-</button>  <! 📍 My Location – –>
-
-<!-- Custom button stack -->
-<div class="custom-map-buttons">
-    <button id="zoomInBtn" class="custom-map-button">
-        <i class="fas fa-plus"></i>
-    </button>  <! + – –>
-    <button id="zoomOutBtn" class="custom-map-button">
-        <i class="fas fa-minus"></i>
-    </button>  <! − – –>
-    <button id="resetNorthBtn" class="custom-map-button">
-        <i class="fas fa-compass"></i>
-    </button>  <! 🧭 – –>
-    <button id="toggleGlobeBtn" class="custom-map-button" title="Toggle Globe">
-        <i class="fas fa-globe"></i>
-    </button>
+<div id="debugInfo">Loading...</div>
+<div id="loadingIndicator">
+    <div class="spinner"></div>
+    <div>Loading your location...</div>
 </div>
 
+<button id="myLocationBtn">
+    <i class="fas fa-location-crosshairs"></i> My Location
+    </button>
+
+<!-- Menu Container (menu button + nested custom buttons) -->
+<div id="menuContainer" class="collapsed">
+    <button id="menuSliderBtn" title="Menu"><i class="fas fa-bars"></i></button>
+    <button id="zoomInBtn" class="custom-map-button" title="Zoom In"><i class="fas fa-plus"></i></button>
+    <button id="zoomOutBtn" class="custom-map-button" title="Zoom Out"><i class="fas fa-minus"></i></button>
+    <button id="resetNorthBtn" class="custom-map-button" title="Reset North"><i class="fas fa-compass"></i></button>
+    <button id="toggleGlobeBtn" class="custom-map-button" title="Toggle Globe"><i class="fas fa-globe"></i></button>
+    <button id="refreshLocationBtn" class="custom-map-button" title="Refresh Location"><i class="fas fa-sync-alt"></i></button>
+    <button id="debugBtn" class="custom-map-button" title="Toggle Debug"><i class="fas fa-bug"></i></button>
+</div>
 
 <script>
     let currentSelectionLat = null;
     let currentSelectionLon = null;
-    let trueInitialLat = null;
     let isGlobe = true;
+  let isMapLoaded = false;
+  let map = null;
 
-  const map = new maplibregl.Map({
+  const debugInfo = document.getElementById("debugInfo");
+  const menuContainer = document.getElementById("menuContainer");
+  const menuSliderBtn = document.getElementById("menuSliderBtn");
+
+  function updateDebugInfo(msg) {
+    debugInfo.textContent = msg;
+    console.log("Debug:", msg);
+    debugInfo.style.display = 'block';
+    debugInfo.classList.add('show');
+    
+    // Auto-hide debug info after 3 seconds
+    setTimeout(() => {
+      debugInfo.classList.remove('show');
+      setTimeout(() => {
+        debugInfo.style.display = 'none';
+      }, 300);
+    }, 3000);
+  }
+
+  function showLoadingIndicator() {
+    document.getElementById('loadingIndicator').style.display = 'flex';
+  }
+
+  function hideLoadingIndicator() {
+    document.getElementById('loadingIndicator').style.display = 'none';
+  }
+
+  function toggleDebug() {
+    if (debugInfo.style.display === 'none') {
+      debugInfo.style.display = 'block';
+      setTimeout(() => debugInfo.classList.add('show'), 10);
+    } else {
+      debugInfo.classList.remove('show');
+      setTimeout(() => debugInfo.style.display = 'none', 300);
+    }
+  }
+
+  function setLocation(lat, lon) {
+    if (!map || !isMapLoaded) return;
+    currentSelectionLat = lat;
+    currentSelectionLon = lon;
+    
+    // Add smooth animation to location change
+    map.flyTo({ 
+      center: [lon, lat], 
+      zoom: 1,
+      duration: 2000,
+      curve: 1.42,
+      easing: (t) => t * (2 - t)
+    });
+    
+    if (window.userMarker) window.userMarker.remove();
+    window.userMarker = new maplibregl.Marker({ color: "#FF0000" }).setLngLat([lon, lat]).addTo(map);
+    hideLoadingIndicator();
+    
+    // Add button effects after location is set
+    setTimeout(() => {
+      addLocationButtonEffects();
+      // Add success animation to button
+      myLocationBtn.classList.add('success');
+      setTimeout(() => {
+        myLocationBtn.classList.remove('success');
+      }, 600);
+    }, 500);
+  }
+
+  try {
+    showLoadingIndicator();
+    map = new maplibregl.Map({
     container: 'map',
     style: 'https://appassets.androidplatform.net/assets/worldglobe.json',
     center: [12, 53],
     zoom: 1,
     antialias: true
-   // attributionControl: false  // ADD THIS to hide info button
   });
 
   map.on('load', () => {
-  // Remove attribution control element manually
+      isMapLoaded = true;
+      map.setProjection({ type: 'globe' });
+      hideLoadingIndicator();
+      updateDebugInfo("Map loaded");
+      
+      // Remove attribution/info button from bottom right corner
   const attribEl = document.querySelector('.maplibregl-ctrl-attrib');
-  if (attribEl) attribEl.style.display = 'none';
-
-  map.setProjection({ type: 'globe' });
-});
-
-
-
-  // map.addControl(new maplibregl.NavigationControl());
- // map.addControl(new maplibregl.GlobeControl());
+      if (attribEl) {
+        attribEl.style.display = 'none';
+      }
+      
+      // Also remove any other default controls that might appear
+      const defaultControls = document.querySelectorAll('.maplibregl-ctrl');
+      defaultControls.forEach(control => {
+        if (control.classList.contains('maplibregl-ctrl-attrib') || 
+            control.classList.contains('maplibregl-ctrl-bottom-right')) {
+          control.style.display = 'none';
+        }
+      });
+    });
 
   map.on('style.load', () => {
     map.setProjection({ type: 'globe' });
-  });
+      
+      // Comprehensive removal of all attribution and info elements
+      setTimeout(() => {
+        const elementsToRemove = [
+          '.maplibregl-ctrl-attrib',
+          '.maplibregl-ctrl-bottom-right',
+          '.maplibregl-ctrl-bottom-left',
+          '.maplibregl-ctrl-top-right',
+          '.maplibregl-ctrl-top-left',
+          '.maplibregl-ctrl-attrib-button',
+          '.maplibregl-ctrl-attrib-inner',
+          '.maplibregl-ctrl-attrib-close',
+          '[class*="maplibregl-ctrl-attrib"]',
+          '[class*="maplibregl-ctrl-bottom"]',
+          '[class*="maplibregl-ctrl-top"]'
+        ];
+        
+        elementsToRemove.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+          });
+        });
+      }, 100);
+    });
 
-  function selection(lat, lon) {
-    console.log("Selection function called with:", lat, lon);
-    // You can communicate back to Android if needed
-  }
-
-  function setLocation(lat, lon, isInitial = false) {
-
-  if (isInitial && trueInitialLat === null) {
-    trueInitialLat = lat;
-    trueInitialLon = lon;
-  }
-
-  console.log("Initial or updated location set:", lat, lon);
-
-  // Always update current selection coordinates
-  currentSelectionLat = lat;
-  currentSelectionLon = lon;
-
-  map.flyTo({ center: [lon, lat], zoom: 1 });
-
-  if (window.userMarker) window.userMarker.remove();
-
-  window.userMarker = new maplibregl.Marker({ color: "#FF0000" })
-    .setLngLat([lon, lat])
-    .addTo(map);
-
-  selection(lat, lon);
+    map.on('error', (e) => {
+      updateDebugInfo('Map error: ' + e.error.message);
+    });
+  } catch (err) {
+    updateDebugInfo('Error initializing map: ' + err.message);
 }
 
-// My Location button flies back to the current selected location (latest)
+  // Button handlers with enhanced animations
 document.getElementById("myLocationBtn").addEventListener("click", () => {
   if (currentSelectionLat !== null && currentSelectionLon !== null) {
-    console.log("Returning to current selection location:", currentSelectionLat, currentSelectionLon);
+      // Add button press animation
+      const btn = document.getElementById("myLocationBtn");
+      btn.style.transform = "translateX(2px) scale(0.98)";
 
-// Reset the view to north and flat (bearing=0, pitch=0)
+      // Add success animation
+      btn.classList.add('success');
+      setTimeout(() => {
+        btn.classList.remove('success');
+      }, 600);
+      
+      setTimeout(() => {
+        btn.style.transform = "";
+      }, 150);
+      
     map.easeTo({
       center: [currentSelectionLon, currentSelectionLat],
       zoom: 1,
       bearing: 0,
       pitch: 0,
-      essential: true
+        duration: 1500,
+        curve: 1.42
     });
-
-    // Also reset marker
     if (window.userMarker) window.userMarker.remove();
-
-    window.userMarker = new maplibregl.Marker({ color: "#FF0000" }) //#6622CC
-      .setLngLat([currentSelectionLon, currentSelectionLat])
-      .addTo(map);
-
-
-    // setLocation(currentSelectionLat, currentSelectionLon);
+      window.userMarker = new maplibregl.Marker({ color: "#FF0000" }).setLngLat([currentSelectionLon, currentSelectionLat]).addTo(map);
   } else {
     alert("Location not set.");
   }
 });
 
-// Hook up zoom in, zoom out, and reset buttons
-  document.getElementById("zoomInBtn").addEventListener("click", () => {
-    map.zoomIn();
-  });
-
-  document.getElementById("zoomOutBtn").addEventListener("click", () => {
-    map.zoomOut();
-  });
-
-   document.getElementById("resetNorthBtn").addEventListener("click", () => {
-      map.easeTo({
-        bearing: 0,
-        pitch: 0,
-        duration: 1000,
-        essential: true
-      });
-    });
-
-    document.getElementById("toggleGlobeBtn").addEventListener("click", () => {
-  if (isGlobe) {
-    map.setProjection('mercator'); // Switch to flat
-  } else {
-    map.setProjection({ type: 'globe' }); // Switch to 3D globe
+  // Add special animations for My Location button
+  const myLocationBtn = document.getElementById("myLocationBtn");
+  
+  // Add pulse glow effect when location is available
+  function addLocationButtonEffects() {
+    if (currentSelectionLat !== null && currentSelectionLon !== null) {
+      myLocationBtn.classList.add('pulse-glow');
+    } else {
+      myLocationBtn.classList.remove('pulse-glow');
+    }
   }
+
+  // Enhanced button interactions
+  function addButtonAnimation(buttonId, action) {
+    const btn = document.getElementById(buttonId);
+    btn.addEventListener("click", () => {
+      // Add press animation
+      btn.style.transform = "translateY(2px) scale(0.95)";
+      setTimeout(() => {
+        btn.style.transform = "";
+        action();
+      }, 150);
+    });
+  }
+
+  addButtonAnimation("zoomInBtn", () => map.zoomIn());
+  addButtonAnimation("zoomOutBtn", () => map.zoomOut());
+  addButtonAnimation("resetNorthBtn", () => map.easeTo({ bearing: 0, pitch: 0, duration: 1000 }));
+  
+  addButtonAnimation("toggleGlobeBtn", () => {
+    map.setProjection(isGlobe ? 'mercator' : { type: 'globe' });
   isGlobe = !isGlobe;
 });
 
-<!--  function switchToMode(mode) {-->
-<!--    const backgroundColor = mode === "dark" ? "#ffffff" : "#C7B4E3";-->
-<!--    const waterColor = mode === "dark" ? "#a7c7e7" : "#f5f2fa";-->
-<!--    const glacierColor = mode === "dark" ? "#d0e3f5" : "#C7B4E3";-->
-<!--    const boundry_3Color = mode === "dark" ? "#b3b3b3" : "#808080"-->
-<!--    const boundry_2Color = mode === "dark" ? "#a4a2ae" : "#838385"-->
+  addButtonAnimation("refreshLocationBtn", () => {
+    if (window.AndroidInterface && window.AndroidInterface.forceRefreshLocation) {
+      window.AndroidInterface.forceRefreshLocation();
+    } else if (currentSelectionLat && currentSelectionLon) {
+      setLocation(currentSelectionLat, currentSelectionLon);
+    }
+  });
 
-<!--    // const backgroundColor = mode === "dark" ? "#1c1c1c" : "#ffffff";-->
-<!--    // const waterColor = mode === "dark" ? "#2a2f33" : "#a7c7e7";-->
-<!--    // const glacierColor = mode === "dark" ? "#3b3f45" : "#d0e3f5";-->
+  addButtonAnimation("debugBtn", toggleDebug);
 
-<!--    try {-->
-<!--      map.setPaintProperty("background", "background-color", backgroundColor);-->
-<!--      map.setPaintProperty("water", "fill-color", waterColor);-->
-<!--      map.setPaintProperty("landcover-glacier", "fill-color", glacierColor);-->
-<!--      map.setPaintProperty("boundary_3", "line-color", boundry_3Color);-->
-<!--      map.setPaintProperty("boundary_2", "line-color", boundry_2Color);-->
-<!--      console.log("Switched to mode:", mode);-->
-<!--    } catch (err) {-->
-<!--      console.error("Failed to switch mode:", err);-->
-<!--    }-->
-<!--  }-->
+  // Expand/collapse menu
+  let autoCollapseTimer;
+  const AUTO_COLLAPSE_DELAY = 5000; // ms
 
+  function expandMenu() {
+    menuContainer.classList.remove('collapsed');
+    menuContainer.classList.add('expanded');
+    clearTimeout(autoCollapseTimer);
+    autoCollapseTimer = setTimeout(collapseMenu, AUTO_COLLAPSE_DELAY);
+    
+    // Add attention pulse to first button to guide user
+    setTimeout(() => {
+      const firstButton = document.querySelector('.custom-map-button');
+      if (firstButton) {
+        firstButton.classList.add('attention-pulse');
+        setTimeout(() => firstButton.classList.remove('attention-pulse'), 2000);
+      }
+    }, 400);
+  }
 
+  function collapseMenu() {
+    menuContainer.classList.remove('expanded');
+    menuContainer.classList.add('collapsed');
+  }
 
+  menuSliderBtn.addEventListener("click", () => {
+    const isCollapsed = menuContainer.classList.contains("collapsed");
+    if (isCollapsed) {
+      expandMenu();
+    } else {
+      collapseMenu();
+    }
+  });
 
+  // Add initial attention pulse to menu button
+  setTimeout(() => {
+    menuSliderBtn.classList.add('attention-pulse');
+    setTimeout(() => menuSliderBtn.classList.remove('attention-pulse'), 3000);
+  }, 2000);
 
+  // Add initial attention animation for My Location button
+  setTimeout(() => {
+    myLocationBtn.classList.add('pulse-glow');
+    setTimeout(() => {
+      myLocationBtn.classList.remove('pulse-glow');
+      // Add floating animation after initial pulse
+      myLocationBtn.style.animation = 'float 3s ease-in-out infinite';
+    }, 2000);
+  }, 1000);
 
-  // Optional: Simulate Android calling this on load
-  // setLocation(28.6139, 77.2090); // Delhi, for example
+  // Optional: collapse when clicking outside
+  document.addEventListener('click', function (event) {
+    if (!menuContainer.contains(event.target)) {
+      collapseMenu();
+    }
+  });
+
+  // Expose functions to Android
+  window.setLocation = setLocation;
+  window.updateDebugInfo = updateDebugInfo;
+  window.toggleDebug = toggleDebug;
 </script>
 </body>
 </html>
