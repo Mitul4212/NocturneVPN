@@ -6,11 +6,15 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
-import android.view.animation.BounceInterpolator
 import android.view.animation.ScaleAnimation
-import androidx.core.content.ContextCompat
+import com.airbnb.lottie.LottieDrawable
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.RenderMode
+import com.airbnb.lottie.model.KeyPath
+import com.airbnb.lottie.value.LottieValueCallback
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentHomeBinding
@@ -26,6 +30,8 @@ class ConnectionStatusManager(
     private val handler = Handler(Looper.getMainLooper())
     private var lastStatus = ""
     private var isButtonPressed = false
+    private var connectionStartTime: Long = 0
+    private var isConnected = false
 
     @SuppressLint("SuspiciousIndentation")
     fun updateConnectionStatus(
@@ -98,14 +104,15 @@ class ConnectionStatusManager(
             else -> status
         }
         
-        // Update connect button UI based on connection status with better animations
+        // Update connect button UI based on connection status
         updateConnectButtonUI(status)
     }
-    
-    // Simple and effective button click animation
+
     fun animateButtonClick() {
-        binding?.connectionButtonImage?.let { imageView ->
-            // Simple scale down and up animation
+        if (isAnimating) return
+        
+        binding?.buttonAnimation?.let { lottieView ->
+            // Simple scale animation for immediate feedback
             val clickAnimation = ScaleAnimation(
                 1.0f, 0.95f, 1.0f, 0.95f,
                 Animation.RELATIVE_TO_SELF, 0.5f,
@@ -117,7 +124,7 @@ class ConnectionStatusManager(
                 interpolator = AccelerateDecelerateInterpolator()
             }
             
-            imageView.startAnimation(clickAnimation)
+            lottieView.startAnimation(clickAnimation)
             Log.d("ConnectionStatusManager", "Button click animation played")
         }
     }
@@ -129,15 +136,15 @@ class ConnectionStatusManager(
         try {
             when (status) {
                 "CONNECTED" -> {
-                    // VPN is connected - simple success animation
+                    // VPN is connected - show success state
                     animateConnectionSuccess()
                 }
-                "DISCONNECTED", "NOPROCESS" -> {
-                    // VPN is disconnected - simple disconnect animation
+                "DISCONNECTED", "NOPROCESS", "NONETWORK", "EXITING", "VPN_GENERATE_CONFIG"  -> {
+                    // VPN is disconnected - show default state
                     animateDisconnection()
                 }
-                "WAIT", "AUTH", "RECONNECTING" -> {
-                    // VPN is connecting - simple connecting animation
+                "WAIT", "AUTH", "RECONNECTING", "TCP_CONNECT", "ASSIGN_IP", "GET_CONFIG", "ADD_ROUTES", "AUTH_PENDING"-> {
+                    // VPN is connecting - show loading animation
                     animateConnecting()
                 }
                 else -> {
@@ -152,183 +159,127 @@ class ConnectionStatusManager(
     }
     
     private fun stopCurrentAnimation() {
-        binding?.connectionButtonImage?.let { imageView ->
-            imageView.clearAnimation()
-            currentAnimation?.cancel()
-            currentAnimation = null
+        binding?.buttonAnimation?.let { lottieView ->
+            lottieView.clearAnimation()
+            lottieView.pauseAnimation()
         }
+        binding?.loaderAnimation?.let { loaderView ->
+            loaderView.clearAnimation()
+            loaderView.pauseAnimation()
+            loaderView.visibility = View.GONE
+        }
+        currentAnimation?.cancel()
+        currentAnimation = null
         isAnimating = false
     }
     
-    // Simple and reliable connecting animation
+    // Show loading animation during connection
     private fun animateConnecting() {
         isAnimating = true
-        
-        binding?.connectionButtonImage?.let { imageView ->
-            // Keep original colors - don't change to orange during authentication
-            // imageView.setBackgroundColor(Color.parseColor("#FF9500")) // Orange color removed
-            // imageView.setColorFilter(Color.WHITE) // White tint removed
-            // binding?.vpnConnectionTime?.setTextColor(Color.WHITE) // White text removed
-            
-            // Simple pulse animation without color change
-            val pulseAnimation = ScaleAnimation(
-                1.0f, 1.05f, 1.0f, 1.05f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            ).apply {
-                duration = 1000
-                repeatCount = Animation.INFINITE
-                repeatMode = Animation.REVERSE
-                interpolator = AccelerateDecelerateInterpolator()
-            }
-            
-            currentAnimation = pulseAnimation
-            imageView.startAnimation(pulseAnimation)
-            
-            Log.d("ConnectionStatusManager", "Connecting animation started (no color change)")
+
+        // Hide connect button card
+        binding?.connectButtonCard?.visibility = View.GONE
+
+        // Show and play button animation (set to orange, smooth fade-in)
+        binding?.buttonAnimation?.let { buttonView ->
+            buttonView.visibility = View.VISIBLE
+            buttonView.setAnimation(R.raw.button_base)
+            buttonView.speed = 1.05f // Smoother, just above normal
+            buttonView.alpha = 0f
+            buttonView.animate().alpha(1f).setDuration(250).start() // Fade in
+            buttonView.setRenderMode(RenderMode.HARDWARE)
+            setLottieButtonColor(context.getColor(R.color.orange)) // Set to orange
+            buttonView.repeatCount = LottieDrawable.INFINITE
+            buttonView.repeatMode = LottieDrawable.RESTART
+            buttonView.playAnimation()
         }
+
+        // Show and play loader animation simultaneously (smooth fade-in)
+        binding?.loaderAnimation?.let { loaderView ->
+            loaderView.visibility = View.VISIBLE
+            loaderView.speed = 1.1f // Smoother, just above normal
+            loaderView.alpha = 0f
+            loaderView.animate().alpha(1f).setDuration(250).start() // Fade in
+            loaderView.setRenderMode(RenderMode.HARDWARE)
+            loaderView.repeatCount = LottieDrawable.INFINITE
+            loaderView.repeatMode = LottieDrawable.RESTART
+            loaderView.playAnimation()
+        }
+
+        // Show white icon and timer
+        binding?.whiteConnectionIcon?.visibility = View.VISIBLE
+        binding?.vpnConnectionTime?.visibility = View.VISIBLE
+        binding?.vpnConnectionTime?.setTextColor(Color.WHITE)
     }
     
-    // Simple and effective success animation
+    // Show success animation when connected
     private fun animateConnectionSuccess() {
         isAnimating = true
-        
-        binding?.connectionButtonImage?.let { imageView ->
-            // Stop any ongoing animations
-            stopCurrentAnimation()
-            
-            // Set connected colors immediately
-            imageView.setBackgroundColor(Color.parseColor("#6622CC"))
-            imageView.setColorFilter(Color.WHITE)
-            binding?.vpnConnectionTime?.setTextColor(Color.WHITE)
-            
-            // Simple success animation - scale up and down
-            val successAnimation = ScaleAnimation(
-                1.0f, 1.1f, 1.0f, 1.1f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            ).apply {
-                duration = 300
-                repeatCount = 2
-                repeatMode = Animation.REVERSE
-                interpolator = BounceInterpolator()
-            }
-            
-            successAnimation.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation?) {
-                    Log.d("ConnectionStatusManager", "Success animation started")
-                }
-                
-                override fun onAnimationEnd(animation: Animation?) {
-                    Log.d("ConnectionStatusManager", "Success animation completed")
-                    isAnimating = false
-                }
-                
-                override fun onAnimationRepeat(animation: Animation?) {}
-            })
-            
-            imageView.startAnimation(successAnimation)
+
+        // Hide connect button card
+        binding?.connectButtonCard?.visibility = View.GONE
+
+        // Show button animation
+        binding?.buttonAnimation?.let { buttonView ->
+            buttonView.visibility = View.VISIBLE
+            buttonView.setAnimation(R.raw.button_base)
+            buttonView.speed = 1.0f
+            setLottieButtonColor(context.getColor(R.color.strong_violet)) // Set to default
+            buttonView.playAnimation()
         }
+
+        // Show white icon and timer
+        binding?.whiteConnectionIcon?.visibility = View.VISIBLE
+        binding?.vpnConnectionTime?.visibility = View.VISIBLE
+        binding?.vpnConnectionTime?.setTextColor(Color.WHITE)
+
+        // Hide loader
+        binding?.loaderAnimation?.visibility = View.GONE
     }
     
-    // Simple and reliable disconnect animation
+    // Show disconnect animation
     private fun animateDisconnection() {
         isAnimating = true
-        
-        binding?.connectionButtonImage?.let { imageView ->
-            // Stop any ongoing animations
-            stopCurrentAnimation()
-            
-            // Set disconnected colors immediately
-            imageView.setBackgroundColor(Color.WHITE)
-            imageView.setColorFilter(Color.parseColor("#6622CC"))
-            binding?.vpnConnectionTime?.setTextColor(Color.BLACK)
-            
-            // Simple disconnect animation - scale down and up
-            val disconnectAnimation = ScaleAnimation(
-                1.0f, 0.95f, 1.0f, 0.95f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            ).apply {
-                duration = 200
-                repeatCount = 1
-                repeatMode = Animation.REVERSE
-                interpolator = AccelerateDecelerateInterpolator()
-            }
-            
-            disconnectAnimation.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation?) {
-                    Log.d("ConnectionStatusManager", "Disconnect animation started")
-                }
-                
-                override fun onAnimationEnd(animation: Animation?) {
-                    Log.d("ConnectionStatusManager", "Disconnect animation completed")
-                    isAnimating = false
-                }
-                
-                override fun onAnimationRepeat(animation: Animation?) {}
-            })
-            
-            imageView.startAnimation(disconnectAnimation)
-        }
-    }
-    
-    private fun setConnectedButtonStyle() {
-        binding?.connectionButtonImage?.let { imageView ->
-            // Stop any ongoing animations
-            stopCurrentAnimation()
-            
-            // Set purple background
-            imageView.setBackgroundColor(Color.parseColor("#6622CC"))
-            // Set white tint for the icon
-            imageView.setColorFilter(Color.WHITE)
-            
-            Log.d("ConnectionStatusManager", "Connected style applied")
-        }
-        
-        binding?.vpnConnectionTime?.let { textView ->
-            // Set white text color
-            textView.setTextColor(Color.WHITE)
-        }
-    }
-    
-    private fun setDisconnectedButtonStyle() {
-        binding?.connectionButtonImage?.let { imageView ->
-            // Stop any ongoing animations
-            stopCurrentAnimation()
-            
-            // Set white background
-            imageView.setBackgroundColor(Color.WHITE)
-            // Set purple tint for the icon
-            imageView.setColorFilter(Color.parseColor("#6622CC"))
-            
-            Log.d("ConnectionStatusManager", "Disconnected style applied")
-        }
-        
-        binding?.vpnConnectionTime?.let { textView ->
-            // Set black text color
-            textView.setTextColor(Color.BLACK)
-        }
+
+        // Show connect button card
+        binding?.connectButtonCard?.visibility = View.VISIBLE
+
+        // Hide button animation, white icon, timer, loader
+        binding?.buttonAnimation?.visibility = View.GONE
+        binding?.whiteConnectionIcon?.visibility = View.GONE
+        binding?.vpnConnectionTime?.visibility = View.GONE
+        binding?.loaderAnimation?.visibility = View.GONE
+
+        isAnimating = false
     }
     
     private fun setDefaultButtonStyle() {
-        binding?.connectionButtonImage?.let { imageView ->
-            // Stop any ongoing animations
-            stopCurrentAnimation()
+        // Hide loader and show button animation
+        binding?.loaderAnimation?.let { loaderView ->
+            loaderView.pauseAnimation()
+            loaderView.visibility = View.GONE
+        }
+        
+        binding?.buttonAnimation?.let { buttonView ->
+            buttonView.visibility = View.VISIBLE
+            buttonView.setAnimation(R.raw.button_base)
+            buttonView.speed = 1.0f  // Normal speed for default state
+            buttonView.playAnimation()
             
-            // Reset to default background
-            imageView.background = ContextCompat.getDrawable(context, R.drawable.connect_button_bnt)
-            // Clear color filter
-            imageView.clearColorFilter()
+            // Set default text color
+            binding.vpnConnectionTime.setTextColor(Color.BLACK)
             
             Log.d("ConnectionStatusManager", "Default style applied")
         }
         
-        binding?.vpnConnectionTime?.let { textView ->
-            // Set default text color
-            textView.setTextColor(Color.BLACK)
-        }
-        
         isAnimating = false
+    }
+
+    private fun setLottieButtonColor(color: Int) {
+        binding?.buttonAnimation?.addValueCallback(
+            KeyPath("**"),
+            LottieProperty.COLOR_FILTER,
+            LottieValueCallback(android.graphics.PorterDuffColorFilter(color, android.graphics.PorterDuff.Mode.SRC_ATOP))
+        )
     }
 } 

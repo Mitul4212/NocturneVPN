@@ -384,29 +384,150 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/connect_button"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:background="@drawable/btn_background"-->
+<!--            app:cardCornerRadius="100dp"-->
+<!--            app:cardElevation="8dp"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/guideline14"-->
+<!--            app:layout_constraintDimensionRatio="1:1"-->
+<!--            app:layout_constraintEnd_toStartOf="@+id/guideline13"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/guideline12"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/guideline9">-->
 
-        <androidx.cardview.widget.CardView
+<!--            &lt;!&ndash; Button Base Animation &ndash;&gt;-->
+<!--            <com.airbnb.lottie.LottieAnimationView-->
+<!--                android:id="@+id/button_animation"-->
+<!--                android:layout_width="285dp"-->
+<!--                android:layout_height="285dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:scaleType="fitCenter"-->
+<!--                app:lottie_rawRes="@raw/button_base"-->
+<!--                app:lottie_autoPlay="false"-->
+<!--                app:lottie_loop="true" />-->
+
+<!--            &lt;!&ndash; Loader Animation (shown during connection) &ndash;&gt;-->
+<!--            <com.airbnb.lottie.LottieAnimationView-->
+<!--                android:id="@+id/loader_animation"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:visibility="visible"-->
+<!--                android:scaleType="fitCenter"-->
+<!--                app:lottie_rawRes="@raw/loader"-->
+<!--                app:lottie_autoPlay="true"-->
+<!--                app:lottie_loop="true" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/vpn_connection_time"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:gravity="bottom|center"-->
+<!--                android:paddingTop="60dp"-->
+<!--                android:text="@string/_00_00_00"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textSize="12sp" />-->
+
+<!--        </androidx.cardview.widget.CardView>-->
+
+
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/connect_button"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:background="@drawable/btn_background"
-            app:cardCornerRadius="100dp"
-            app:cardElevation="8dp"
+            android:layout_width="285dp"
+            android:layout_height="285dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline14"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toStartOf="@+id/guideline13"
-            app:layout_constraintStart_toStartOf="@+id/guideline12"
+            app:layout_constraintEnd_toStartOf="@+id/guideline5"
+            app:layout_constraintStart_toStartOf="@+id/guideline3"
             app:layout_constraintTop_toTopOf="@+id/guideline9">
 
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/connect_button_card"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:background="@drawable/btn_background"
+                app:cardCornerRadius="100dp"
+                app:cardElevation="8dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/Connection_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/connect_button_bnt"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_connect" />
+
+                <TextView
+                    android:id="@+id/Connection_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="bottom|center"
+                    android:paddingTop="60dp"
+                    android:text="@string/_00_00_00"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- Button Base Animation -->
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/button_animation"
+                android:layout_width="285dp"
+                android:layout_height="285dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/button_base" />
+
+            <!-- Loader Animation (shown during connection) -->
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/loader_animation"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/loader" />
+
             <ImageView
-                android:id="@+id/connection_button_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/connect_button_bnt"
+                android:id="@+id/white_connection_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:scaleType="centerCrop"
-                android:contentDescription="Connect Button Image"
-                android:src="@drawable/ic_connect" />
+                android:visibility="gone"
+
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:src="@drawable/ic_connect"
+                app:tint="@color/white" />
 
             <TextView
                 android:id="@+id/vpn_connection_time"
@@ -416,11 +537,17 @@
                 android:gravity="bottom|center"
                 android:paddingTop="60dp"
                 android:text="@string/_00_00_00"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
 
 
-        </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
         <androidx.constraintlayout.widget.Guideline
@@ -551,6 +678,7 @@
             app:layout_constraintGuide_percent="0.43" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

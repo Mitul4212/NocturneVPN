@@ -92,6 +92,7 @@ dependencies {
     implementation ("com.github.murgupluoglu:flagkit-android:1.0.5")
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
     implementation ("com.google.android.material:material:1.12.0") // or latest
+    implementation ("com.airbnb.android:lottie:6.3.0")
 
 
 }

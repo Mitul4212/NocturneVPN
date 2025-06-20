@@ -1,5 +1,6 @@
 package com.example.nocturnevpn.view.fragment
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -51,6 +52,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     var wasConnectedOnce = false
     private var lastClickTime = 0L
 
+
+    @SuppressLint("SuspiciousIndentation")
     private val getServerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val selectedServer = result.data!!.getParcelableExtra<Server>("serverextra")
@@ -61,13 +64,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     }
 
     private val vpnResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { vpnResult ->
-        if (vpnResult.resultCode == Activity.RESULT_OK) {
-            //Permission granted, start the VPN
+            if (vpnResult.resultCode == Activity.RESULT_OK) {
+                //Permission granted, start the VPN
             vpnManager.startVpn()
-        } else {
-            mContext.toast("For a successful VPN connection, permission must be granted.")
+            } else {
+                mContext.toast("For a successful VPN connection, permission must be granted.")
+            }
         }
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -103,6 +106,9 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         // Initialize managers that need binding AFTER binding is ready
         initializeBindingDependentManagers()
 
+        // Initialize Lottie animations
+        initializeLottieAnimations()
+
         // Load country coordinates from JSON
         Utils.loadCountryCoordinates(requireContext())
 
@@ -124,6 +130,26 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         // Connect managers
         vpnManager.setConnectionStatusManager(connectionStatusManager)
         vpnManager.setNotificationManager(notificationManager)
+    }
+
+    private fun initializeLottieAnimations() {
+        // Initialize the button animation
+        binding?.buttonAnimation?.let { buttonView ->
+            buttonView.setAnimation(R.raw.button_base)
+            buttonView.loop(true)
+            buttonView.speed = 1.0f  // Normal speed for initial state
+            buttonView.playAnimation()
+        }
+        
+        // Initialize the loader animation (hidden by default)
+        binding?.loaderAnimation?.let { loaderView ->
+            loaderView.setAnimation(R.raw.loader)
+            loaderView.loop(true)
+            loaderView.speed = 2.0f  // Faster speed for loader
+            loaderView.visibility = View.GONE
+        }
+        
+        Log.d("HomeFragment", "Lottie animations initialized with optimized settings")
     }
 
     private fun setupUI() {
@@ -221,6 +247,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         vpnManager.checkServiceStatus()
     }
 
+
+
     private fun confirmDisconnect() {
         AlertDialog.Builder(mContext)
             .setMessage(mContext.getString(R.string.connection_close_confirm))
@@ -255,6 +283,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     override fun onDestroy() {
         super.onDestroy()
         notificationManager.removeVPNNotification()
+        _binding = null  // 💡 Add this to avoid memory leaks
     }
 
     // VpnStatus.StateListener implementation
