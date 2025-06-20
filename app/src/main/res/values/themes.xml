@@ -33,7 +33,7 @@
         <item name="android:textSize">15sp</item>
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:background">@drawable/rounded_edit_text</item>
+
 
     </style>
 

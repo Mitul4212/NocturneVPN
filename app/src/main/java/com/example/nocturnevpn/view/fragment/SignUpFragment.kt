@@ -38,6 +38,11 @@ class SignUpFragment : Fragment() {
             findNavController().navigate(R.id.action_signUpFragment_to_signInFragment)
         }
 
+        _binding?.signInTextLink?.setOnClickListener{
+            findNavController().navigate(R.id.action_signUpFragment_to_signInFragment)
+
+        }
+
     }
 
     companion object {
