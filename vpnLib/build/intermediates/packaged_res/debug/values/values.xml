@@ -411,7 +411,7 @@
     <string name="no_vpn_support_image">Your image does not support the VPNService API, sorry :(</string>
     <string name="nobind_summary">Do not bind to local address and port</string>
     <string name="notenoughdata">Not enough data</string>
-    <string name="notifcation_title">Liberty VPN - %s</string>
+    <string name="notifcation_title">Nocturne VPN - %s</string>
     <string name="notifcation_title_notconnect">Not connected</string>
     <string name="nought_alwayson_warning"><![CDATA[If you did not get a VPN confirmation dialog, you have \"Always on VPN\" enabled for another app. In that case only that app is allowed to connect to a VPN. Check under Settings-> Networks more .. -> VPNS]]></string>
     <string name="novpn_selected">No VPN selected.</string>
