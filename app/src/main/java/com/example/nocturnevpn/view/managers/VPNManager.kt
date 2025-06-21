@@ -1,6 +1,5 @@
 package com.example.nocturnevpn.view.managers
 
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,11 +13,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.nocturnevpn.CheckInternetConnection
 import com.example.nocturnevpn.SharedPreference
+import com.example.nocturnevpn.utils.HistoryManager
 import com.example.nocturnevpn.utils.toast
 import de.blinkt.openvpn.OpenVpnApi
 import de.blinkt.openvpn.core.OpenVPNService
 import de.blinkt.openvpn.core.OpenVPNThread
-import de.blinkt.openvpn.core.VpnStatus
 import java.io.IOException
 
 class VPNManager(
@@ -35,12 +34,14 @@ class VPNManager(
     private var notificationManager: NotificationManager? = null
     private var notificationUpdateHandler: Handler? = null
     private var notificationUpdateRunnable: Runnable? = null
+    private var historyManager: HistoryManager? = null
 
     init {
         vpnThread = OpenVPNThread()
         vpnService = OpenVPNService()
         connection = CheckInternetConnection()
         notificationUpdateHandler = Handler(Looper.getMainLooper())
+        historyManager = HistoryManager.getInstance(context)
     }
 
     fun setVPNResultLauncher(launcher: ActivityResultLauncher<Intent>) {
@@ -99,18 +100,35 @@ class VPNManager(
             Log.d("VPN_START", "Country: ${selectedServer.getCountryLong()} (${selectedServer.getCountryShort()})")
             Log.d("VPN_START", "IP Address: ${selectedServer.getIpAddress()}")
 
+            // Track connection start in history
+            historyManager?.onConnectionStarted(selectedServer)
+
             OpenVpnApi.startVpn(context, conf, selectedServer.getCountryShort(), "vpn", "vpn")
             vpnStart = true
         } catch (exception: IOException) {
             exception.printStackTrace()
+            // Track failed connection
+            val selectedServer = sharedPreference.getServer()
+            if (selectedServer != null) {
+                historyManager?.onConnectionFailed(selectedServer, "Configuration Error")
+            }
         } catch (exception: RemoteException) {
             exception.printStackTrace()
+            // Track failed connection
+            val selectedServer = sharedPreference.getServer()
+            if (selectedServer != null) {
+                historyManager?.onConnectionFailed(selectedServer, "Service Error")
+            }
         }
     }
 
     fun stopVPN(): Boolean {
         return try {
             Log.d("VPNManager", "Stopping VPN connection")
+            
+            // Track connection stop in history
+            historyManager?.onConnectionDisconnected()
+            
             OpenVPNThread.stop()
             vpnStart = false
             stopPeriodicNotificationUpdate() // Stop periodic updates
@@ -209,10 +227,14 @@ class VPNManager(
             "CONNECTED" -> {
                 vpnStart = true
                 startPeriodicNotificationUpdate()
+                // Notify history manager that connection is established
+                historyManager?.onConnectionEstablished()
             }
             "DISCONNECTED", "NOPROCESS" -> {
                 vpnStart = false
                 stopPeriodicNotificationUpdate()
+                // Track connection stop in history when VPN state changes to disconnected
+                historyManager?.onConnectionDisconnected()
             }
         }
     }
@@ -236,10 +258,25 @@ class VPNManager(
                 vpnStart = false
                 stopPeriodicNotificationUpdate()
                 OpenVPNService.setDefaultStatus()
+                // Track connection stop in history
+                historyManager?.onConnectionDisconnected()
             }
             "CONNECTED" -> {
                 vpnStart = true
                 startPeriodicNotificationUpdate()
+                // Notify history manager that connection is established
+                historyManager?.onConnectionEstablished()
+            }
+            "CONNECTING" -> {
+                // Connection is in progress
+                // History manager already knows about this from onConnectionStarted
+            }
+            "AUTH_FAILED", "CONNECTION_FAILED", "TUNNEL_FAILED" -> {
+                // Connection failed during the process
+                val selectedServer = sharedPreference.getServer()
+                if (selectedServer != null) {
+                    historyManager?.onConnectionFailed(selectedServer, connectionState)
+                }
             }
         }
     }
