@@ -40,6 +40,9 @@
         <action
             android:id="@+id/action_settingFragment3_to_appIconFragment"
             app:destination="@id/appIconFragment" />
+        <action
+            android:id="@+id/action_settingFragment3_to_helpCenterFragment"
+            app:destination="@id/helpCenterFragment" />
     </fragment>
     <fragment
         android:id="@+id/advanceSetttingFragment"
@@ -61,5 +64,9 @@
         android:name="com.example.nocturnevpn.view.fragment.HistoryFragment"
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/helpCenterFragment"
+        android:name="com.example.nocturnevpn.view.fragment.HelpCenterFragment"
+        android:label="HelpCenterFragment" />
 
 </navigation>

@@ -66,8 +66,6 @@
     <string name="_00_00_00">00:00:00</string>
 
 
-
-
     <string-array name="faq_questions">
         <item>Why do I need a VPN?</item>
         <item>Is it safe?</item>
@@ -111,8 +109,6 @@ Details: https://support.google.com/googleplay/answer/2476088</item>
         <item>Yes. We follow a strict no-log policy. Nocturen VPN does not collect, store, or share any of your personal or browsing data.</item>
         <item>Our Premium plan supports some streaming services like Netflix or Amazon Prime. However, content access may vary depending on your location or the streaming platform’s restrictions.</item>
     </string-array>
-
-
 
 
 </resources>
