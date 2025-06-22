@@ -437,7 +437,6 @@
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/connect_button"
             android:layout_width="285dp"
             android:layout_height="285dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline14"
@@ -445,16 +444,28 @@
             app:layout_constraintStart_toStartOf="@+id/guideline3"
             app:layout_constraintTop_toTopOf="@+id/guideline9">
 
+            <LinearLayout
+                android:id="@+id/connect_button"
+                android:layout_width="153dp"
+                android:layout_height="154dp"
+                android:elevation="9dp"
+                android:background="@drawable/connect_button_btn"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:orientation="horizontal" />
+
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/connect_button_card"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
+                android:layout_width="153dp"
+                android:layout_height="154dp"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_background"
+                android:visibility="visible"
                 app:cardCornerRadius="100dp"
                 app:cardElevation="8dp"
-                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
