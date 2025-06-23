@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -15,12 +13,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RatingBar
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.FragmentSettingBinding
+import java.util.concurrent.TimeUnit
 
 class settingFragment : Fragment() {
 
@@ -75,13 +73,20 @@ class settingFragment : Fragment() {
             showRatingDialog(prefs)
         }
 
-        // Show rating dialog after delay if not rated
-        if (!hasRated) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (!prefs.getBoolean("has_rated", false)) {
-                    showRatingDialog(prefs)
-                }
-            }, 1000 * 60 * 2) // 2 minutes delay
+        // Show rating dialog after first VPN connect/disconnect and then once per day if not rated
+        val vpnPrompted = prefs.getBoolean("vpn_prompted", false)
+        val lastPromptTime = prefs.getLong("last_rating_prompt", 0L)
+        val now = System.currentTimeMillis()
+        val oneDayMillis = TimeUnit.DAYS.toMillis(1)
+
+        // Simulate VPN connect/disconnect event (replace with real event in your app)
+        val vpnConnected = prefs.getBoolean("vpn_connected_once", false)
+
+        if (!hasRated && vpnConnected) {
+            if (!vpnPrompted || now - lastPromptTime > oneDayMillis) {
+                showRatingDialog(prefs)
+                prefs.edit().putBoolean("vpn_prompted", true).putLong("last_rating_prompt", now).apply()
+            }
         }
     }
 
@@ -98,19 +103,16 @@ class settingFragment : Fragment() {
         val dialog = Dialog(requireContext())
         dialog.setContentView(R.layout.rating_dialog)
         dialog.setCancelable(false)
-        dialog.window?.let { window ->
-            window.setBackgroundDrawableResource(android.R.color.transparent)
-        }
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val ratingBar = dialog.findViewById<RatingBar>(R.id.ratingBar)
         val btnSubmit = dialog.findViewById<Button>(R.id.btnSubmit)
-        val tvNoThanks = dialog.findViewById<TextView>(R.id.tvNoThanks)
+        val tvNoThanks = dialog.findViewById<Button>(R.id.tvNoThanks)
         val ivClose = dialog.findViewById<LinearLayout>(R.id.ivClose)
 
         btnSubmit.setOnClickListener {
             val rating = ratingBar.rating
             if (rating >= 4) {
-                // Redirect to Play Store
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = android.net.Uri.parse("market://details?id=" + requireContext().packageName)
                 startActivity(intent)
@@ -128,6 +130,11 @@ class settingFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
     }
 
     companion object {

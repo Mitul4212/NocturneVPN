@@ -266,6 +266,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         VpnStatus.addStateListener(this)
         vpnManager.registerBroadcastReceiver()
         serverManager.loadSavedServer()
+        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
     }
 
     override fun onPause() {

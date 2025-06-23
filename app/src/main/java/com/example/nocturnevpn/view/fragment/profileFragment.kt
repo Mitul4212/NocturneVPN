@@ -100,6 +100,7 @@ class profileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
         // Refresh history when returning from HistoryFragment
         loadRecentHistory()
     }

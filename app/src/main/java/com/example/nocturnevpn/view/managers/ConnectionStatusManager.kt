@@ -18,6 +18,8 @@ import com.airbnb.lottie.value.LottieValueCallback
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentHomeBinding
+import com.example.nocturnevpn.utils.RatingDialogManager
+import androidx.fragment.app.FragmentActivity
 
 class ConnectionStatusManager(
     private val context: Context,
@@ -32,6 +34,7 @@ class ConnectionStatusManager(
     private var isButtonPressed = false
     private var connectionStartTime: Long = 0
     private var isConnected = false
+    private var wasConnectedOnce = false
 
     @SuppressLint("SuspiciousIndentation")
     fun updateConnectionStatus(
@@ -215,6 +218,7 @@ class ConnectionStatusManager(
     // Show success animation when connected
     private fun animateConnectionSuccess() {
         isAnimating = true
+        wasConnectedOnce = true
 
         // Hide connect button card
         binding?.connectButtonCard?.visibility = View.GONE
@@ -249,6 +253,16 @@ class ConnectionStatusManager(
         binding?.whiteConnectionIcon?.visibility = View.GONE
         binding?.vpnConnectionTime?.visibility = View.GONE
         binding?.loaderAnimation?.visibility = View.GONE
+
+        // Set vpn_connected_once flag after first connection cycle
+        val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        if (wasConnectedOnce && !prefs.getBoolean("vpn_connected_once", false)) {
+            prefs.edit().putBoolean("vpn_connected_once", true).apply()
+            // Show rating dialog immediately after first disconnect
+            if (context is FragmentActivity) {
+                RatingDialogManager.maybeShowRatingDialog(context)
+            }
+        }
 
         isAnimating = false
     }

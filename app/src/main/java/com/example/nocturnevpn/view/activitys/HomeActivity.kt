@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.ActivityHomeBinding
 import me.ibrahimsn.lib.SmoothBottomBar
+import com.example.nocturnevpn.utils.RatingDialogManager
 
 
 class HomeActivity : AppCompatActivity() {
@@ -47,6 +48,9 @@ class HomeActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         askNotificationPermission()
+
+        // Show rating dialog if needed (after first VPN connect/disconnect and once per day)
+        RatingDialogManager.maybeShowRatingDialog(this)
 
         // Initialize bottom navigation bar
         bottomNavigation = binding.bottomBar

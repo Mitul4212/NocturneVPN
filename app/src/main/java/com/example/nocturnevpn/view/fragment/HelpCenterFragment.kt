@@ -57,6 +57,11 @@ class HelpCenterFragment : Fragment() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
