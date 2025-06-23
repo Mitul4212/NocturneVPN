@@ -16,4 +16,10 @@
         <item name="cornerSize">12dp</item> <!-- Change radius as needed -->
     </style>
 
+    <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+
 </resources>
