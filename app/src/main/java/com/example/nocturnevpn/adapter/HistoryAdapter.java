@@ -92,20 +92,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             dataUsedText.setText(history.getFormattedDataUsed());
             dateText.setText(formatDate(history.getConnectionDate()));
 
-            // Set status color based on status
-            switch (history.getStatus().toLowerCase()) {
-                case "connected":
-                    statusText.setBackgroundResource(R.drawable.status_background);
-                    break;
-                case "disconnected":
-                    statusText.setBackgroundResource(R.drawable.status_background);
-                    break;
-                case "failed":
-                    statusText.setBackgroundResource(R.drawable.status_background);
-                    break;
-                default:
-                    statusText.setBackgroundResource(R.drawable.status_background);
-                    break;
+            // Set status background based on status
+            if ("failed".equalsIgnoreCase(history.getStatus())) {
+                statusText.setBackgroundResource(R.drawable.status_failed_background);
+            } else {
+                statusText.setBackgroundResource(R.drawable.status_background);
             }
         }
 
