@@ -61,6 +61,11 @@ class ServerManager(
                 binding?.countryFlag?.setImageResource(R.drawable.ic_server_flage_icon)
             }
 
+            // Set selected server ping signal
+            val pingValue = parsePing(server.ping)
+            val signalRes = getSignalResId(pingValue)
+            binding?.selectedServerPing?.setImageResource(signalRes)
+
             isServerSelected = true
         } else {
             // Handle the case when the server is null
@@ -68,7 +73,29 @@ class ServerManager(
             binding?.serverFlagDes?.text = context.getString(R.string.IP_address)
             binding?.connectionIp?.text = context.getString(R.string.IP_address)
             binding?.countryFlag?.setImageResource(R.drawable.ic_server_flage_icon)
+            binding?.selectedServerPing?.setImageResource(R.drawable.ic_signal_no_signal)
             isServerSelected = false
+        }
+    }
+
+    private fun parsePing(ping: String?): Int {
+        if (ping == null) return -1
+        return try {
+            val digits = ping.replace(Regex("[^0-9]"), "")
+            digits.toInt()
+        } catch (e: Exception) {
+            -1
+        }
+    }
+
+    private fun getSignalResId(ping: Int): Int {
+        return when {
+            ping == 0 -> R.drawable.ic_signal_no_signal
+            ping in 1..20 -> R.drawable.ic_signal_four
+            ping in 21..50 -> R.drawable.ic_signal_three
+            ping in 51..100 -> R.drawable.ic_signal_two
+            ping in 101..250 -> R.drawable.ic_signal_one
+            else -> R.drawable.ic_signal_no_signal
         }
     }
 } 

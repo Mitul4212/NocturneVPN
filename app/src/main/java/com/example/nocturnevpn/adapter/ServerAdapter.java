@@ -1,9 +1,11 @@
 package com.example.nocturnevpn.adapter;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -83,10 +85,18 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             shimmerHolder.shimmerLayout.startShimmer();
         } else {
             Server server = servers.get(position);
+            // Debug: Log all server pings
+            Log.d("ServerPingDebug", "Server: " + server.getHostName() + " | IP: " + server.getIpAddress() + " | Ping: " + server.getPing());
             ServerViewHolder serverHolder = (ServerViewHolder) holder;
             serverHolder.tvIp.setText(server.getIpAddress());
             serverHolder.tvSpeed.setText(OvpnUtils.humanReadableCount(server.getSpeed(), true));
             serverHolder.tvProtocol.setText(server.getProtocol().toUpperCase(Locale.ROOT));
+
+            // Set ping signal image
+            ImageView pingImage = serverHolder.itemView.findViewById(R.id.serverPingImage);
+            int pingValue = parsePing(server.getPing());
+            int signalRes = getSignalResId(pingValue);
+            pingImage.setImageResource(signalRes);
 
             if (server.getIpAddress().equals(selectedIp)) {
                 serverHolder.itemView.setBackgroundColor(Color.parseColor("#33FFFFFF"));
@@ -96,6 +106,26 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             serverHolder.itemView.setOnClickListener(v -> clickCallback.onServerClick(server));
         }
+    }
+
+    private int parsePing(String ping) {
+        if (ping == null) return -1;
+        try {
+            String digits = ping.replaceAll("[^0-9]", "");
+            return Integer.parseInt(digits);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private int getSignalResId(int ping) {
+        if (ping == 0) return R.drawable.ic_signal_no_signal;
+        if (ping > 0 && ping <= 20) return R.drawable.ic_signal_four;
+        if (ping > 20 && ping <= 50) return R.drawable.ic_signal_three;
+        if (ping > 50 && ping <= 100) return R.drawable.ic_signal_two;
+        if (ping > 100 && ping <= 150) return R.drawable.ic_signal_one;
+        if (ping > 150) return R.drawable.ic_signal_no_signal;
+        return R.drawable.ic_signal_no_signal;
     }
 
     static class ServerViewHolder extends RecyclerView.ViewHolder {

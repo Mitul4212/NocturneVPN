@@ -268,12 +268,12 @@
                 <!--                    android:layout_weight="1" />-->
 
                 <ImageView
-                    android:id="@+id/imageView4"
+                    android:id="@+id/selectedServerPing"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:padding="10dp"
-                    android:src="@drawable/ic_signal"
+                    android:src="@drawable/ic_signal_three"
                     android:contentDescription="Ping Image"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/imageView14"
