@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.badoo.mobile.util.WeakHandler;
@@ -242,6 +243,19 @@ public class ChangeServerActivity extends AppCompatActivity {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setAdapter(adapter);
+
+        RecyclerView recyclerView = binding.recyclerView;
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    int firstVisible = layoutManager.findFirstCompletelyVisibleItemPosition();
+                    binding.swipeRefresh.setEnabled(firstVisible == 0);
+                }
+            }
+        });
     }
 
     private void showSkeletonPlaceholders() {
