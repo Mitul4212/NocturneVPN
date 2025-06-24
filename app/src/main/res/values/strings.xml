@@ -11,7 +11,7 @@
     <string name="download">00.0 KB/S</string>
     <string name="speed_ind">KB/S</string>
     <string name="upload">00.0 KB/S</string>
-    <string name="not_signin">Looks like You’re not signed in yet.</string>
+    <string name="not_signin">Looks like You\'re not signed in yet.</string>
     <string name="user_id">User ID</string>
     <string name="user_num">284529462</string>
     <string name="base_plan">Base Plan</string>
@@ -64,17 +64,17 @@
     <string name="notifictions">Notifictions</string>
     <string name="advance_settiing">Advance Settiing</string>
     <string name="_00_00_00">00:00:00</string>
-
+    <string name="search_faq">Search</string>
 
     <string-array name="faq_questions">
         <item>Why do I need a VPN?</item>
         <item>Is it safe?</item>
         <item>How to use Nocturen VPN?</item>
         <item>How to disconnect Nocturen VPN?</item>
-        <item>Can’t connect, unstable, or speed is slow.</item>
+        <item>Can\'t connect, unstable, or speed is slow.</item>
         <item>How to switch server location?</item>
-        <item>Can’t find the server you want?</item>
-        <item>Why can’t I use the internet after connection is established?</item>
+        <item>Can\'t find the server you want?</item>
+        <item>Why can\'t I use the internet after connection is established?</item>
         <item>How to disable battery optimization for Nocturen VPN?</item>
         <item>How to cancel the subscription in Google Play?</item>
         <item>Can I get a refund?</item>
@@ -89,26 +89,36 @@
         <item>Yes. We use SSL to encrypt your internet data, making it undecipherable during transmission. We also follow a strict no-log policy — we do not collect, log, store, or share any user data.</item>
         <item>Tap the "Start" button in the center of the home screen. If prompted, tap "Trust this application" to allow VPN permission.</item>
         <item>Tap the same connect button on the home screen to disconnect from the VPN server.</item>
-        <item>Connection problems can be caused by many factors. Please update the app to the latest version, refresh the server list, and try connecting to a top server multiple times. If it still doesn’t work, contact us at paypal4212a@gmail.com with your country and network provider name.</item>
+        <item>Connection problems can be caused by many factors. Please update the app to the latest version, refresh the server list, and try connecting to a top server multiple times. If it still doesn\'t work, contact us at paypal4212a@gmail.com with your country and network provider name.</item>
         <item>Select the server location you want from the server list. The VPN will connect to the selected location.</item>
         <item>Please contact us at paypal4212a@gmail.com and provide the website URL you want to unblock. We will review your request and improve our service.</item>
         <item>First, check your network connection. Then, disable battery optimization for Nocturen VPN in your Android battery settings.</item>
         <item>To disable battery optimization:
 - Go to Settings > Battery > Battery Optimization
 - Choose "All apps" from the dropdown
-- Find Nocturen VPN and select "Don’t optimize"
+- Find Nocturen VPN and select "Don't optimize"
 
 For Huawei: Settings > Battery > Launch > Manage manually > Enable "Auto launch" and "Run in background".
 For Samsung: Settings > Battery > App Power Saving > Details > Disable for Nocturen VPN.
 Other devices may list this under "Protected Apps" or "Background activity".</item>
         <item>Google Play subscriptions renew automatically unless you cancel them. To unsubscribe: open Google Play Store > Menu > Subscriptions > Tap the subscription > Tap "Cancel subscription".
 Details: https://support.google.com/googleplay/answer/2476088</item>
-        <item>If you don’t cancel your subscription before the trial period ends, you may not be eligible for a refund. For more, visit: https://support.google.com/googleplay/answer/2476088</item>
+        <item>If you don\'t cancel your subscription before the trial period ends, you may not be eligible for a refund. For more, visit: https://support.google.com/googleplay/answer/2476088</item>
         <item>Nocturen VPN offers both free and premium plans. The free version includes limited speed and servers. Premium unlocks faster speeds, global servers, and full access.</item>
-        <item>Tap the “Go to Premium” button at the bottom of your Profile page. Choose a subscription plan and complete your payment through Google Play.</item>
+        <item>Tap the "Go to Premium" button at the bottom of your Profile page. Choose a subscription plan and complete your payment through Google Play.</item>
         <item>Yes. We follow a strict no-log policy. Nocturen VPN does not collect, store, or share any of your personal or browsing data.</item>
-        <item>Our Premium plan supports some streaming services like Netflix or Amazon Prime. However, content access may vary depending on your location or the streaming platform’s restrictions.</item>
+        <item>Our Premium plan supports some streaming services like Netflix or Amazon Prime. However, content access may vary depending on your location or the streaming platform\'s restrictions.</item>
     </string-array>
 
+    <string-array name="faq_topics">
+        <item>All</item>
+        <item>General</item>
+        <item>Safety &amp; Privacy</item>
+        <item>How To</item>
+        <item>Connection Issues</item>
+        <item>Servers</item>
+        <item>Subscription &amp; Payment</item>
+        <item>Streaming</item>
+    </string-array>
 
 </resources>

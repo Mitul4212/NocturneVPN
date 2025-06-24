@@ -3,6 +3,8 @@ package com.example.nocturnevpn.view.activitys;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,8 @@ import com.example.nocturnevpn.db.DbHelper;
 import com.example.nocturnevpn.model.CountryServerGroup;
 import com.example.nocturnevpn.model.Server;
 import com.example.nocturnevpn.utils.CsvParser;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +71,8 @@ public class ChangeServerActivity extends AppCompatActivity {
 
     private Dialog infoAlertDialog;
 
-
+    private TextInputEditText serverSearchEditText;
+    private TextInputLayout serverSearchInputLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,36 +116,28 @@ public class ChangeServerActivity extends AppCompatActivity {
             }
         });
 
-
-        searchView = binding.serverSearchView;
-
-        // Force SearchView to expand (iconifiedByDefault = false)
-        searchView.setIconifiedByDefault(false);
-
-        EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        if (searchEditText != null) {
-            searchEditText.setBackgroundResource(R.drawable.search_background);
-            searchEditText.setPadding(24, 16, 24, 16); // optional
-        } else {
-            Log.e("ChangeServerActivity", "EditText inside SearchView is null!");
-        }
-
+        serverSearchInputLayout = binding.serverSearchInputLayout;
+        serverSearchEditText = binding.serverSearchEditText;
 
         // Search filter logic
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        serverSearchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                filterServers(query);
-                return true;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterServers(s.toString());
             }
-
             @Override
-            public boolean onQueryTextChange(String newText) {
-                filterServers(newText);
-                return true;
+            public void afterTextChanged(Editable s) {}
+        });
+        serverSearchInputLayout.setEndIconOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                serverSearchEditText.setText("");
+                serverSearchEditText.clearFocus();
+                filterServers("");
             }
         });
-
     }
 
     private void filterServers(String query) {
