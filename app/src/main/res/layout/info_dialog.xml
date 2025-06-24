@@ -15,15 +15,27 @@
         android:background="@color/white"
         android:padding="16dp">
 
-        <ImageView
+<!--        <ImageView-->
+<!--            android:id="@+id/info_dialog_image"-->
+<!--            android:layout_width="60dp"-->
+<!--            android:layout_height="60dp"-->
+<!--            android:src="@drawable/ic_info"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:tint="@color/strong_violet" />-->
+
+        <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/info_dialog_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_info"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:lottie_rawRes="@raw/info_animation"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/strong_violet" />
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/info_dialog_title"
