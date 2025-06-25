@@ -25,6 +25,10 @@
             android:name=".view.activitys.AppAuthActivity"
             android:exported="false" />
         <activity
+            android:name=".view.activitys.ReportIssueActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".view.activitys.ChangeServerActivity"
             android:exported="false"
             android:screenOrientation="portrait"/>

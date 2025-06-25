@@ -65,6 +65,11 @@ class settingFragment : Fragment() {
             findNavController().navigateUp()
         }
 
+        binding.reportIssue.setOnClickListener {
+            val intent = Intent(requireContext(), com.example.nocturnevpn.view.activitys.ReportIssueActivity::class.java)
+            startActivity(intent)
+        }
+
         // Rating dialog logic
         val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val hasRated = prefs.getBoolean("has_rated", false)
