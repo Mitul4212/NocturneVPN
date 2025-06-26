@@ -40,6 +40,10 @@ class SignInFragment : Fragment() {
 
         }
 
+        _binding?.forgetPasswordTextLink?.setOnClickListener{
+            findNavController().navigate(R.id.action_signInFragment_to_forgotPasswordFragment)
+        }
+
     }
 
     companion object {

@@ -22,5 +22,31 @@
         <action
             android:id="@+id/action_signInFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_signInFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.example.nocturnevpn.view.fragment.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" >
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_otpFragment"
+            app:destination="@id/otpFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/otpFragment"
+        android:name="com.example.nocturnevpn.view.fragment.OtpFragment"
+        android:label="fragment_otp"
+        tools:layout="@layout/fragment_otp" >
+        <action
+            android:id="@+id/action_otpFragment_to_setPasswordFragment"
+            app:destination="@id/setPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setPasswordFragment"
+        android:name="com.example.nocturnevpn.view.fragment.SetPasswordFragment"
+        android:label="fragment_set_password"
+        tools:layout="@layout/fragment_set_password" />
 </navigation>
