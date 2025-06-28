@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_profileFragment_to_historyFragment"
             app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_editUserInfoFragment"
+            app:destination="@id/editUserInfoFragment" />
     </fragment>
 
     <fragment
@@ -68,5 +71,10 @@
         android:id="@+id/helpCenterFragment"
         android:name="com.example.nocturnevpn.view.fragment.HelpCenterFragment"
         android:label="HelpCenterFragment" />
+    <fragment
+        android:id="@+id/editUserInfoFragment"
+        android:name="com.example.nocturnevpn.view.fragment.EditUserInfoFragment"
+        android:label="EditUserInfoFragment"
+        tools:layout="@layout/fragment_edit_user_info" />
 
 </navigation>
