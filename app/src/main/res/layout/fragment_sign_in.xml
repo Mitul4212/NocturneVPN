@@ -99,58 +99,6 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="597dp" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline5">
-
-        <View
-            android:layout_width="103.5dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_marginEnd="16dp"
-            android:background="#6D6C69" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Or sign up with"
-            android:textColor="#6D6C69"
-            android:textSize="14sp" />
-
-        <View
-            android:layout_width="103.5dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="16dp"
-            android:background="#6D6C69" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline6">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_google"
-            android:layout_marginEnd="16dp"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_facebook" />
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -198,27 +146,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.93" />
+        app:layout_constraintGuide_percent="0.85" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.705" />
+        app:layout_constraintGuide_percent="0.75" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.789" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.847" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
