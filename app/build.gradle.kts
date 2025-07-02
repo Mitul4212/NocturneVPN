@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
+apply(plugin = "androidx.navigation.safeargs.kotlin")
+
 
 android {
     namespace = "com.example.nocturnevpn"

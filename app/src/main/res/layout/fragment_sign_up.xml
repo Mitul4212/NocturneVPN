@@ -51,7 +51,8 @@
                     style="@style/LoginTextInputInnerFieldStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -72,7 +73,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/enter_email"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -94,7 +96,8 @@
                     android:layout_height="match_parent"
                     android:hint="@string/enter_password"
                     android:inputType="textPassword"
-                    android:textColorHint="@color/strong_violet" />
+                    android:textColorHint="@color/strong_violet"
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -116,7 +119,8 @@
                     android:layout_height="match_parent"
                     android:hint="Enter Confirm Password"
                     android:inputType="textPassword"
-                    android:textColorHint="@color/strong_violet" />
+                    android:textColorHint="@color/strong_violet"
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.checkbox.MaterialCheckBox

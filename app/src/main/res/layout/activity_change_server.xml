@@ -102,7 +102,8 @@
             android:inputType="text"
             android:singleLine="true"
             android:textColor="@color/black"
-            android:textColorHint="@color/gray"/>
+            android:textColorHint="@color/gray"
+            android:textCursorDrawable="@drawable/edittext_cursor_color" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

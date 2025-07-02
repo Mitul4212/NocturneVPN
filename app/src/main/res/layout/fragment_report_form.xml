@@ -24,7 +24,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false"
-                android:hint="Issue Category" />
+                android:hint="Issue Category"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -41,7 +42,8 @@
                 style="@style/LoginTextInputInnerFieldStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -58,7 +60,8 @@
                 style="@style/LoginTextInputInnerFieldStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -78,7 +81,8 @@
                 android:inputType="textMultiLine"
                 android:minLines="5"
                 android:maxLines="20"
-                android:gravity="top|start" />
+                android:gravity="top|start"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -98,7 +102,8 @@
                 android:inputType="textMultiLine"
                 android:minLines="4"
                 android:maxLines="20"
-                android:gravity="top|start" />
+                android:gravity="top|start"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -118,7 +123,8 @@
                 android:inputType="textMultiLine"
                 android:minLines="4"
                 android:maxLines="20"
-                android:gravity="top|start" />
+                android:gravity="top|start"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -138,7 +144,8 @@
                 android:inputType="textMultiLine"
                 android:minLines="4"
                 android:maxLines="20"
-                android:gravity="top|start" />
+                android:gravity="top|start"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -167,7 +174,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:enabled="false"
-                android:text="Device info will be auto-filled here" />
+                android:text="Device info will be auto-filled here"
+                android:textCursorDrawable="@drawable/edittext_cursor_color" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

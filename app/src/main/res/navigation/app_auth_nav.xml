@@ -35,23 +35,12 @@
         android:label="fragment_forgot_password"
         tools:layout="@layout/fragment_forgot_password" >
         <action
-            android:id="@+id/action_forgotPasswordFragment_to_otpFragment"
-            app:destination="@id/otpFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/otpFragment"
-        android:name="com.example.nocturnevpn.view.fragment.OtpFragment"
-        android:label="fragment_otp"
-        tools:layout="@layout/fragment_otp" >
+            android:id="@+id/action_forgotPasswordFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
         <action
-            android:id="@+id/action_otpFragment_to_setPasswordFragment"
-            app:destination="@id/setPasswordFragment" />
+            android:id="@+id/action_forgotPasswordFragment_to_passwordResetConfirmationFragment"
+            app:destination="@id/passwordResetConfirmationFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/setPasswordFragment"
-        android:name="com.example.nocturnevpn.view.fragment.SetPasswordFragment"
-        android:label="fragment_set_password"
-        tools:layout="@layout/fragment_set_password" />
     <fragment
         android:id="@+id/verificationFragment"
         android:name="com.example.nocturnevpn.view.fragment.VerificationFragment"
@@ -59,6 +48,18 @@
         tools:layout="@layout/fragment_verification" >
         <action
             android:id="@+id/action_verificationFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/passwordResetConfirmationFragment"
+        android:name="com.example.nocturnevpn.view.fragment.PasswordResetConfirmationFragment"
+        android:label="fragment_password_reset_confirmation"
+        tools:layout="@layout/fragment_password_reset_confirmation" >
+        <argument
+            android:name="email"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_passwordResetConfirmationFragment_to_signInFragment"
             app:destination="@id/signInFragment" />
     </fragment>
 </navigation>
