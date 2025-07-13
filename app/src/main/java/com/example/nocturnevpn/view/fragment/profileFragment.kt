@@ -16,6 +16,10 @@ import com.example.nocturnevpn.databinding.FragmentProfileBinding
 import com.example.nocturnevpn.db.HistoryHelper
 import com.example.nocturnevpn.utils.SampleDataGenerator
 import com.example.nocturnevpn.view.activitys.AppAuthActivity
+import com.example.nocturnevpn.SharedPreference
+import com.example.nocturnevpn.model.Server
+import android.provider.Settings
+import com.example.nocturnevpn.utils.getUserFriendlyDeviceId
 
 
 class profileFragment : Fragment() {
@@ -25,12 +29,14 @@ class profileFragment : Fragment() {
     
     private lateinit var simpleHistoryAdapter: SimpleHistoryAdapter
     private lateinit var historyHelper: HistoryHelper
+    private var sharedPreference: SharedPreference? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        sharedPreference = SharedPreference(requireContext())
         return binding.root
     }
 
@@ -44,6 +50,8 @@ class profileFragment : Fragment() {
         
         // Temporary: Add sample data generation for testing
         addSampleDataButton()
+        updateSelectedServerIp()
+        updateDeviceUniqueId()
     }
 
     private fun setupSimpleHistoryRecyclerView() {
@@ -142,6 +150,18 @@ class profileFragment : Fragment() {
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
         // Refresh history when returning from HistoryFragment
         loadRecentHistory()
+        updateSelectedServerIp()
+        updateDeviceUniqueId()
     }
 
+    private fun updateSelectedServerIp() {
+        val server: Server? = sharedPreference?.getServer()
+        val ip = server?.getIpAddress() ?: "0.0.0.0"
+        binding.ipAddressProfilePage.text = ip
+    }
+
+    private fun updateDeviceUniqueId() {
+        val userFriendlyId = requireContext().getUserFriendlyDeviceId()
+        binding.myId.text = userFriendlyId
+    }
 }

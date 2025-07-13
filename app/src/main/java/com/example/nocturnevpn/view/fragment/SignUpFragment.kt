@@ -12,6 +12,12 @@ import com.example.nocturnevpn.databinding.FragmentSignUpBinding
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.nocturnevpn.utils.getUserFriendlyDeviceId
+import android.provider.Settings
+import android.os.Build
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SignUpFragment : Fragment() {
 
@@ -133,6 +139,7 @@ class SignUpFragment : Fragment() {
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: ""
                     saveUserDataToFirestore(userId, name, email, agreedToTerms)
+                    uploadDeviceInfoToFirestore(userId)
                     sendEmailVerification()
                 } else {
                     binding.emailLayoutSignUp.error = "Registration failed: ${task.exception?.message}"
@@ -149,6 +156,48 @@ class SignUpFragment : Fragment() {
             "isVerified" to false
         )
         db.collection("users").document(userId).set(user)
+    }
+
+    private fun uploadDeviceInfoToFirestore(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+        val context = requireContext()
+        val userFriendlyId = context.getUserFriendlyDeviceId()
+        val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "UNKNOWN"
+        val model = Build.MODEL ?: "MODEL"
+        val manufacturer = Build.MANUFACTURER ?: "MANUFACTURER"
+        val osVersion = Build.VERSION.RELEASE ?: "RELEASE"
+        val now = System.currentTimeMillis()
+        val readableNow = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(now))
+        val deviceInfo = hashMapOf(
+            "device_id" to userFriendlyId,
+            "android_id" to androidId,
+            "model" to model,
+            "manufacturer" to manufacturer,
+            "os_version" to osVersion,
+            "first_login" to now,
+            "first_login_readable" to readableNow,
+            "last_login" to now,
+            "last_login_readable" to readableNow
+        )
+        val userDoc = db.collection("users").document(userId)
+        val devicesCol = userDoc.collection("devices")
+        // Check if device already exists for this user
+        devicesCol.whereEqualTo("device_id", userFriendlyId).get().addOnSuccessListener { querySnapshot ->
+            if (querySnapshot.isEmpty) {
+                // New device for this user
+                devicesCol.add(deviceInfo)
+            } else {
+                // Device exists, update last_login
+                for (doc in querySnapshot.documents) {
+                    doc.reference.update(
+                        mapOf(
+                            "last_login" to now,
+                            "last_login_readable" to readableNow
+                        )
+                    )
+                }
+            }
+        }
     }
 
     private fun sendEmailVerification() {

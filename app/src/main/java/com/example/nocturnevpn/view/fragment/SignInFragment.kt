@@ -15,6 +15,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.nocturnevpn.utils.getUserFriendlyDeviceId
+import android.provider.Settings
+import android.os.Build
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SignInFragment : Fragment() {
 
@@ -95,6 +101,8 @@ class SignInFragment : Fragment() {
                             if (task.isSuccessful) {
                                 val user = auth.currentUser
                                 if (user != null && user.isEmailVerified) {
+                                    // Upload device info to Firestore
+                                    uploadDeviceInfoToFirestore(user.uid)
                                     Toast.makeText(context, "Sign in successful!", Toast.LENGTH_SHORT).show()
                                     val intent = Intent(requireContext(), HomeActivity::class.java)
                                     startActivity(intent)
@@ -117,6 +125,51 @@ class SignInFragment : Fragment() {
                 binding.emailLayout1.error = "Error checking user registration."
                 binding.signInButton.isEnabled = true
             }
+    }
+
+    private fun uploadDeviceInfoToFirestore(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+        val context = requireContext()
+        val userFriendlyId = context.getUserFriendlyDeviceId()
+        val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "UNKNOWN"
+        val model = Build.MODEL ?: "MODEL"
+        val manufacturer = Build.MANUFACTURER ?: "MANUFACTURER"
+        val osVersion = Build.VERSION.RELEASE ?: "RELEASE"
+        val now = System.currentTimeMillis()
+        val readableNow = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(now))
+        val deviceInfo = hashMapOf(
+            "device_id" to userFriendlyId,
+            "android_id" to androidId,
+            "model" to model,
+            "manufacturer" to manufacturer,
+            "os_version" to osVersion,
+            "first_login" to now,
+            "first_login_readable" to readableNow,
+            "last_login" to now,
+            "last_login_readable" to readableNow
+        )
+        val userDoc = db.collection("users").document(userId)
+        val devicesCol = userDoc.collection("devices")
+        // Check if device already exists for this user
+        devicesCol.whereEqualTo("device_id", userFriendlyId).get().addOnSuccessListener { querySnapshot ->
+            if (querySnapshot.isEmpty) {
+                // New device for this user
+                devicesCol.add(deviceInfo)
+            } else {
+                // Device exists, update last_login and set first_login_readable if missing
+                for (doc in querySnapshot.documents) {
+                    val updates = mutableMapOf<String, Any>(
+                        "last_login" to now,
+                        "last_login_readable" to readableNow
+                    )
+                    val firstLoginReadable = doc.getString("first_login_readable")
+                    if (firstLoginReadable.isNullOrEmpty()) {
+                        updates["first_login_readable"] = readableNow
+                    }
+                    doc.reference.update(updates)
+                }
+            }
+        }
     }
 
     companion object {
