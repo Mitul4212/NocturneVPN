@@ -6,7 +6,13 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@id/profileFragment"
+        android:id="@+id/rewardFragment"
+        android:name="com.example.nocturnevpn.view.fragment.RewardFragment"
+        android:label="fragment_reward"
+        tools:layout="@layout/fragment_reward" />
+
+    <fragment
+        android:id="@+id/profileFragment"
         android:name="com.example.nocturnevpn.view.fragment.profileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
@@ -19,6 +25,9 @@
         <action
             android:id="@+id/action_profileFragment_to_editUserInfoFragment"
             app:destination="@id/editUserInfoFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_rewardFragment"
+            app:destination="@id/rewardFragment" />
     </fragment>
 
     <fragment

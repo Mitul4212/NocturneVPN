@@ -67,6 +67,7 @@
     <string name="search_faq">Search</string>
     <string name="didn_t_receive_the_email_check_your_spam_or_promotions_folder_n_once_verified_you_can_continue_n_already_verified">\n✅ Once verified, you can continue. \n🔁 Already verified?</string>
     <string name="mystery_day">\??</string>
+    <string name="reward_hub">Reward Hub</string>
 
     <string-array name="faq_questions">
         <item>Why do I need a VPN?</item>

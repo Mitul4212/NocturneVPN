@@ -62,6 +62,7 @@ class profileFragment : Fragment() {
         }
     }
 
+
     private fun setupClickListeners() {
         binding.upgradeButton.setOnClickListener {
             this.findNavController().navigate(R.id.action_profileFragment_to_premiumFragment)
@@ -84,6 +85,11 @@ class profileFragment : Fragment() {
         // Add click listener for info update button
         binding.infoUpadetButton.setOnClickListener {
             showEditUserInfoScreen()
+        }
+
+        // Add click listener for Reward Hub button
+        binding.rewardHub.setOnClickListener {
+            this.findNavController().navigate(R.id.action_profileFragment_to_rewardFragment)
         }
     }
 
