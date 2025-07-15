@@ -17,18 +17,39 @@
             android:orientation="vertical"
             >
 
-            <!-- Header -->
-            <TextView
-                android:id="@+id/rewardHeader"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Daily Rewards"
-                android:textColor="@color/strong_violet"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:paddingTop="8dp"/>
+                android:layout_marginTop="24dp">
+
+                <!-- Header -->
+                <TextView
+                    android:id="@+id/rewardHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Daily Rewards"
+                    android:textColor="@color/strong_violet"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:paddingTop="8dp"/>
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <ImageView
+                    android:id="@+id/closebtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_close"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="24dp"/>
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/rewardSubtitle"
@@ -74,39 +95,63 @@
 
                         <TextView
                             android:text="Your Balance"
-                            android:textColor="@color/gray"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                         <TextView
                             android:id="@+id/coinBalance"
                             android:text="2,150"
-                            android:textColor="@color/strong_violet"
+                            android:textColor="@color/white"
                             android:textSize="28sp"
                             android:textStyle="bold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                         <TextView
                             android:text="Coins"
-                            android:textColor="@color/gray"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                     </LinearLayout>
 
-                    <Button
+                    <LinearLayout
                         android:id="@+id/howToEarnButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:text="How to earn more?"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:layout_marginLeft="16dp"
-                        android:paddingLeft="18dp"
-                        android:paddingRight="18dp"
-                        />
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:background="@drawable/bg_earn_info"
+                        >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="How to earn \n      more?"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:layout_gravity="center"
+                            />
+
+                    </LinearLayout>
+
+<!--                    <Button-->
+<!--                        android:id="@+id/howToEarnButton"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="36dp"-->
+<!--                        android:text="How to earn more?"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textSize="12sp"-->
+<!--                        android:layout_marginLeft="16dp"-->
+<!--                        android:paddingLeft="18dp"-->
+<!--                        android:paddingRight="18dp"-->
+<!--                        />-->
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
 
             <!-- Daily Check-In Card -->
             <androidx.cardview.widget.CardView
@@ -193,6 +238,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day1"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -201,6 +247,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="5"
@@ -209,6 +256,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -246,6 +294,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day2"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -254,6 +303,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="5"
@@ -262,6 +312,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -301,6 +352,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day3"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -310,6 +362,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="10"
@@ -318,6 +371,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -374,6 +428,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day4"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -382,6 +437,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward4"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="5"
@@ -390,6 +446,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay4"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -429,6 +486,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day5"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -438,6 +496,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward5"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="10"
@@ -446,6 +505,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay5"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -502,6 +562,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day6"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -510,6 +571,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="5"
@@ -518,6 +580,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -560,6 +623,7 @@
                                     android:src="@drawable/ic_coin" />
 
                                 <ImageView
+                                    android:id="@+id/ic_check_day7"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
@@ -569,6 +633,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/checkinReward7"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="$"
@@ -577,6 +642,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/checkinDay7"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
@@ -641,7 +707,7 @@
                             android:text="Watch Ad (Earn 250 Coins)"
                             android:textColor="#FFFFFF"
                             app:cornerRadius="12dp"
-                            android:backgroundTint="#1ED760"
+                            android:backgroundTint="@color/strong_violet"
                             android:textSize="14sp"
                             />
 
@@ -686,9 +752,11 @@
 
 
                     <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/watchedAdProgressBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
+
                         />
 
                 </LinearLayout>
@@ -784,12 +852,14 @@
                                 android:layout_height="0dp"
                                 android:layout_weight="1"/>
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/halfHourClimeBTN"
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
                                 android:text="Claim"
                                 android:textColor="#FFFFFF"
-                                android:backgroundTint="#E05EFF"
+                                app:cornerRadius="12dp"
+                                android:backgroundTint="@color/strong_violet"
                                 android:textSize="12sp"
                                />
                         </LinearLayout>
@@ -847,12 +917,15 @@
                                 android:layout_height="0dp"
                                 android:layout_weight="1"/>
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/oneHourClimeBTN"
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
                                 android:text="Claim"
                                 android:textColor="#FFFFFF"
-                                android:backgroundTint="#E05EFF"
+                                app:cornerRadius="12dp"
+
+                                android:backgroundTint="@color/strong_violet"
                                 android:textSize="12sp"
                                 />
                         </LinearLayout>
@@ -881,23 +954,25 @@
                                     android:textColor="@color/black"
                                     android:layout_weight="1"
                                     android:textSize="14sp"/>
+
                                 <androidx.appcompat.widget.LinearLayoutCompat
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content">
+                                    android:layout_width="87dp"
+                                    android:layout_height="12dp">
+
                                     <ImageView
                                         android:layout_width="15dp"
                                         android:layout_height="15dp"
                                         android:layout_marginEnd="2dp"
-                                        android:src="@drawable/treasure"/>
+                                        android:src="@drawable/treasure" />
 
                                     <TextView
-                                        android:layout_height="wrap_content"
                                         android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginEnd="8dp"
                                         android:text="5000 coins"
-                                        android:textSize="12sp"
 
                                         android:textColor="@color/gold"
-                                        android:layout_marginEnd="8dp"/>
+                                        android:textSize="12sp" />
 
                                 </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -908,17 +983,106 @@
                                 android:layout_height="0dp"
                                 android:layout_weight="1"/>
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/oneDayClimeBTN"
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
                                 android:text="Claim"
                                 android:textColor="#FFFFFF"
-                                android:backgroundTint="#E05EFF"
+                                app:cornerRadius="12dp"
+
+                                android:backgroundTint="@color/strong_violet"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/coinHistoryLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/profile_info_bg"
+                android:elevation="5dp"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dailyCheckinSection">
+
+                <TextView
+                    android:id="@+id/coinHistoryHeadingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="History"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/gray"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/coinHistoryHeadingText" />
+
+                <LinearLayout
+                    android:id="@+id/noCoinHistoryText"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No History"
+                        android:textColor="#B2AFB6"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/coinHistoryRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layout_constraintBottom_toTopOf="@+id/moreButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view" />
+
+                <TextView
+                    android:id="@+id/moreButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="more"
+                    android:textColor="@color/strong_violet"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/historyRecyclerView" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
     </ScrollView>

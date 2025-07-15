@@ -52,6 +52,12 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     var wasConnectedOnce = false
     private var lastClickTime = 0L
 
+    private val PREFS = "reward_prefs"
+    private val KEY_PRO_TIMER_END = "pro_timer_end"
+    private val KEY_PRO_TIMER_TYPE = "pro_timer_type"
+    private var proTimerHandler: Handler? = null
+    private var proTimerRunnable: Runnable? = null
+
 
     @SuppressLint("SuspiciousIndentation")
     private val getServerResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -155,6 +161,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private fun setupUI() {
         setupProButtonGradient()
         serverManager.loadSavedServer()
+        setupProTimer()
     }
 
     private fun setupProButtonGradient() {
@@ -227,6 +234,65 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }
     }
 
+    private fun setupProTimer() {
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val endTime = prefs.getLong(KEY_PRO_TIMER_END, 0L)
+        val timerType = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+        if (endTime > System.currentTimeMillis()) {
+            binding?.proTimer?.visibility = View.VISIBLE
+            binding?.goProButton?.visibility = View.GONE
+            startProTimerCountdown(endTime, timerType)
+        } else {
+            binding?.proTimer?.visibility = View.GONE
+            binding?.goProButton?.visibility = View.VISIBLE
+        }
+        applyProTimerGradient()
+    }
+
+    private fun startProTimerCountdown(endTime: Long, timerType: String) {
+        proTimerRunnable?.let { proTimerHandler?.removeCallbacks(it) }
+        proTimerHandler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                val remaining = endTime - System.currentTimeMillis()
+                if (remaining > 0) {
+                    val hours = (remaining / (1000 * 60 * 60)).toInt()
+                    val minutes = ((remaining / (1000 * 60)) % 60).toInt()
+                    val seconds = ((remaining / 1000) % 60).toInt()
+                    val timeStr = when {
+                        timerType == "1d" -> String.format("%02d:%02d", hours + minutes / 60, minutes % 60)
+                        hours > 0 -> String.format("%02d:%02d", hours, minutes)
+                        else -> String.format("%02d:%02d", minutes, seconds)
+                    }
+                    binding?.proTimerText?.text = timeStr
+                    binding?.proTimer?.visibility = View.VISIBLE
+                    binding?.goProButton?.visibility = View.GONE
+                    proTimerHandler?.postDelayed(this, 1000)
+                } else {
+                    binding?.proTimer?.visibility = View.GONE
+                    binding?.goProButton?.visibility = View.VISIBLE
+                    binding?.proTimerText?.text = "00:00"
+                }
+            }
+        }
+        proTimerRunnable = runnable
+        proTimerHandler?.post(runnable)
+    }
+
+    private fun applyProTimerGradient() {
+        val proTimerText = binding?.proTimerText
+        proTimerText?.let { textView ->
+            val paint = textView.paint
+            val width = paint.measureText(textView.text.toString())
+            textView.paint.shader = LinearGradient(
+                0f, 0f, width, textView.textSize,
+                intArrayOf(Color.parseColor("#6622CC"), Color.parseColor("#22CCC2")),
+                null, Shader.TileMode.REPEAT
+            )
+            textView.invalidate()
+        }
+    }
+
     private fun setupGlobe() {
         globeManager?.setupGlobe()
         
@@ -267,13 +333,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         vpnManager.registerBroadcastReceiver()
         serverManager.loadSavedServer()
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+        setupProTimer()
     }
 
     override fun onPause() {
-        Log.d("VPN_Debug", "=== Fragment Paused ===")
-        vpnManager.unregisterBroadcastReceiver()
         super.onPause()
         VpnStatus.removeStateListener(this)
+        proTimerRunnable?.let { proTimerHandler?.removeCallbacks(it) }
     }
 
     override fun onStop() {

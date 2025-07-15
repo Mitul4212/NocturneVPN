@@ -72,6 +72,7 @@
                 app:layout_constraintGuide_percent="0.9" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout9"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:background="@color/white"
@@ -113,6 +114,41 @@
             <!--                android:layout_weight="1" />-->
 
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/proTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline29"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/pro_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="premium button Image"
+                    android:paddingStart="2dp"
+                    android:src="@drawable/ic_pro"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/proTimerText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:text="00:00"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/pro_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <!-- Custom Button -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/go_pro_button"
@@ -122,6 +158,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/guideline29"
                 app:layout_constraintTop_toTopOf="parent">
