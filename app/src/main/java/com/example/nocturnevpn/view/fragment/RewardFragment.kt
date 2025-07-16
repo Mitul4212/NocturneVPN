@@ -44,6 +44,7 @@ class RewardFragment : Fragment() {
 
     private var historyList = mutableListOf<CoinHistory>()
     private lateinit var adapter: CoinHistoryAdapter
+    private var displayedCount = 5 // Start with 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,13 +109,31 @@ class RewardFragment : Fragment() {
         val savedBalance = loadCoinBalance()
         binding.coinBalance.text = savedBalance.toString()
         historyList = loadCoinHistory()
-        adapter = CoinHistoryAdapter(historyList)
+        adapter = CoinHistoryAdapter(mutableListOf())
         binding.coinHistoryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.coinHistoryRecyclerView.adapter = adapter
+        updateDisplayedHistory()
         updateHistoryVisibility()
         setupDailyCheckin()
         setupWatchAdSection()
         setupUseYourCoinSection()
+
+        // More button logic
+        binding.moreButton.setOnClickListener {
+            val nextCount = displayedCount + 10
+            if (nextCount <= historyList.size) {
+                displayedCount = nextCount
+            } else {
+                displayedCount = historyList.size
+            }
+            updateDisplayedHistory()
+            // Optionally hide button if all loaded
+            if (displayedCount >= historyList.size) {
+                binding.moreButton.visibility = View.GONE
+            }
+        }
+        // Show/hide more button initially
+        binding.moreButton.visibility = if (historyList.size > displayedCount) View.VISIBLE else View.GONE
 
         // Force update check-in UI with latest streak
         val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -138,6 +157,12 @@ class RewardFragment : Fragment() {
             binding.noCoinHistoryText.visibility = View.GONE
             binding.coinHistoryRecyclerView.visibility = View.VISIBLE
         }
+    }
+
+    private fun updateDisplayedHistory() {
+        val toShow = historyList.take(displayedCount)
+        adapter.updateList(toShow)
+        binding.moreButton.visibility = if (historyList.size > displayedCount) View.VISIBLE else View.GONE
     }
 
     private fun setupDailyCheckin() {
@@ -208,9 +233,7 @@ class RewardFragment : Fragment() {
                     saveCoinBalance(newBalance)
                     // Add to history
                     historyList.add(0, CoinHistory(HistoryType.EARN, reward, currentToday, "Daily Check-in"))
-                    adapter.notifyItemInserted(0)
-                    binding.coinHistoryRecyclerView.scrollToPosition(0)
-                    updateHistoryVisibility()
+                    updateDisplayedHistory()
                     saveCoinHistory()
                 }, 5000)
             }
@@ -338,9 +361,7 @@ class RewardFragment : Fragment() {
                 // Add to history
                 val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 historyList.add(0, CoinHistory(HistoryType.EARN, adReward, todayDate, "Watched Ad"))
-                adapter.notifyItemInserted(0)
-                binding.coinHistoryRecyclerView.scrollToPosition(0)
-                updateHistoryVisibility()
+                updateDisplayedHistory()
                 saveCoinHistory()
                 // Update ad watch count
                 val newCount = count + 1
@@ -380,9 +401,7 @@ class RewardFragment : Fragment() {
         // Add to history
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         historyList.add(0, CoinHistory(HistoryType.SPENT, cost, today, description))
-        adapter.notifyItemInserted(0)
-        binding.coinHistoryRecyclerView.scrollToPosition(0)
-        updateHistoryVisibility()
+        updateDisplayedHistory()
         saveCoinHistory()
         Toast.makeText(requireContext(), "Pro timer started!", Toast.LENGTH_SHORT).show()
     }

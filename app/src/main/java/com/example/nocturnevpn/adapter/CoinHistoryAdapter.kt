@@ -9,7 +9,7 @@ import com.example.nocturnevpn.R
 import com.example.nocturnevpn.model.CoinHistory
 import com.example.nocturnevpn.model.HistoryType
 
-class CoinHistoryAdapter(private val items: List<CoinHistory>) : RecyclerView.Adapter<CoinHistoryAdapter.ViewHolder>() {
+class CoinHistoryAdapter(private var items: MutableList<CoinHistory>) : RecyclerView.Adapter<CoinHistoryAdapter.ViewHolder>() {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val amount: TextView = view.findViewById(R.id.historyAmount)
         val type: TextView = view.findViewById(R.id.historyType)
@@ -36,4 +36,10 @@ class CoinHistoryAdapter(private val items: List<CoinHistory>) : RecyclerView.Ad
     }
 
     override fun getItemCount() = items.size
+
+    fun updateList(newList: List<CoinHistory>) {
+        items.clear()
+        items.addAll(newList)
+        notifyDataSetChanged()
+    }
 } 
