@@ -92,10 +92,21 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             serverHolder.tvSpeed.setText(OvpnUtils.humanReadableCount(server.getSpeed(), true));
             serverHolder.tvProtocol.setText(server.getProtocol().toUpperCase(Locale.ROOT));
 
-            // Set ping signal image
+            // Set ping signal image (wider ranges)
             ImageView pingImage = serverHolder.itemView.findViewById(R.id.serverPingImage);
             int pingValue = parsePing(server.getPing());
-            int signalRes = getSignalResId(pingValue);
+            int signalRes;
+            if (pingValue <= 0) {
+                signalRes = R.drawable.ic_signal_no_signal;
+            } else if (pingValue <= 100) {
+                signalRes = R.drawable.ic_signal_four; // green
+            } else if (pingValue <= 250) {
+                signalRes = R.drawable.ic_signal_three; // yellow
+            } else if (pingValue <= 500) {
+                signalRes = R.drawable.ic_signal_two; // orange
+            } else {
+                signalRes = R.drawable.ic_signal_one; // red
+            }
             pingImage.setImageResource(signalRes);
 
             if (server.getIpAddress().equals(selectedIp)) {
@@ -104,7 +115,20 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 serverHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
 
-            serverHolder.itemView.setOnClickListener(v -> clickCallback.onServerClick(server));
+            ImageView preImage = serverHolder.itemView.findViewById(R.id.pre_imaage);
+            View serverLayout = serverHolder.itemView.findViewById(R.id.serverLayout);
+            if (server.isPremium()) {
+                preImage.setVisibility(View.VISIBLE);
+                preImage.setAlpha(1.0f); // Premium icon always fully visible
+                serverLayout.setAlpha(0.5f); // Fade only the serverLayout
+                serverHolder.itemView.setClickable(false);
+                serverHolder.itemView.setOnClickListener(null);
+            } else {
+                preImage.setVisibility(View.GONE);
+                serverLayout.setAlpha(1.0f);
+                serverHolder.itemView.setClickable(true);
+                serverHolder.itemView.setOnClickListener(v -> clickCallback.onServerClick(server));
+            }
         }
     }
 

@@ -86,5 +86,67 @@ public class Utils {
         return countryCoordinates.get(country);
     }
 
+    /**
+     * Performs a live ping to the given IP address. Returns round-trip time in ms, or -1 if unreachable.
+     */
+    public static int pingHost(String ipAddress, int timeoutMs) {
+        try {
+            long start = System.currentTimeMillis();
+            // Use system ping command for better accuracy
+            Process process = Runtime.getRuntime().exec("ping -c 1 -W " + (timeoutMs / 1000) + " " + ipAddress);
+            int returnVal = process.waitFor();
+            long end = System.currentTimeMillis();
+            if (returnVal == 0) {
+                return (int) (end - start);
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
+    /**
+     * Performs a TCP ping to the given IP address and port. Returns round-trip time in ms, or -1 if unreachable.
+     */
+    public static int tcpPing(String ipAddress, int port, int timeoutMs) {
+        try {
+            long start = System.currentTimeMillis();
+            java.net.Socket socket = new java.net.Socket();
+            socket.connect(new java.net.InetSocketAddress(ipAddress, port), timeoutMs);
+            socket.close();
+            return (int) (System.currentTimeMillis() - start);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Performs a UDP ping to the given IP address and port. Returns time in ms if no exception, or -1 if unreachable.
+     * Note: Most servers will not reply, so this is best effort only.
+     */
+    public static int udpPing(String ipAddress, int port, int timeoutMs) {
+        java.net.DatagramSocket socket = null;
+        try {
+            socket = new java.net.DatagramSocket();
+            socket.setSoTimeout(timeoutMs);
+            byte[] buf = new byte[1];
+            java.net.DatagramPacket packet = new java.net.DatagramPacket(buf, buf.length, java.net.InetAddress.getByName(ipAddress), port);
+            long start = System.currentTimeMillis();
+            socket.send(packet);
+            // Try to receive (most servers won't reply, so just measure send time)
+            try {
+                socket.receive(packet);
+                return (int) (System.currentTimeMillis() - start);
+            } catch (Exception e) {
+                // No reply, but send succeeded
+                return (int) (System.currentTimeMillis() - start);
+            }
+        } catch (Exception e) {
+            return -1;
+        } finally {
+            if (socket != null) socket.close();
+        }
+    }
 }

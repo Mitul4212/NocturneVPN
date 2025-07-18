@@ -75,6 +75,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:id="@+id/pre_imaage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="5dp"
