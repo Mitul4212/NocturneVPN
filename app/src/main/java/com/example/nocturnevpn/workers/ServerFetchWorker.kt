@@ -7,6 +7,8 @@ import androidx.work.WorkerParameters
 import com.example.nocturnevpn.BuildConfig
 import com.example.nocturnevpn.db.DbHelper
 import com.example.nocturnevpn.utils.CsvParser
+import com.example.nocturnevpn.SharedPreference
+import com.example.nocturnevpn.utils.PremiumServerUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -14,6 +16,7 @@ import okhttp3.Request
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.Intent
 
 class ServerFetchWorker (
     private val context: Context,
@@ -45,7 +48,23 @@ class ServerFetchWorker (
                 val servers = CsvParser.parse(response)
                 Log.d("ServerFetchWorker", "✅ [$triggerType] Parsed ${servers.size} servers from response")
 
-                dbHelper.save(servers, context)
+                // --- Notify UI that server list is fetched ---
+                val intent = Intent("com.example.nocturnevpn.SERVER_LIST_FETCHED")
+                applicationContext.sendBroadcast(intent)
+                Log.d("ServerFetchWorker", "📢 [$triggerType] Broadcast sent: SERVER_LIST_FETCHED")
+
+                // --- Run premium calculation and ping logic ---
+                val updatedServers = withContext(Dispatchers.Default) {
+                    PremiumServerUtils.calculatePremiumServers(servers)
+                }
+                Log.d("ServerFetchWorker", "✨ [$triggerType] Premium calculation complete, saving to cache...")
+
+                // --- Save to SharedPreferences cache ---
+                val sharedPref = SharedPreference(applicationContext)
+                sharedPref.saveServerList(updatedServers)
+                Log.d("ServerFetchWorker", "💾 [$triggerType] Saved updated server list to SharedPreferences cache")
+
+                dbHelper.save(updatedServers, context)
                 Log.d("ServerFetchWorker", "💾 [$triggerType] Successfully saved servers to database")
 
                 Result.success()

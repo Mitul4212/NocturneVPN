@@ -1,7 +1,10 @@
 package com.example.nocturnevpn.view.activitys;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -38,6 +42,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import androidx.lifecycle.Observer;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -76,8 +83,26 @@ public class ChangeServerActivity extends AppCompatActivity {
     private TextInputEditText serverSearchEditText;
     private TextInputLayout serverSearchInputLayout;
 
+    // BroadcastReceiver for server list fetched notification
+    private final BroadcastReceiver serverListFetchedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("ServerPageDebug", "[Broadcast] SERVER_LIST_FETCHED received");
+            if (binding.swipeRefresh.isRefreshing()) {
+                binding.swipeRefresh.setRefreshing(false);
+                Log.d("ServerPageDebug", "[Broadcast] Stopped swipeRefresh spinner after server list fetched");
+            }
+            List<Server> cachedServerList = sharedPreference.loadServerList();
+            if (cachedServerList != null && !cachedServerList.isEmpty()) {
+                loadServerList(cachedServerList);
+                Toast.makeText(ChangeServerActivity.this, "Server list updated! (Premium logic running in background)", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("ServerPageDebug", "onCreate called! (Activity is starting)");
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_change_server);
         handler = new WeakHandler();
@@ -86,25 +111,33 @@ public class ChangeServerActivity extends AppCompatActivity {
         binding = ActivityChangeServerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Check scheduled work status
-        checkScheduledWorkStatus();
+        // Do NOT trigger Worker or server fetch on page open for best UX
+        // Only periodic Worker and manual refresh will update data
 
-        // Load cached servers from database
-        servers.addAll(dbHelper.getAll());
         setupSwipeRefreshLayout();
         setupRecyclerView();
 
+        // Always initialize request before any possible use
         if (request == null) {
-            request = new Request.Builder()
+            request = new okhttp3.Request.Builder()
                     .url(BuildConfig.VPN_GATE_API)
                     .build();
         }
 
-        if (servers.isEmpty()) {
-            populateServerList();
+        // 1. Try to load cached server list (with ping and premium status)
+        List<Server> cachedServerList = sharedPreference.loadServerList();
+        if (cachedServerList != null && !cachedServerList.isEmpty()) {
+            Log.d("ServerPageDebug", "[onCreate] Loaded cached server list, count: " + cachedServerList.size());
+            loadServerList(cachedServerList);
         } else {
-            // Use cached data
-            loadServerList(servers);
+            Log.d("ServerPageDebug", "[onCreate] No cached server list found, loading from DB/API");
+            // Load cached servers from database (original API data)
+            servers.addAll(dbHelper.getAll());
+            if (servers.isEmpty()) {
+                // No data to show, could show empty state or message
+            } else {
+                loadServerList(servers);
+            }
         }
 
         binding.backArrow.setOnClickListener(view -> {
@@ -140,6 +173,18 @@ public class ChangeServerActivity extends AppCompatActivity {
                 filterServers("");
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(serverListFetchedReceiver, new IntentFilter("com.example.nocturnevpn.SERVER_LIST_FETCHED"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(serverListFetchedReceiver);
     }
 
     private void filterServers(String query) {
@@ -188,10 +233,44 @@ public class ChangeServerActivity extends AppCompatActivity {
         binding.swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d("ServerPageDebug", "[ManualRefresh] User triggered manual refresh");
                 triggerServerFetch();
-                populateServerList();
+                observeWorkerCompletion();
             }
         });
+    }
+
+    // Listen for ServerFetchWorker completion and update UI
+    private void observeWorkerCompletion() {
+        WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData("vpn_server_fetch")
+            .observe(this, new Observer<java.util.List<WorkInfo>>() {
+                @Override
+                public void onChanged(java.util.List<WorkInfo> workInfos) {
+                    if (workInfos != null && !workInfos.isEmpty()) {
+                        WorkInfo workInfo = workInfos.get(0);
+                        Log.d("ServerPageDebug", "[ManualRefresh] Worker state: " + workInfo.getState());
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            // Worker finished, reload cached data
+                            List<Server> cachedServerList = sharedPreference.loadServerList();
+                            if (cachedServerList != null && !cachedServerList.isEmpty()) {
+                                Log.d("ServerPageDebug", "[ManualRefresh] Reloaded cached server list after refresh, count: " + cachedServerList.size());
+                                loadServerList(cachedServerList);
+                                Toast.makeText(ChangeServerActivity.this, "Server list updated! (Premium logic running in background)", Toast.LENGTH_SHORT).show();
+                            }
+                            // Stop the spinner immediately after API fetch/parse
+                            if (binding.swipeRefresh.isRefreshing()) {
+                                binding.swipeRefresh.setRefreshing(false);
+                                Log.d("ServerPageDebug", "[ManualRefresh] Stopped swipeRefresh spinner after API fetch");
+                            }
+                        } else if (workInfo.getState() == WorkInfo.State.FAILED || workInfo.getState() == WorkInfo.State.CANCELLED) {
+                            if (binding.swipeRefresh.isRefreshing()) {
+                                binding.swipeRefresh.setRefreshing(false);
+                            }
+                            Toast.makeText(ChangeServerActivity.this, "Failed to update server list.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
     }
 
     private void triggerServerFetch() {
@@ -574,6 +653,10 @@ public class ChangeServerActivity extends AppCompatActivity {
                           .append(") ");
             }
             Log.d("PremiumSelect", premiumLog.toString());
+
+            // --- Save updated server list to cache ---
+            sharedPreference.saveServerList(serverList);
+            Log.d("ServerPageDebug", "[PremiumCalc] Saved updated server list to cache, count: " + serverList.size());
         }).start();
     }
 

@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.nocturnevpn.workers.ServerFetchWorker
@@ -20,7 +19,7 @@ class NocturnVPNAppliction : Application() {
     private fun setupPeriodicServerFetch() {
         try {
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
+                // No network type constraint, allow any network
                 .build()
 
             // Set to 30 minutes for both debug and release

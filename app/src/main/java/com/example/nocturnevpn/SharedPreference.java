@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.nocturnevpn.model.Server;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class SharedPreference {
 
@@ -23,6 +27,8 @@ public class SharedPreference {
     private static final String SERVER_HOSTNAME = "server_hostname";
     private static final String SERVER_OVPN = "server_ovpn";
     private static final String SERVER_PORT = "server_port";
+    private static final String SERVER_LIST_JSON = "server_list_json";
+    private static final Gson gson = new Gson();
 
     public SharedPreference(Context context) {
         this.mPreference = context.getSharedPreferences(APP_PREFS_NAME, Context.MODE_PRIVATE);
@@ -72,6 +78,36 @@ public class SharedPreference {
         Log.d("SharedPref", "get Server saved: " + server.getIpAddress());
 
         return server;
+    }
+
+    /**
+     * Save the full server list (with ping and premium status) as JSON
+     */
+    public void saveServerList(List<Server> serverList) {
+        String json = gson.toJson(serverList);
+        mPrefEditor.putString(SERVER_LIST_JSON, json);
+        mPrefEditor.commit();
+        Log.d("SharedPref", "[saveServerList] Saved server list JSON: " + json.substring(0, Math.min(200, json.length())) + (json.length() > 200 ? "..." : ""));
+    }
+
+    /**
+     * Load the full server list (with ping and premium status) from JSON
+     */
+    public List<Server> loadServerList() {
+        String json = mPreference.getString(SERVER_LIST_JSON, null);
+        if (json == null) {
+            Log.d("SharedPref", "[loadServerList] No cached server list found");
+            return null;
+        }
+        try {
+            Type listType = new TypeToken<List<Server>>(){}.getType();
+            List<Server> serverList = gson.fromJson(json, listType);
+            Log.d("SharedPref", "[loadServerList] Loaded server list, count: " + (serverList != null ? serverList.size() : 0));
+            return serverList;
+        } catch (Exception e) {
+            Log.e("SharedPref", "[loadServerList] Error parsing server list JSON", e);
+            return null;
+        }
     }
 
     public Boolean isPrefsHasServer() {
