@@ -1,5 +1,7 @@
 package com.example.nocturnevpn.adapter;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -117,14 +119,21 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             ImageView preImage = serverHolder.itemView.findViewById(R.id.pre_imaage);
             View serverLayout = serverHolder.itemView.findViewById(R.id.serverLayout);
-            if (server.isPremium()) {
+
+            // --- PREMIUM TIMER CHECK ---
+            SharedPreferences prefs = serverHolder.itemView.getContext().getSharedPreferences("reward_prefs", Context.MODE_PRIVATE);
+            long proTimerEnd = prefs.getLong("pro_timer_end", 0L);
+            boolean isUserPremium = proTimerEnd > System.currentTimeMillis();
+            // --- END PREMIUM TIMER CHECK ---
+
+            if (server.isPremium() && !isUserPremium) {
                 preImage.setVisibility(View.VISIBLE);
                 preImage.setAlpha(1.0f); // Premium icon always fully visible
                 serverLayout.setAlpha(0.5f); // Fade only the serverLayout
                 serverHolder.itemView.setClickable(false);
                 serverHolder.itemView.setOnClickListener(null);
             } else {
-                preImage.setVisibility(View.GONE);
+                preImage.setVisibility(server.isPremium() ? View.VISIBLE : View.GONE);
                 serverLayout.setAlpha(1.0f);
                 serverHolder.itemView.setClickable(true);
                 serverHolder.itemView.setOnClickListener(v -> clickCallback.onServerClick(server));

@@ -61,10 +61,14 @@ class ServerManager(
                 binding?.countryFlag?.setImageResource(R.drawable.ic_server_flage_icon)
             }
 
-            // Set selected server ping signal
-            val pingValue = parsePing(server.ping)
+            // --- FIX: Get latest ping from server list if available ---
+            val latestServerList = sharedPreference.loadServerList()
+            val matchedServer = latestServerList?.find { it.ipAddress == server.getIpAddress() }
+            val pingToShow = matchedServer?.ping ?: server.ping
+            val pingValue = parsePing(pingToShow)
             val signalRes = getSignalResId(pingValue)
             binding?.selectedServerPing?.setImageResource(signalRes)
+            // --- END FIX ---
 
             isServerSelected = true
         } else {

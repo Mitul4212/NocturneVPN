@@ -14,9 +14,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.CheckInternetConnection
@@ -221,17 +223,68 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         
         if (vpnManager.isVPNStarted()) {
             confirmDisconnect()
-        } else {
-            if (!vpnManager.isVPNStarted() && serverManager.isServerSelected()) {
-                vpnManager.prepareVPN()
-            } else if (!serverManager.isServerSelected() && !vpnManager.isVPNStarted()) {
-                getServerResult.launch(Intent(mContext, ChangeServerActivity::class.java))
-            } else if (vpnManager.isVPNStarted() && !serverManager.isServerSelected()) {
-                mContext.toast(resources.getString(R.string.disconnect_first))
-            } else {
-                mContext.toast("Unable to connect the VPN")
-            }
+            return
         }
+
+        // Check if server is selected
+        if (!serverManager.isServerSelected()) {
+            getServerResult.launch(Intent(mContext, ChangeServerActivity::class.java))
+            return
+        }
+
+        // --- DEBUG LOGS START ---
+        val selectedServer = sharedPreference?.getServer()
+        if (selectedServer == null) {
+            mContext.toast("No server selected")
+            Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "No server selected in SharedPreference!")
+            return
+        }
+
+        // Get the latest server list and update the selected server's premium status
+        val latestServerList = sharedPreference?.loadServerList()
+        val matchedServer = latestServerList?.find { it.ipAddress == selectedServer.ipAddress }
+        val isPremiumServer = matchedServer?.isPremium ?: selectedServer.isPremium
+
+        Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Selected server: IP=${selectedServer.ipAddress}, Country=${selectedServer.countryLong}, isPremium=$isPremiumServer (matched in list: ${matchedServer != null})")
+        // --- DEBUG LOGS END ---
+
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val proTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
+        val isUserPremium = proTimerEnd > System.currentTimeMillis()
+        Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "isPremiumServer=$isPremiumServer, isUserPremium=$isUserPremium, proTimerEnd=$proTimerEnd, now=${System.currentTimeMillis()}")
+
+        if (isPremiumServer && !isUserPremium) {
+            // Show custom dialog: Not allowed to connect premium server
+            Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Blocked: User tried to connect to premium server without premium access!")
+            val dialogView = LayoutInflater.from(mContext).inflate(R.layout.premium_block_dialog, null)
+            val titleView = dialogView.findViewById<TextView>(R.id.premium_block_title)
+            val messageView = dialogView.findViewById<TextView>(R.id.premium_block_message)
+            val lottie = dialogView.findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.premium_block_lottie)
+            val changeServerBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_change_server_btn)
+            val getPremiumBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_get_premium_btn)
+            // Set dialog content (optional, already set in XML)
+            titleView.text = "Premium Server"
+            messageView.text = "This server is for premium users only.\n\nPlease change to a normal server or get a premium subscription."
+            lottie.setAnimation(R.raw.info_animation)
+            val dialog = android.app.Dialog(mContext)
+            dialog.setContentView(dialogView)
+            dialog.setCancelable(true)
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            changeServerBtn.setOnClickListener {
+                dialog.dismiss()
+                getServerResult.launch(Intent(mContext, ChangeServerActivity::class.java))
+            }
+            getPremiumBtn.setOnClickListener {
+                dialog.dismiss()
+                findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+            }
+            dialog.show()
+            return
+        }
+        // --- PREMIUM CHECK LOGIC END ---
+
+        // If we get here, either the server is not premium or the user is premium
+        vpnManager.prepareVPN()
     }
 
     private fun setupProTimer() {
