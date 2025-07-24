@@ -191,9 +191,11 @@
                             android:layout_height="wrap_content"/>
 
                         <TextView
+                            android:id="@+id/week_dates"
                             android:text=" 7-7 ~ 7-13"
                             android:textSize="14sp"
                             android:textColor="@color/gray"
+                            android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"/>
@@ -230,12 +232,15 @@
 
                             <FrameLayout
                                 android:layout_width="24dp"
-                                android:layout_height="24dp">
+                                android:layout_height="24dp"
+                                >
 
                                 <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_coin" />
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_coin"
+                                    android:visibility="visible"
+                                    android:contentDescription="coin_img" />
 
                                 <ImageView
                                     android:id="@+id/ic_check_day1"

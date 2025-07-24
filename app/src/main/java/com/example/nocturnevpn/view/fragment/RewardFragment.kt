@@ -143,6 +143,22 @@ class RewardFragment : Fragment() {
             binding.icCheckDay5, binding.icCheckDay6, binding.icCheckDay7
         )
         updateCheckinUI(checkmarks, streak)
+
+        // Set week_dates TextView to current week range
+        binding.weekDates.text = getCurrentWeekRange()
+    }
+
+    // Helper function to get current week range as string (e.g., 7-7 ~ 7-13)
+    private fun getCurrentWeekRange(): String {
+        val calendar = Calendar.getInstance()
+        // Set to first day of week (Sunday)
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+        val start = calendar.time
+        // Set to last day of week (Saturday)
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+        val end = calendar.time
+        val sdf = java.text.SimpleDateFormat("M-d", Locale.getDefault())
+        return "${sdf.format(start)} ~ ${sdf.format(end)}"
     }
 
     private fun setupCoinHistory() {

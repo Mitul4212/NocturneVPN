@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.nocturnevpn.databinding.FragmentPremiumBinding
+import com.example.nocturnevpn.R
+import androidx.navigation.fragment.findNavController
 
 class PremiumFragment : Fragment() {
 
@@ -35,6 +37,27 @@ class PremiumFragment : Fragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
+        // TEST: When user clicks any subscription plan, show AfterPremiumFragment after 5 seconds
+        view.findViewById<View>(R.id.cardView4)?.setOnClickListener {
+            it.isEnabled = false // Disable to prevent double click
+            view.postDelayed({
+                if (findNavController().currentDestination?.id == R.id.premiumFragment) {
+                    navigateToAfterPremiumFragment()
+                }
+            }, 5000)
+        }
+        view.findViewById<View>(R.id.cardView5)?.setOnClickListener {
+            it.isEnabled = false
+            view.postDelayed({
+                if (findNavController().currentDestination?.id == R.id.premiumFragment) {
+                    navigateToAfterPremiumFragment()
+                }
+            }, 5000)
+        }
+    }
+
+    private fun navigateToAfterPremiumFragment() {
+        findNavController().navigate(R.id.action_premiumFragment_to_afterPremiumFragment)
     }
 
     companion object {

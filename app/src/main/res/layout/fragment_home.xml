@@ -150,10 +150,12 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Custom Button -->
-            <androidx.constraintlayout.widget.ConstraintLayout
+
+
+            <com.example.nocturnevpn.widget.AnimatedGradientBorderView
                 android:id="@+id/go_pro_button"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:background="@color/white"
                 android:clickable="true"
                 android:focusable="true"
@@ -163,32 +165,43 @@
                 app:layout_constraintEnd_toStartOf="@+id/guideline29"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/go_pro"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="@string/go_pro"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/button_icon"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp">
 
-                <ImageView
-                    android:id="@+id/button_icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingStart="2dp"
-                    android:contentDescription="premium button Image"
-                    android:src="@drawable/ic_pro"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/go_pro"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/go_pro"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/button_icon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/button_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="2dp"
+                        android:contentDescription="premium button Image"
+                        android:src="@drawable/ic_pro"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            </com.example.nocturnevpn.widget.AnimatedGradientBorderView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
         <androidx.cardview.widget.CardView
             android:id="@+id/choose_server"

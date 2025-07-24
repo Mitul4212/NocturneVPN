@@ -38,6 +38,10 @@ import de.blinkt.openvpn.core.VpnStatus
 
 class HomeFragment : Fragment(), VpnStatus.StateListener {
 
+    companion object {
+        var shouldShowAnimatedBorder = false
+    }
+
     private lateinit var mContext: Context
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding
@@ -127,6 +131,27 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         
         // Initialize VPN status
         VpnStatus.initLogCache(mContext.cacheDir)
+
+        // Start animated border if user is premium
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val proTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
+        val isUserPremium = proTimerEnd > System.currentTimeMillis()
+        val goProButton = view.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
+        if (isUserPremium) {
+            goProButton.startBorderAnimation()
+        } else {
+            goProButton.stopBorderAnimation()
+        }
+        // For testing: hide border by default
+        goProButton.stopBorderAnimation()
+        android.util.Log.d("AnimatedBorderTest", "Border hidden by default")
+
+        // On click: navigate to PremiumFragment, then after returning, show animated border for 1 minute
+        goProButton.setOnClickListener {
+            android.util.Log.d("AnimatedBorderTest", "Button clicked, navigating to PremiumFragment")
+            shouldShowAnimatedBorder = true
+            findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        }
     }
 
     private fun initializeBindingDependentManagers() {
@@ -387,6 +412,21 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         serverManager.loadSavedServer()
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
         setupProTimer()
+
+        // Animated border test logic
+        val goProButton = view?.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
+        if (shouldShowAnimatedBorder && goProButton != null) {
+            shouldShowAnimatedBorder = false
+            goProButton.stopBorderAnimation()
+            goProButton.postDelayed({
+                android.util.Log.d("AnimatedBorderTest", "Showing animated border for 1 minute after returning from PremiumFragment")
+                goProButton.startBorderAnimation()
+                goProButton.postDelayed({
+                    android.util.Log.d("AnimatedBorderTest", "Hiding animated border after 1 minute")
+                    goProButton.stopBorderAnimation()
+                }, 60000)
+            }, 5000)
+        }
     }
 
     override fun onPause() {

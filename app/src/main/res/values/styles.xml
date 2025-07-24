@@ -11,6 +11,12 @@
         <item name="strokeColor">@color/gray</item>
     </style>
 
+    <style name="RoundedCornerCoinImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">17dp</item> <!-- Change radius as needed -->
+
+    </style>
+
     <style name="RoundedCornerBackArrowImage" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item> <!-- Change radius as needed -->
