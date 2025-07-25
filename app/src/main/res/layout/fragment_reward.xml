@@ -9,18 +9,27 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:fillViewport="true"
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:descendantFocusability="blocksDescendants"
+            android:focusableInTouchMode="true"
+            android:clickable="false"
             >
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp">
+                android:layout_marginTop="24dp"
+                android:descendantFocusability="blocksDescendants"
+                android:focusableInTouchMode="true"
+                android:clickable="false"
+                >
 
                 <!-- Header -->
                 <TextView
@@ -79,7 +88,11 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="20dp"
-                    android:background="@drawable/bg_balance_gradient">
+                    android:background="@drawable/bg_balance_gradient"
+                    android:descendantFocusability="blocksDescendants"
+                    android:focusableInTouchMode="true"
+                    android:clickable="false"
+                    >
 
                     <ImageView
                         android:layout_width="48dp"
@@ -171,7 +184,11 @@
                     android:orientation="vertical"
                     android:paddingTop="20dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:descendantFocusability="blocksDescendants"
+                    android:focusableInTouchMode="true"
+                    android:clickable="false"
+                    >
 
                     <!-- Title and date range -->
                     <LinearLayout
@@ -206,6 +223,9 @@
                         android:id="@+id/daysRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:descendantFocusability="blocksDescendants"
+                        android:focusableInTouchMode="true"
+                        android:clickable="false"
                         android:gravity="center"
                         android:orientation="horizontal"
                         android:paddingTop="16dp">
@@ -223,6 +243,8 @@
                             android:gravity="center"
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/day2_btn"
                             app:layout_constraintHorizontal_bias="0.5"
@@ -280,9 +302,10 @@
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/day3_btn"
                             app:layout_constraintHorizontal_bias="0.5"
@@ -336,12 +359,12 @@
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/day4_btn"
-
                             app:layout_constraintHorizontal_bias="0.5"
                             app:layout_constraintStart_toEndOf="@+id/day2_btn"
                             app:layout_constraintTop_toTopOf="parent">
@@ -413,11 +436,11 @@
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
-
                             app:layout_constraintEnd_toStartOf="@+id/day5_btn"
                             app:layout_constraintHorizontal_bias="0.5"
                             app:layout_constraintStart_toEndOf="@+id/day3_btn"
@@ -470,11 +493,11 @@
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
-
                             app:layout_constraintEnd_toStartOf="@+id/day6_btn"
                             app:layout_constraintHorizontal_bias="0.5"
                             app:layout_constraintStart_toEndOf="@+id/day4_btn"
@@ -539,7 +562,6 @@
                         <!-- Day 6 -->
                         <LinearLayout
                             android:id="@+id/day6_btn"
-
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
@@ -547,12 +569,12 @@
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/day7_btn"
-
                             app:layout_constraintHorizontal_bias="0.5"
                             app:layout_constraintStart_toEndOf="@+id/day5_btn"
                             app:layout_constraintTop_toTopOf="parent">
@@ -597,20 +619,18 @@
                         <!-- Day 7 (?? overlay) -->
                         <LinearLayout
                             android:id="@+id/day7_btn"
-
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-
                             android:layout_marginEnd="16dp"
                             android:layout_marginBottom="10dp"
                             android:layout_weight="1"
                             android:background="@drawable/checkin_btn"
                             android:elevation="3dp"
                             android:gravity="center"
-
                             android:orientation="vertical"
                             android:padding="3dp"
-
+                            android:clickable="true"
+                            android:focusable="true"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintHorizontal_bias="0.5"

@@ -84,6 +84,7 @@ class profileFragment : Fragment() {
 
         // Add click listener for info update button
         binding.infoUpadetButton.setOnClickListener {
+            android.util.Log.d("PROFILE_DEBUG", "infoUpadetButton clicked")
             showEditUserInfoScreen()
         }
 
@@ -114,15 +115,10 @@ class profileFragment : Fragment() {
         // Get current user data from UI
         val currentUserName = binding.userName.text.toString()
         val currentUserEmail = "test@gmail.com" // This should come from your actual user data source
-        
-        // Create and show the edit user info fragment as overlay
+
+        // Create and show the edit user info fragment as a bottom sheet dialog
         val editUserInfoFragment = EditUserInfoFragment.newInstance(currentUserName, currentUserEmail)
-        
-        // Add as child fragment to keep the profile fragment visible in background
-        childFragmentManager.beginTransaction()
-            .add(R.id.profile_overlay_container, editUserInfoFragment, "EditUserInfoFragment")
-            .addToBackStack(null)
-            .commit()
+        editUserInfoFragment.show(childFragmentManager, "EditUserInfoFragment")
     }
 
     private fun loadRecentHistory() {

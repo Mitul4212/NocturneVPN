@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
-import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.nocturnevpn.databinding.FragmentEditUserInfoBinding
 
-class EditUserInfoFragment : Fragment() {
+class EditUserInfoFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentEditUserInfoBinding? = null
     private val binding get() = _binding!!
@@ -23,7 +21,7 @@ class EditUserInfoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         _binding = FragmentEditUserInfoBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -40,7 +38,7 @@ class EditUserInfoFragment : Fragment() {
         setupUI()
         setupClickListeners()
         updateVerificationUI()
-        startSlideUpAnimation()
+        // No need for custom animation, BottomSheetDialogFragment handles it
     }
 
     private fun setupUI() {
@@ -50,14 +48,9 @@ class EditUserInfoFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Overlay click to dismiss
-        binding.overlay.setOnClickListener {
-            dismissWithAnimation()
-        }
-
         // Cancel button
         binding.cancelButton.setOnClickListener {
-            dismissWithAnimation()
+            dismiss()
         }
 
         // Save button
@@ -79,63 +72,7 @@ class EditUserInfoFragment : Fragment() {
         // Here you would typically make an API call to verify the user
     }
 
-    private fun startSlideUpAnimation() {
-        // Start with the container below the screen, invisible and scaled down
-        binding.mainContainer.apply {
-            translationY = height.toFloat()
-            alpha = 0f
-            scaleX = 0.95f
-            scaleY = 0.95f
-        }
-        binding.overlay.alpha = 0f
-
-        // Animate the overlay fade in
-        val overlayAnimator = ObjectAnimator.ofFloat(binding.overlay, "alpha", 0f, 1f).apply {
-            duration = 250
-            interpolator = FastOutSlowInInterpolator()
-        }
-
-        // Animate the container slide up, fade in, and scale up
-        binding.mainContainer.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(400)
-            .setInterpolator(FastOutSlowInInterpolator())
-            .start()
-        overlayAnimator.start()
-    }
-
-    private fun dismissWithAnimation() {
-        // Animate the overlay fade out
-        val overlayAnimator = ObjectAnimator.ofFloat(binding.overlay, "alpha", 1f, 0f).apply {
-            duration = 200
-            interpolator = FastOutSlowInInterpolator()
-        }
-
-        // Animate the container slide down, fade out, and scale down
-        binding.mainContainer.animate()
-            .translationY(binding.mainContainer.height.toFloat())
-            .alpha(0f)
-            .scaleX(0.95f)
-            .scaleY(0.95f)
-            .setDuration(300)
-            .setInterpolator(FastOutSlowInInterpolator())
-            .withEndAction {
-                // Use the appropriate fragment manager based on how the fragment was added
-                if (parentFragmentManager.fragments.contains(this@EditUserInfoFragment)) {
-                    parentFragmentManager.beginTransaction()
-                        .remove(this@EditUserInfoFragment)
-                        .commit()
-                } else {
-                    // Fallback to pop back stack if added via navigation
-                    findNavController().navigateUp()
-                }
-            }
-            .start()
-        overlayAnimator.start()
-    }
+    // No need for custom animation or overlay logic
 
     private fun saveUserInfo() {
         val newUserName = binding.userNameEditText.text.toString().trim()
@@ -158,7 +95,6 @@ class EditUserInfoFragment : Fragment() {
             putString("updated_user_name", newUserName)
             putString("updated_user_email", currentUserEmail)
         }
-        
         // Send result back to parent fragment using the appropriate fragment manager
         if (parentFragmentManager.fragments.contains(this)) {
             // If added as child fragment, send to parent
@@ -167,8 +103,7 @@ class EditUserInfoFragment : Fragment() {
             // If added via navigation, send to activity
             requireActivity().supportFragmentManager.setFragmentResult("edit_user_info_result", result)
         }
-        
-        dismissWithAnimation()
+        dismiss()
     }
 
     private fun updateVerificationUI() {

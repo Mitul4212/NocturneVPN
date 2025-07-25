@@ -3,35 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@android:color/transparent"
     tools:context=".view.fragment.EditUserInfoFragment">
-
-    <!-- Semi-transparent overlay -->
-    <View
-        android:id="@+id/overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#40000000"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Main content container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/edit_user_info_background"
         android:elevation="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintStart_toStartOf="parent">
 
         <!-- Handle bar -->
         <View
@@ -223,13 +208,5 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Guideline for slide-up animation -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="366dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

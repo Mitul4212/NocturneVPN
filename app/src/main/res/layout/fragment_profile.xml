@@ -1190,6 +1190,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
+                android:elevation="100dp"
                 tools:layout_editor_absoluteX="1dp"
                 tools:layout_editor_absoluteY="21dp" />
 

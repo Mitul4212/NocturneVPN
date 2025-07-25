@@ -24,6 +24,11 @@ import java.util.*
 import android.animation.ValueAnimator
 import org.json.JSONArray
 import org.json.JSONObject
+import android.content.SharedPreferences
+import android.widget.ImageView
+import androidx.navigation.fragment.findNavController
+import android.os.Vibrator
+import android.os.VibrationEffect
 
 private val KEY_COIN_BALANCE = "coin_balance"
 private val KEY_COIN_HISTORY = "coin_history"
@@ -39,12 +44,22 @@ class RewardFragment : Fragment() {
     private val PREFS = "reward_prefs"
     private val KEY_STREAK = "checkin_streak"
     private val KEY_LAST_DATE = "last_checkin_date"
+    private val STRONG_VIOLET = R.color.strong_violet
+    private val DEFAULT_BG = R.drawable.checkin_btn
+    private val CHECKED_BG = R.color.strong_violet
+    private val DEFAULT_REWARD_COLOR = R.color.gold
+    private val DEFAULT_DAY_COLOR = R.color.gray
+
     private val handler = Handler(Looper.getMainLooper())
     private var isAdRunning = false
 
     private var historyList = mutableListOf<CoinHistory>()
     private lateinit var adapter: CoinHistoryAdapter
     private var displayedCount = 5 // Start with 5
+
+    private val CHECKIN_PREFS = "checkin_prefs"
+    private val KEY_CHECKED_DATES = "checked_dates"
+    private val CHECKIN_REWARD = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +75,8 @@ class RewardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        android.util.Log.e("DAILY_CHECKIN_DEBUG", "RewardFragment onResume called")
+        setupStreakCheckIn()
         setupWatchAdSection()
     }
 
@@ -103,6 +120,168 @@ class RewardFragment : Fragment() {
         return list
     }
 
+    private fun getTodayDate(): String {
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+    }
+
+    private fun getCheckedDates(prefs: SharedPreferences): MutableSet<String> {
+        return prefs.getStringSet(KEY_CHECKED_DATES, mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+    }
+
+    private fun saveCheckedDates(prefs: SharedPreferences, dates: Set<String>) {
+        prefs.edit().putStringSet(KEY_CHECKED_DATES, dates).apply()
+    }
+
+    private fun getYesterdayDate(): String {
+        val cal = java.util.Calendar.getInstance()
+        cal.add(java.util.Calendar.DATE, -1)
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(cal.time)
+    }
+
+    private fun updateStreakUI(streak: Int, enableCheckin: Boolean) {
+        val dayBtns = listOf(binding.day1Btn, binding.day2Btn, binding.day3Btn, binding.day4Btn, binding.day5Btn, binding.day6Btn, binding.day7Btn)
+        val checkinDays = listOf(
+            binding.checkinDay1, binding.checkinDay2, binding.checkinDay3, binding.checkinDay4,
+            binding.checkinDay5, binding.checkinDay6, binding.checkinDay7
+        )
+        val checkinRewards = listOf(
+            binding.checkinReward1, binding.checkinReward2, binding.checkinReward3, binding.checkinReward4,
+            binding.checkinReward5, binding.checkinReward6, binding.checkinReward7
+        )
+        val checkmarks = listOf(
+            binding.icCheckDay1, binding.icCheckDay2, binding.icCheckDay3, binding.icCheckDay4,
+            binding.icCheckDay5, binding.icCheckDay6, binding.icCheckDay7
+        )
+        for (i in 0..6) {
+            if (i < streak) {
+                // Checked in
+                checkmarks[i].visibility = View.VISIBLE
+                checkinDays[i].setTextColor(resources.getColor(android.R.color.white, null))
+                checkinRewards[i].setTextColor(resources.getColor(android.R.color.white, null))
+                dayBtns[i].setBackgroundResource(R.drawable.bg_checkedin_card)
+            } else {
+                // Not checked in
+                checkmarks[i].visibility = View.GONE
+                checkinDays[i].setTextColor(resources.getColor(DEFAULT_DAY_COLOR, null))
+                checkinRewards[i].setTextColor(resources.getColor(DEFAULT_REWARD_COLOR, null))
+                dayBtns[i].setBackgroundResource(DEFAULT_BG)
+            }
+            dayBtns[i].alpha = 1.0f
+            // Only current streak day is clickable/enabled if enableCheckin is true
+            dayBtns[i].isEnabled = (enableCheckin && i == streak)
+            dayBtns[i].isClickable = (enableCheckin && i == streak)
+            if (enableCheckin && i == streak) {
+                bounceView(dayBtns[i])
+            }
+        }
+    }
+
+    // Returns the logical 'today' for check-in (if before 1 AM, returns yesterday)
+    private fun getCheckinLogicalToday(): String {
+        val cal = java.util.Calendar.getInstance()
+        val now = cal.time
+        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        if (hour < 1) {
+            cal.add(java.util.Calendar.DATE, -1)
+        }
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(cal.time)
+    }
+
+    private fun setupStreakCheckIn() {
+        val prefs = requireContext().getSharedPreferences(CHECKIN_PREFS, Context.MODE_PRIVATE)
+        val streak = prefs.getInt(KEY_STREAK, 0)
+        val lastDate = prefs.getString(KEY_LAST_DATE, "") ?: ""
+        val logicalToday = getCheckinLogicalToday()
+        val logicalYesterday = getYesterdayDateForCheckin()
+        var currentStreak = streak
+        var enableCheckin = false
+        // If never checked in or missed a day, reset
+        if (lastDate.isEmpty() || (lastDate != logicalToday && lastDate != logicalYesterday)) {
+            currentStreak = 0
+            prefs.edit().putInt(KEY_STREAK, 0).putString(KEY_LAST_DATE, "").apply()
+            enableCheckin = true // allow day 1
+        } else if (lastDate == logicalYesterday) {
+            // Continue streak, allow check-in for next day
+            enableCheckin = true
+        } else if (lastDate == logicalToday) {
+            // Already checked in today, do not allow check-in
+            enableCheckin = false
+        }
+        updateStreakUI(currentStreak, enableCheckin)
+        val dayBtns = listOf(binding.day1Btn, binding.day2Btn, binding.day3Btn, binding.day4Btn, binding.day5Btn, binding.day6Btn, binding.day7Btn)
+        dayBtns.forEachIndexed { idx, btn ->
+            btn.setOnClickListener {
+                if (enableCheckin && idx == currentStreak) {
+                    val reward = if (idx == 6) {
+                        val rand = java.util.Random().nextInt(100)
+                        val value = if (rand < 80) {
+                            10 + java.util.Random().nextInt(21)
+                        } else {
+                            31 + java.util.Random().nextInt(20)
+                        }
+                        val animator = android.animation.ValueAnimator.ofInt(0, value)
+                        animator.duration = 1000
+                        animator.addUpdateListener { valueAnimator ->
+                            binding.checkinReward7.text = valueAnimator.animatedValue.toString()
+                        }
+                        animator.start()
+                        try {
+                            val vibrator = requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                vibrator.vibrate(android.os.VibrationEffect.createOneShot(100, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                vibrator.vibrate(100)
+                            }
+                        } catch (e: Exception) { /* ignore */ }
+                        value
+                    } else {
+                        val rewardText = when(idx) {
+                            0 -> binding.checkinReward1.text.toString()
+                            1 -> binding.checkinReward2.text.toString()
+                            2 -> binding.checkinReward3.text.toString()
+                            3 -> binding.checkinReward4.text.toString()
+                            4 -> binding.checkinReward5.text.toString()
+                            5 -> binding.checkinReward6.text.toString()
+                            else -> "5"
+                        }
+                        rewardText.toIntOrNull() ?: 5
+                    }
+                    val newStreak = currentStreak + 1
+                    val logicalTodayNow = getCheckinLogicalToday()
+                    prefs.edit().putInt(KEY_STREAK, newStreak).putString(KEY_LAST_DATE, logicalTodayNow).apply()
+                    updateStreakUI(newStreak, false)
+                    val coinPrefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    val oldBalance = coinPrefs.getInt(KEY_COIN_BALANCE, 0)
+                    val newBalance = oldBalance + reward
+                    coinPrefs.edit().putInt(KEY_COIN_BALANCE, newBalance).apply()
+                    animateCoinBalance(oldBalance, newBalance)
+                    val todayDate = getTodayDate()
+                    historyList.add(0, CoinHistory(HistoryType.EARN, reward, todayDate, "Daily Check-in"))
+                    updateDisplayedHistory()
+                    saveCoinHistory()
+                    if (newStreak == 7) {
+                        Toast.makeText(requireContext(), "Week complete! You got $reward coins! Start again tomorrow!", Toast.LENGTH_LONG).show()
+                        prefs.edit().putInt(KEY_STREAK, 0).putString(KEY_LAST_DATE, "").apply()
+                    } else {
+                        Toast.makeText(requireContext(), "Check-in successful! +$reward coins", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    // Returns the logical 'yesterday' for check-in (if before 1 AM, returns two days ago)
+    private fun getYesterdayDateForCheckin(): String {
+        val cal = java.util.Calendar.getInstance()
+        val hour = cal.get(java.util.Calendar.HOUR_OF_DAY)
+        if (hour < 1) {
+            cal.add(java.util.Calendar.DATE, -2)
+        } else {
+            cal.add(java.util.Calendar.DATE, -1)
+        }
+        return java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(cal.time)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Load coin balance and history from SharedPreferences
@@ -114,9 +293,9 @@ class RewardFragment : Fragment() {
         binding.coinHistoryRecyclerView.adapter = adapter
         updateDisplayedHistory()
         updateHistoryVisibility()
-        setupDailyCheckin()
         setupWatchAdSection()
         setupUseYourCoinSection()
+        setupStreakCheckIn()
 
         // More button logic
         binding.moreButton.setOnClickListener {
@@ -142,10 +321,20 @@ class RewardFragment : Fragment() {
             binding.icCheckDay1, binding.icCheckDay2, binding.icCheckDay3, binding.icCheckDay4,
             binding.icCheckDay5, binding.icCheckDay6, binding.icCheckDay7
         )
-        updateCheckinUI(checkmarks, streak)
+        // updateCheckinUI(checkmarks, streak) // Removed
+        // setCheckinButtonsEnabled(dayBtns, streak, canCheckInToday) // Removed
+        // bounceView(dayBtns[safeStreak]) // Removed
 
         // Set week_dates TextView to current week range
         binding.weekDates.text = getCurrentWeekRange()
+        // Close button logic
+        binding.closebtn.setOnClickListener {
+            try {
+                findNavController().popBackStack()
+            } catch (e: Exception) {
+                requireActivity().finish()
+            }
+        }
     }
 
     // Helper function to get current week range as string (e.g., 7-7 ~ 7-13)
@@ -181,147 +370,13 @@ class RewardFragment : Fragment() {
         binding.moreButton.visibility = if (historyList.size > displayedCount) View.VISIBLE else View.GONE
     }
 
-    private fun setupDailyCheckin() {
-        val dayBtns = listOf(
-            binding.day1Btn, binding.day2Btn, binding.day3Btn, binding.day4Btn,
-            binding.day5Btn, binding.day6Btn, binding.day7Btn
-        )
-        val checkmarks = listOf(
-            binding.icCheckDay1, binding.icCheckDay2, binding.icCheckDay3, binding.icCheckDay4,
-            binding.icCheckDay5, binding.icCheckDay6, binding.icCheckDay7
-        )
-        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        // Always read the latest streak and lastDate from SharedPreferences
-        val streak = prefs.getInt(KEY_STREAK, 0)
-        val lastDate = prefs.getString(KEY_LAST_DATE, "")
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
-        // Only allow check-in if today > last check-in date
-        val canCheckInToday = lastDate != today
-        val actualStreak = if (canCheckInToday) streak else streak - 1
-        val safeStreak = actualStreak.coerceAtLeast(0)
-
-        // Check if user broke streak (missed a day)
-        if (lastDate != "" && lastDate != today) {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val last = sdf.parse(lastDate)
-            val now = sdf.parse(today)
-            val diff = (now.time - last.time) / (1000 * 60 * 60 * 24)
-            if (diff > 1) {
-                // Reset streak
-                prefs.edit().putInt(KEY_STREAK, 0).apply()
-                updateCheckinUI(checkmarks, 0)
-                setCheckinButtonsEnabled(dayBtns, 0, canCheckInToday)
-                if (canCheckInToday) bounceView(dayBtns[0])
-                return
-            }
-        }
-
-        // Always update UI with the correct streak
-        updateCheckinUI(checkmarks, safeStreak)
-        setCheckinButtonsEnabled(dayBtns, safeStreak, canCheckInToday)
-        if (canCheckInToday) bounceView(dayBtns[safeStreak])
-
-        // Set click listener for current day only
-        dayBtns.forEachIndexed { idx, btn ->
-            btn.setOnClickListener {
-                // Always re-read streak and lastDate before allowing check-in
-                val currentPrefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                val currentStreak = currentPrefs.getInt(KEY_STREAK, 0)
-                val currentLastDate = currentPrefs.getString(KEY_LAST_DATE, "")
-                val currentToday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                val canCheckIn = currentLastDate != currentToday && idx == (if (currentLastDate != currentToday) currentStreak else currentStreak - 1).coerceAtLeast(0)
-                if (!canCheckIn || isAdRunning) return@setOnClickListener
-                isAdRunning = true
-                Toast.makeText(requireContext(), "Ad running...", Toast.LENGTH_LONG).show()
-                handler.postDelayed({
-                    // Mark as checked-in
-                    val newStreak = currentStreak + 1
-                    currentPrefs.edit().putInt(KEY_STREAK, newStreak).putString(KEY_LAST_DATE, currentToday).apply()
-                    updateCheckinUI(checkmarks, newStreak)
-                    setCheckinButtonsEnabled(dayBtns, newStreak, false)
-                    isAdRunning = false
-                    // --- Add reward to coinBalance and show in history ---
-                    val previousBalance = loadCoinBalance()
-                    val reward = 5 // or get from your reward logic
-                    val newBalance = previousBalance + reward
-                    animateCoinBalance(previousBalance, newBalance)
-                    saveCoinBalance(newBalance)
-                    // Add to history
-                    historyList.add(0, CoinHistory(HistoryType.EARN, reward, currentToday, "Daily Check-in"))
-                    updateDisplayedHistory()
-                    saveCoinHistory()
-                }, 5000)
-            }
-        }
-    }
-
-    private fun updateCheckinUI(checkmarks: List<View>, streak: Int) {
-        val dayBtns = listOf(
-            binding.day1Btn, binding.day2Btn, binding.day3Btn, binding.day4Btn,
-            binding.day5Btn, binding.day6Btn, binding.day7Btn
-        )
-        val checkinDays = listOf(
-            binding.day1Btn.findViewById<TextView>(R.id.checkinDay1),
-            binding.day2Btn.findViewById<TextView>(R.id.checkinDay2),
-            binding.day3Btn.findViewById<TextView>(R.id.checkinDay3),
-            binding.day4Btn.findViewById<TextView>(R.id.checkinDay4),
-            binding.day5Btn.findViewById<TextView>(R.id.checkinDay5),
-            binding.day6Btn.findViewById<TextView>(R.id.checkinDay6),
-            binding.day7Btn.findViewById<TextView>(R.id.checkinDay7)
-        )
-        val checkinRewards = listOf(
-            binding.day1Btn.findViewById<TextView>(R.id.checkinReward1),
-            binding.day2Btn.findViewById<TextView>(R.id.checkinReward2),
-            binding.day3Btn.findViewById<TextView>(R.id.checkinReward3),
-            binding.day4Btn.findViewById<TextView>(R.id.checkinReward4),
-            binding.day5Btn.findViewById<TextView>(R.id.checkinReward5),
-            binding.day6Btn.findViewById<TextView>(R.id.checkinReward6),
-            binding.day7Btn.findViewById<TextView>(R.id.checkinReward7)
-        )
-        checkmarks.forEachIndexed { idx, check ->
-            check.isVisible = idx < streak
-            if (idx < streak) {
-                dayBtns[idx].setBackgroundResource(R.drawable.bg_checkedin_card)
-                checkinDays[idx]?.setTextColor(resources.getColor(android.R.color.white, null))
-                checkinRewards[idx]?.setTextColor(resources.getColor(android.R.color.white, null))
-            } else {
-                dayBtns[idx].setBackgroundResource(R.drawable.checkin_btn)
-                checkinDays[idx]?.setTextColor(resources.getColor(R.color.gray, null))
-                checkinRewards[idx]?.setTextColor(resources.getColor(R.color.gold, null))
-            }
-        }
-    }
-
-    private fun bounceView(view: View) {
-        val animator = ObjectAnimator.ofFloat(view, "translationY", 0f, -30f, 0f)
-        animator.duration = 600
-        animator.repeatCount = 2
-        animator.start()
-    }
-
-    private fun setCheckinButtonsEnabled(dayBtns: List<View>, streak: Int, canCheckInToday: Boolean) {
-        dayBtns.forEachIndexed { idx, btn ->
-            btn.isEnabled = idx == streak && canCheckInToday
-        }
-    }
-
-    private fun animateCoinBalance(from: Int, to: Int) {
-        val animator = ValueAnimator.ofInt(from, to)
-        animator.duration = 1000
-        animator.addUpdateListener { valueAnimator ->
-            binding.coinBalance.text = valueAnimator.animatedValue.toString()
-        }
-        animator.start()
-    }
-
-    // Call this function whenever the user spends coins
-    fun onUserSpentCoins(spentAmount: Int) {
-        val currentBalance = binding.coinBalance.text.toString().replace(",", "").toIntOrNull() ?: 0
-        val newBalance = (currentBalance - spentAmount).coerceAtLeast(0)
-        animateCoinBalance(currentBalance, newBalance)
-        // Optionally, update the stored balance after animation
-    }
+    // Remove all old daily check-in logic, including:
+    // - setupDailyCheckin()
+    // - updateCheckinUI()
+    // - setCheckinButtonsEnabled()
+    // - bounceView()
+    // - any related state/fields (e.g., KEY_STREAK, KEY_LAST_DATE, isAdRunning, handler, etc.)
+    // - all usages and calls to these functions in lifecycle methods
 
     private fun setupWatchAdSection() {
         val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -420,5 +475,21 @@ class RewardFragment : Fragment() {
         updateDisplayedHistory()
         saveCoinHistory()
         Toast.makeText(requireContext(), "Pro timer started!", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun animateCoinBalance(from: Int, to: Int) {
+        val animator = android.animation.ValueAnimator.ofInt(from, to)
+        animator.duration = 1000
+        animator.addUpdateListener { valueAnimator ->
+            binding.coinBalance.text = valueAnimator.animatedValue.toString()
+        }
+        animator.start()
+    }
+
+    private fun bounceView(view: View) {
+        val animator = android.animation.ObjectAnimator.ofFloat(view, "translationY", 0f, -30f, 0f)
+        animator.duration = 600
+        animator.repeatCount = 2
+        animator.start()
     }
 }
