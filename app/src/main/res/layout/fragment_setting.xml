@@ -96,15 +96,11 @@
                     android:id="@+id/account"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-
-                    android:clickable="true"
-                    android:focusable="auto"
                     android:orientation="horizontal"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:padding="15dp"
                     android:background="@drawable/ripple"
-
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/Account">

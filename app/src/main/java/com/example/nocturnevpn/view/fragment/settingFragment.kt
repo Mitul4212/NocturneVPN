@@ -13,10 +13,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RatingBar
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
+import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentSettingBinding
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +26,7 @@ class settingFragment : Fragment() {
 
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
+    private var sharedPreference: SharedPreference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)// Non-null assertion operator to safely access binding
@@ -36,6 +39,7 @@ class settingFragment : Fragment() {
     ): View? {
         // Inflate the layout using View Binding
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
+        sharedPreference = SharedPreference(requireContext())
         return binding.root // Use binding.root, not binding.roots
     }
 
@@ -70,6 +74,14 @@ class settingFragment : Fragment() {
             startActivity(intent)
         }
 
+        // Add sign out functionality
+        binding.signOut.setOnClickListener {
+            showSignOutConfirmationDialog()
+        }
+
+        // Update account name display
+        updateAccountName()
+
         // Rating dialog logic
         val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val hasRated = prefs.getBoolean("has_rated", false)
@@ -92,6 +104,59 @@ class settingFragment : Fragment() {
                 showRatingDialog(prefs)
                 prefs.edit().putBoolean("vpn_prompted", true).putLong("last_rating_prompt", now).apply()
             }
+        }
+    }
+
+    private fun updateAccountName() {
+        val userName = sharedPreference?.getUserName()
+        if (userName != null && userName.isNotEmpty()) {
+            binding.accountName.text = userName
+        } else {
+            // If no user name is set, show a default or placeholder
+            binding.accountName.text = "Guest User"
+        }
+    }
+
+    private fun showSignOutConfirmationDialog() {
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.sign_out_dialog)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Get dialog views
+        val btnCancel = dialog.findViewById<Button>(R.id.btnCancel)
+        val btnSignOut = dialog.findViewById<Button>(R.id.btnSignOut)
+        val ivClose = dialog.findViewById<LinearLayout>(R.id.ivClose)
+
+        btnSignOut.setOnClickListener {
+            performSignOut()
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        ivClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun performSignOut() {
+        try {
+            // Clear user data using the new method
+            sharedPreference?.clearUserData()
+            
+            // Show success message
+            Toast.makeText(context, "Signed out successfully", Toast.LENGTH_SHORT).show()
+            
+            // Navigate back to home/profile to show guest profile
+            findNavController().navigate(R.id.action_settingFragment3_to_profileFragment)
+            
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error signing out: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -140,6 +205,8 @@ class settingFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+        // Refresh account name when returning to settings
+        updateAccountName()
     }
 
     companion object {

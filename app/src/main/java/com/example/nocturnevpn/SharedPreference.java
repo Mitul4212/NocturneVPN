@@ -28,6 +28,8 @@ public class SharedPreference {
     private static final String SERVER_OVPN = "server_ovpn";
     private static final String SERVER_PORT = "server_port";
     private static final String SERVER_LIST_JSON = "server_list_json";
+    private static final String USER_SIGNED_IN = "user_signed_in";
+    private static final String USER_NAME = "user_name";
     private static final Gson gson = new Gson();
 
     public SharedPreference(Context context) {
@@ -114,6 +116,65 @@ public class SharedPreference {
         return mPreference.contains(SERVER_IP_ADDRESS);
     }
 
+    /**
+     * Check if user is signed in
+     *
+     * @return true if user is signed in, false otherwise
+     */
+    public Boolean isUserSignedIn() {
+        return mPreference.getBoolean(USER_SIGNED_IN, false);
+    }
 
+    /**
+     * Set user signed in status
+     *
+     * @param signedIn true if user is signed in, false otherwise
+     */
+    public void setUserSignedIn(Boolean signedIn) {
+        mPrefEditor.putBoolean(USER_SIGNED_IN, signedIn);
+        mPrefEditor.commit();
+    }
+
+    /**
+     * Save user name
+     *
+     * @param name the user's name
+     */
+    public void saveUserName(String name) {
+        mPrefEditor.putString(USER_NAME, name);
+        mPrefEditor.commit();
+        Log.d("SharedPref", "User name saved: " + name);
+    }
+
+    /**
+     * Get user name
+     *
+     * @return the user's name, or null if not set
+     */
+    public String getUserName() {
+        String name = mPreference.getString(USER_NAME, null);
+        Log.d("SharedPref", "User name retrieved: " + (name != null ? name : "Not set"));
+        return name;
+    }
+
+    /**
+     * Clear user-specific data when signing out
+     * This clears user-related preferences while keeping server and app settings
+     */
+    public void clearUserData() {
+        // Clear user sign-in status
+        mPrefEditor.remove(USER_SIGNED_IN);
+        // Clear user name
+        mPrefEditor.remove(USER_NAME);
+        
+        // You can add more user-specific data clearing here
+        // For example: user profile, preferences, etc.
+        // mPrefEditor.remove("USER_NAME");
+        // mPrefEditor.remove("USER_EMAIL");
+        // mPrefEditor.remove("USER_PREFERENCES");
+        
+        mPrefEditor.commit();
+        Log.d("SharedPref", "User data cleared");
+    }
 
 }
