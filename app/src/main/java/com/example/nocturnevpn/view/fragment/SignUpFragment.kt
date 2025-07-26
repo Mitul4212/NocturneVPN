@@ -1,14 +1,19 @@
 package com.example.nocturnevpn.view.fragment
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.FragmentSignUpBinding
+import com.example.nocturnevpn.utils.SocialAuthHelper
+import com.example.nocturnevpn.view.activitys.HomeActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -24,10 +29,24 @@ class SignUpFragment : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private lateinit var auth: FirebaseAuth
+    private lateinit var socialAuthHelper: SocialAuthHelper
+
+    // Modern Activity Result API
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        Log.d("SignUpFragment", "Google Sign-In result received: ${result.resultCode}")
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            socialAuthHelper.handleActivityResult(9001, result.resultCode, result.data)
+        } else {
+            Log.d("SignUpFragment", "Google Sign-In was cancelled or failed")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
+        socialAuthHelper = SocialAuthHelper(requireContext())
     }
 
     override fun onCreateView(
@@ -63,6 +82,15 @@ class SignUpFragment : Fragment() {
         // Sign In Link
         binding.signInTextLink.setOnClickListener {
             findNavController().navigate(R.id.action_signUpFragment_to_signInFragment)
+        }
+
+        // Social Authentication Buttons
+        binding.googleSignUpBtn.setOnClickListener {
+            signInWithGoogle()
+        }
+
+        binding.facebookSignUpBtn.setOnClickListener {
+            signInWithFacebook()
         }
     }
 
@@ -213,6 +241,43 @@ class SignUpFragment : Fragment() {
                 }
             }
     }
+
+    private fun signInWithGoogle() {
+        Log.d("SignUpFragment", "Google sign-in button clicked")
+        socialAuthHelper.signInWithGoogleModern(googleSignInLauncher, object : SocialAuthHelper.AuthCallback {
+            override fun onSuccess(userId: String, email: String, name: String) {
+                Log.d("SignUpFragment", "Google sign-in successful for user: $email")
+                Toast.makeText(context, "Google sign-in successful!", Toast.LENGTH_SHORT).show()
+                navigateToHome()
+            }
+
+            override fun onFailure(errorMessage: String) {
+                Log.e("SignUpFragment", "Google sign-in failed: $errorMessage")
+                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun signInWithFacebook() {
+        socialAuthHelper.signInWithFacebook(object : SocialAuthHelper.AuthCallback {
+            override fun onSuccess(userId: String, email: String, name: String) {
+                Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
+                navigateToHome()
+            }
+
+            override fun onFailure(errorMessage: String) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(requireContext(), HomeActivity::class.java)
+        startActivity(intent)
+        requireActivity().finish()
+    }
+
+    // Removed old onActivityResult since we're using modern Activity Result API
 
     override fun onDestroyView() {
         super.onDestroyView()

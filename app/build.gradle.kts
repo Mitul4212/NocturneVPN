@@ -105,6 +105,12 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-analytics")
 
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    
+    // Facebook Sign-In
+    implementation("com.facebook.android:facebook-login:16.3.0")
+    
     implementation("com.google.code.gson:gson:2.10.1")
 
 

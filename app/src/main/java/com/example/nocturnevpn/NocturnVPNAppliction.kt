@@ -7,6 +7,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.nocturnevpn.workers.ServerFetchWorker
+import com.example.nocturnevpn.utils.KeyHashGenerator
 import java.util.concurrent.TimeUnit
 
 class NocturnVPNAppliction : Application() {
@@ -14,6 +15,13 @@ class NocturnVPNAppliction : Application() {
     override fun onCreate() {
         super.onCreate()
         setupPeriodicServerFetch()
+        
+        // Generate key hashes for Facebook authentication (debug only)
+        if (BuildConfig.DEBUG) {
+            KeyHashGenerator.generateKeyHash(this)
+            KeyHashGenerator.generateSHA1Hash(this)
+            KeyHashGenerator.generateSHA256Hash(this)
+        }
     }
 
     private fun setupPeriodicServerFetch() {
