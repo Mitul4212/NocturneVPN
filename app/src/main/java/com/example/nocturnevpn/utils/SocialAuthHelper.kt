@@ -192,6 +192,7 @@ class SocialAuthHelper(private val context: Context) {
                         val authManager = AuthManager.getInstance(context)
                         authManager.saveAuthState(it.uid, it.email ?: "", it.displayName ?: "", "google")
                         
+                        Log.d("SocialAuthHelper", "Google auth state saved, calling callback")
                         callback.onSuccess(it.uid, it.email ?: "", it.displayName ?: "")
                         // Clear the callback after successful authentication
                         currentCallback = null
@@ -231,7 +232,7 @@ class SocialAuthHelper(private val context: Context) {
                         val authManager = AuthManager.getInstance(context)
                         authManager.saveAuthState(it.uid, userEmail, userName, "facebook")
                         
-                        Log.d("SocialAuthHelper", "Calling onSuccess callback")
+                        Log.d("SocialAuthHelper", "Facebook auth state saved, calling callback")
                         callback.onSuccess(it.uid, userEmail, userName)
                         // Clear the callback after successful authentication
                         currentCallback = null

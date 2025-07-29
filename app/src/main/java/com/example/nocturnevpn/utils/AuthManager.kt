@@ -73,13 +73,28 @@ class AuthManager private constructor(context: Context) {
      */
     fun saveAuthState(userId: String, email: String, name: String, provider: String) {
         Log.d("AuthManager", "Saving auth state for user: $email")
-        sharedPreferences.edit().apply {
-            putBoolean(KEY_IS_USER_SIGNED_IN, true)
-            putString(KEY_USER_ID, userId)
-            putString(KEY_USER_EMAIL, email)
-            putString(KEY_USER_NAME, name)
-            putString(KEY_AUTH_PROVIDER, provider)
-            apply()
+        try {
+            val success = sharedPreferences.edit().apply {
+                putBoolean(KEY_IS_USER_SIGNED_IN, true)
+                putString(KEY_USER_ID, userId)
+                putString(KEY_USER_EMAIL, email)
+                putString(KEY_USER_NAME, name)
+                putString(KEY_AUTH_PROVIDER, provider)
+            }.commit() // Use commit() instead of apply() for immediate save
+            
+            if (success) {
+                Log.d("AuthManager", "Auth state committed successfully")
+            } else {
+                Log.e("AuthManager", "Failed to commit auth state")
+            }
+            
+            // Verify the save was successful
+            val savedState = sharedPreferences.getBoolean(KEY_IS_USER_SIGNED_IN, false)
+            val savedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+            Log.d("AuthManager", "Auth state saved successfully - isSignedIn: $savedState, userId: $savedUserId")
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Error saving auth state: ${e.message}")
+            e.printStackTrace()
         }
     }
     

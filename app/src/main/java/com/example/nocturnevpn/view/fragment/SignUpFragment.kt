@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.FragmentSignUpBinding
 import com.example.nocturnevpn.utils.SocialAuthHelper
+import com.example.nocturnevpn.utils.AuthManager
 import com.example.nocturnevpn.view.activitys.HomeActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
@@ -247,6 +248,12 @@ class SignUpFragment : Fragment() {
         socialAuthHelper.signInWithGoogleModern(googleSignInLauncher, object : SocialAuthHelper.AuthCallback {
             override fun onSuccess(userId: String, email: String, name: String) {
                 Log.d("SignUpFragment", "Google sign-in successful for user: $email")
+                
+                // Verify auth state was saved
+                val authManager = AuthManager.getInstance(requireContext())
+                val isSignedIn = authManager.isUserSignedIn()
+                Log.d("SignUpFragment", "Auth state verification - isSignedIn: $isSignedIn")
+                
                 Toast.makeText(context, "Google sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }
@@ -272,6 +279,12 @@ class SignUpFragment : Fragment() {
         socialAuthHelper.signInWithFacebook(object : SocialAuthHelper.AuthCallback {
             override fun onSuccess(userId: String, email: String, name: String) {
                 Log.d("SignUpFragment", "Facebook sign-in successful for user: $email")
+                
+                // Verify auth state was saved
+                val authManager = AuthManager.getInstance(requireContext())
+                val isSignedIn = authManager.isUserSignedIn()
+                Log.d("SignUpFragment", "Auth state verification - isSignedIn: $isSignedIn")
+                
                 Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }
