@@ -8,12 +8,35 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.nocturnevpn.workers.ServerFetchWorker
 import com.example.nocturnevpn.utils.KeyHashGenerator
+import com.example.nocturnevpn.utils.AuthManager
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 import java.util.concurrent.TimeUnit
 
 class NocturnVPNAppliction : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Initialize Facebook SDK
+        try {
+            FacebookSdk.sdkInitialize(applicationContext)
+            AppEventsLogger.activateApp(this)
+            Log.d("NocturnVPNAppliction", "Facebook SDK initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing Facebook SDK: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Initialize Firebase Auth state
+        try {
+            val authManager = AuthManager.getInstance(this)
+            Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${authManager.getFirebaseAuth().currentUser != null}")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing Firebase Auth: ${e.message}")
+            e.printStackTrace()
+        }
+        
         setupPeriodicServerFetch()
         
         // Generate key hashes for Facebook authentication (debug only)

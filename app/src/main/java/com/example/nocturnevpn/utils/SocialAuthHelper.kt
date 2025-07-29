@@ -93,15 +93,18 @@ class SocialAuthHelper(private val context: Context) {
         Log.d("SocialAuthHelper", "signInWithFacebook called")
         
         try {
-            LoginManager.getInstance().logInWithReadPermissions(
-                context as Activity,
-                listOf("email", "public_profile")
-            )
+            // Store callback first
+            currentCallback = callback
             
+            // Always logout first to force fresh login (for testing)
+            LoginManager.getInstance().logOut()
+            Log.d("SocialAuthHelper", "Logged out from Facebook to force fresh login")
+            
+            // Register callback before starting login
             LoginManager.getInstance().registerCallback(callbackManager,
                 object : FacebookCallback<LoginResult> {
                     override fun onSuccess(result: LoginResult) {
-                        Log.d("SocialAuthHelper", "Facebook login successful")
+                        Log.d("SocialAuthHelper", "Facebook login successful with token: ${result.accessToken.token.take(10)}...")
                         handleFacebookAccessToken(result.accessToken, callback)
                     }
                     
@@ -116,17 +119,42 @@ class SocialAuthHelper(private val context: Context) {
                     }
                 })
             
-            currentCallback = callback
+            // Start login after registering callback
+            // Using only basic permissions that don't require verification
+            LoginManager.getInstance().logInWithReadPermissions(
+                context as Activity,
+                listOf("public_profile") // Remove email temporarily
+            )
+            
         } catch (e: Exception) {
             Log.e("SocialAuthHelper", "Error starting Facebook login: ${e.message}")
+            e.printStackTrace()
             callback.onFailure("Facebook configuration error: ${e.message}")
         }
     }
     
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("SocialAuthHelper", "handleActivityResult called, requestCode=$requestCode, resultCode=$resultCode")
-        callbackManager.onActivityResult(requestCode, resultCode, data)
         
+        // Handle Facebook login result first
+        val facebookHandled = callbackManager.onActivityResult(requestCode, resultCode, data)
+        Log.d("SocialAuthHelper", "Facebook callback manager handled result: $facebookHandled")
+        
+        // If Facebook login was handled and we have a current callback, check for access token
+        if (facebookHandled && currentCallback != null) {
+            // Add a small delay to allow Facebook SDK to process the result
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val accessToken = AccessToken.getCurrentAccessToken()
+                if (accessToken != null && !accessToken.isExpired) {
+                    Log.d("SocialAuthHelper", "Found valid access token after Facebook login: ${accessToken.token.take(10)}...")
+                    handleFacebookAccessToken(accessToken, currentCallback!!)
+                } else {
+                    Log.d("SocialAuthHelper", "No valid access token found after Facebook login")
+                }
+            }, 1000) // 1 second delay
+        }
+        
+        // Handle Google Sign-In result
         if (requestCode == RC_SIGN_IN) {
             Log.d("SocialAuthHelper", "Processing Google Sign-In result")
             val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -159,6 +187,11 @@ class SocialAuthHelper(private val context: Context) {
                     user?.let {
                         saveUserDataToFirestore(it.uid, it.email ?: "", it.displayName ?: "", true, "google")
                         uploadDeviceInfoToFirestore(it.uid)
+                        
+                        // Save authentication state
+                        val authManager = AuthManager.getInstance(context)
+                        authManager.saveAuthState(it.uid, it.email ?: "", it.displayName ?: "", "google")
+                        
                         callback.onSuccess(it.uid, it.email ?: "", it.displayName ?: "")
                         // Clear the callback after successful authentication
                         currentCallback = null
@@ -173,22 +206,39 @@ class SocialAuthHelper(private val context: Context) {
     }
     
     private fun handleFacebookAccessToken(token: AccessToken, callback: AuthCallback) {
-        Log.d("SocialAuthHelper", "handleFacebookAccessToken called")
+        Log.d("SocialAuthHelper", "handleFacebookAccessToken called with token: ${token.token.take(10)}...")
+        Log.d("SocialAuthHelper", "Token permissions: ${token.permissions}")
+        Log.d("SocialAuthHelper", "Token is expired: ${token.isExpired}")
+        
         val credential = FacebookAuthProvider.getCredential(token.token)
+        
+        Log.d("SocialAuthHelper", "Starting Firebase authentication with Facebook credential")
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     Log.d("SocialAuthHelper", "Firebase Facebook sign-in successful: ${user?.email}")
                     user?.let {
-                        saveUserDataToFirestore(it.uid, it.email ?: "", it.displayName ?: "", true, "facebook")
+                        // Generate a fallback email if none is provided
+                        val userEmail = it.email ?: "user_${it.uid}@facebook.com"
+                        val userName = it.displayName ?: "Facebook User"
+                        
+                        Log.d("SocialAuthHelper", "Saving user data to Firestore with email: $userEmail")
+                        saveUserDataToFirestore(it.uid, userEmail, userName, true, "facebook")
                         uploadDeviceInfoToFirestore(it.uid)
-                        callback.onSuccess(it.uid, it.email ?: "", it.displayName ?: "")
+                        
+                        // Save authentication state
+                        val authManager = AuthManager.getInstance(context)
+                        authManager.saveAuthState(it.uid, userEmail, userName, "facebook")
+                        
+                        Log.d("SocialAuthHelper", "Calling onSuccess callback")
+                        callback.onSuccess(it.uid, userEmail, userName)
                         // Clear the callback after successful authentication
                         currentCallback = null
                     }
                 } else {
                     Log.e("SocialAuthHelper", "Firebase Facebook sign-in failed: ${task.exception?.message}")
+                    task.exception?.printStackTrace()
                     callback.onFailure("Authentication failed: ${task.exception?.message}")
                     // Clear the callback after failed authentication
                     currentCallback = null

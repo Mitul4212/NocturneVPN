@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- For testing - replace with your actual Firebase Facebook App ID -->
-    <string name="facebook_app_id">123456789012345</string>
-    <string name="fb_login_protocol_scheme">fb123456789012345</string>
-    <string name="facebook_client_token">test_token</string>
+    <!-- Replace with your actual Facebook App ID from Facebook Developer Console -->
+    <string name="facebook_app_id">1316370979855055</string>
+    
+    <!-- This should be "fb" + your Facebook App ID -->
+    <string name="fb_login_protocol_scheme">fb1316370979855055</string>
+    
+    <!-- Replace with your actual Facebook Client Token from Facebook Developer Console -->
+    <string name="facebook_client_token">f9b929be2db62d06fe71caea58b82370</string>
 </resources> 

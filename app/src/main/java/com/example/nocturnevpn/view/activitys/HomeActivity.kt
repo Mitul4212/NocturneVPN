@@ -1,6 +1,7 @@
 package com.example.nocturnevpn.view.activitys
 
 import android.Manifest
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,6 +15,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.ActivityHomeBinding
+import com.example.nocturnevpn.utils.AuthManager
 import me.ibrahimsn.lib.SmoothBottomBar
 import com.example.nocturnevpn.utils.RatingDialogManager
 
@@ -74,6 +76,20 @@ class HomeActivity : AppCompatActivity() {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
+    
+    /**
+     * Sign out the current user and navigate to auth screen
+     */
+    fun signOut() {
+        val authManager = AuthManager.getInstance(this)
+        authManager.signOut()
+        
+        // Navigate back to auth screen
+        val intent = Intent(this, AppAuthActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
 

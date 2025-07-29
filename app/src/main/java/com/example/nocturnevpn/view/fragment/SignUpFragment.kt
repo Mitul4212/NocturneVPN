@@ -259,20 +259,34 @@ class SignUpFragment : Fragment() {
     }
 
     private fun signInWithFacebook() {
+        Log.d("SignUpFragment", "Facebook sign-in button clicked")
+        
+        // Check if Facebook SDK is available
+        try {
+            val facebookAppId = resources.getString(com.example.nocturnevpn.R.string.facebook_app_id)
+            Log.d("SignUpFragment", "Facebook App ID: $facebookAppId")
+        } catch (e: Exception) {
+            Log.e("SignUpFragment", "Error getting Facebook App ID: ${e.message}")
+        }
+        
         socialAuthHelper.signInWithFacebook(object : SocialAuthHelper.AuthCallback {
             override fun onSuccess(userId: String, email: String, name: String) {
+                Log.d("SignUpFragment", "Facebook sign-in successful for user: $email")
                 Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }
 
             override fun onFailure(errorMessage: String) {
+                Log.e("SignUpFragment", "Facebook sign-in failed: $errorMessage")
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             }
         })
     }
 
     private fun navigateToHome() {
+        Log.d("SignUpFragment", "Navigating to HomeActivity after successful sign in")
         val intent = Intent(requireContext(), HomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         requireActivity().finish()
     }
