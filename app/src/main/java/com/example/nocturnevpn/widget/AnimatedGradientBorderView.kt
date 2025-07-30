@@ -81,4 +81,12 @@ class AnimatedGradientBorderView @JvmOverloads constructor(
         gradient = null // Remove the shader
         invalidate()
     }
+    
+    fun isAnimating(): Boolean {
+        return animator != null && animator!!.isRunning
+    }
+    
+    fun hasGradient(): Boolean {
+        return gradient != null
+    }
 } 

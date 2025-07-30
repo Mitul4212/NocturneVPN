@@ -28,6 +28,7 @@ import com.example.nocturnevpn.databinding.FragmentHomeBinding
 import com.example.nocturnevpn.model.Server
 import com.example.nocturnevpn.utils.Utils
 import com.example.nocturnevpn.utils.toast
+import com.example.nocturnevpn.utils.AnimatedBorderManager
 import com.example.nocturnevpn.view.activitys.ChangeServerActivity
 import com.example.nocturnevpn.view.managers.ConnectionStatusManager
 import com.example.nocturnevpn.view.managers.GlobeManager
@@ -39,7 +40,7 @@ import de.blinkt.openvpn.core.VpnStatus
 class HomeFragment : Fragment(), VpnStatus.StateListener {
 
     companion object {
-        var shouldShowAnimatedBorder = false
+        // Removed shouldShowAnimatedBorder as it's now handled by AnimatedBorderManager
     }
 
     private lateinit var mContext: Context
@@ -63,6 +64,9 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private val KEY_PRO_TIMER_TYPE = "pro_timer_type"
     private var proTimerHandler: Handler? = null
     private var proTimerRunnable: Runnable? = null
+    
+    // Animated border manager
+    private lateinit var animatedBorderManager: AnimatedBorderManager
 
 
     @SuppressLint("SuspiciousIndentation")
@@ -99,6 +103,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private fun initializeManagers() {
         vpnManager = VPNManager(requireContext(), sharedPreference!!)
         notificationManager = NotificationManager(requireContext())
+        animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
         
         // Set up VPN result launcher
         vpnManager.setVPNResultLauncher(vpnResult)
@@ -132,25 +137,22 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         // Initialize VPN status
         VpnStatus.initLogCache(mContext.cacheDir)
 
-        // Start animated border if user is premium
-        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val proTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
-        val isUserPremium = proTimerEnd > System.currentTimeMillis()
+        // Get reference to go pro button for later use
         val goProButton = view.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
-        if (isUserPremium) {
-            goProButton.startBorderAnimation()
-        } else {
-            goProButton.stopBorderAnimation()
-        }
-        // For testing: hide border by default
-        goProButton.stopBorderAnimation()
-        android.util.Log.d("AnimatedBorderTest", "Border hidden by default")
 
         // On click: navigate to PremiumFragment, then after returning, show animated border for 1 minute
         goProButton.setOnClickListener {
             android.util.Log.d("AnimatedBorderTest", "Button clicked, navigating to PremiumFragment")
-            shouldShowAnimatedBorder = true
+            animatedBorderManager.setShouldShowAfterNavigation(true)
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        }
+        
+        // Long press to manually trigger animation for testing
+        goProButton.setOnLongClickListener {
+            android.util.Log.d("AnimatedBorderTest", "Long press - manually triggering animation")
+            animatedBorderManager.debugAnimationState() // Debug current state
+            animatedBorderManager.triggerAnimation(goProButton, 60000) // 1 minute
+            true
         }
     }
 
@@ -206,6 +208,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
 
     private fun setupClickListeners() {
         binding?.goProButton?.setOnClickListener {
+            // Set flag to show animation after navigation
+            animatedBorderManager.setShouldShowAfterNavigation(true)
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
         }
 
@@ -320,9 +324,21 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             binding?.proTimer?.visibility = View.VISIBLE
             binding?.goProButton?.visibility = View.GONE
             startProTimerCountdown(endTime, timerType)
+            
+            // Show animated border for premium users
+            val goProButton = view?.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
+            if (goProButton != null && !animatedBorderManager.isCurrentlyAnimating()) {
+                animatedBorderManager.startAnimatedBorder(goProButton, 60000) // 1 minute duration
+            }
         } else {
             binding?.proTimer?.visibility = View.GONE
             binding?.goProButton?.visibility = View.VISIBLE
+            
+            // Only stop animated border if it's not running for navigation purposes
+            val goProButton = view?.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
+            if (goProButton != null && !animatedBorderManager.isAnimationRunningForNavigation()) {
+                animatedBorderManager.stopAnimatedBorder()
+            }
         }
         applyProTimerGradient()
     }
@@ -350,6 +366,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
                     binding?.proTimer?.visibility = View.GONE
                     binding?.goProButton?.visibility = View.VISIBLE
                     binding?.proTimerText?.text = "00:00"
+                    
+                    // Only stop animated border when pro timer expires if it's not for navigation
+                    if (!animatedBorderManager.isAnimationRunningForNavigation()) {
+                        animatedBorderManager.stopAnimatedBorder()
+                    }
                 }
             }
         }
@@ -413,19 +434,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
         setupProTimer()
 
-        // Animated border test logic
+        // Restore animated border state when fragment resumes
         val goProButton = view?.findViewById<com.example.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
-        if (shouldShowAnimatedBorder && goProButton != null) {
-            shouldShowAnimatedBorder = false
-            goProButton.stopBorderAnimation()
-            goProButton.postDelayed({
-                android.util.Log.d("AnimatedBorderTest", "Showing animated border for 1 minute after returning from PremiumFragment")
-                goProButton.startBorderAnimation()
-                goProButton.postDelayed({
-                    android.util.Log.d("AnimatedBorderTest", "Hiding animated border after 1 minute")
-                    goProButton.stopBorderAnimation()
-                }, 60000)
-            }, 5000)
+        if (goProButton != null) {
+            // Add a small delay to prevent multiple rapid calls
+            goProButton.post {
+                animatedBorderManager.onFragmentResume(goProButton)
+            }
         }
     }
 
@@ -433,6 +448,9 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         super.onPause()
         VpnStatus.removeStateListener(this)
         proTimerRunnable?.let { proTimerHandler?.removeCallbacks(it) }
+        
+        // Preserve animated border state when fragment is paused
+        animatedBorderManager.onFragmentPause()
     }
 
     override fun onStop() {

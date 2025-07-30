@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.AuthFlowManager
 import com.google.firebase.auth.FirebaseAuth
 
 class SplashActivity : AppCompatActivity() {
@@ -18,6 +19,7 @@ class SplashActivity : AppCompatActivity() {
     }
     
     private lateinit var authManager: AuthManager
+    private lateinit var authFlowManager: AuthFlowManager
     private var authStateListener: FirebaseAuth.AuthStateListener? = null
     private var hasNavigated = false
     
@@ -28,6 +30,10 @@ class SplashActivity : AppCompatActivity() {
         Log.d("SplashActivity", "Splash activity started")
         
         authManager = AuthManager.getInstance(this)
+        authFlowManager = AuthFlowManager.getInstance(this)
+        
+        // Debug auth flow state
+        authFlowManager.debugState()
         
         // Set up Firebase auth state listener
         setupAuthStateListener()
@@ -65,17 +71,12 @@ class SplashActivity : AppCompatActivity() {
         
         hasNavigated = true
         
-        if (isSignedIn) {
-            // User is signed in, go to Home Activity
-            Log.d("SplashActivity", "User is signed in, navigating to HomeActivity")
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-        } else {
-            // User is not signed in, go to Auth Activity
-            Log.d("SplashActivity", "User is not signed in, navigating to AppAuthActivity")
-            val intent = Intent(this, AppAuthActivity::class.java)
-            startActivity(intent)
-        }
+        // Use AuthFlowManager to determine destination
+        val destinationClass = authFlowManager.getDestinationClass(authManager)
+        
+        Log.d("SplashActivity", "Navigating to: ${destinationClass.simpleName}")
+        val intent = Intent(this, destinationClass)
+        startActivity(intent)
         
         // Finish splash activity
         finish()

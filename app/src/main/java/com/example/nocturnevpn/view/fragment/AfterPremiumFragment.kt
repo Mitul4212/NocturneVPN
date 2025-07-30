@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.nocturnevpn.R
+import com.example.nocturnevpn.utils.AnimatedBorderManager
 
 class AfterPremiumFragment : Fragment() {
     override fun onCreateView(
@@ -32,5 +33,9 @@ class AfterPremiumFragment : Fragment() {
             )
             textView.invalidate()
         }
+        
+        // Trigger animated border when user completes premium purchase
+        val animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
+        animatedBorderManager.setShouldShowAfterNavigation(true)
     }
 } 

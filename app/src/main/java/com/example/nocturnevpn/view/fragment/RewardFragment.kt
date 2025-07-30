@@ -29,6 +29,7 @@ import android.widget.ImageView
 import androidx.navigation.fragment.findNavController
 import android.os.Vibrator
 import android.os.VibrationEffect
+import com.example.nocturnevpn.utils.AnimatedBorderManager
 
 private val KEY_COIN_BALANCE = "coin_balance"
 private val KEY_COIN_HISTORY = "coin_history"
@@ -474,6 +475,11 @@ class RewardFragment : Fragment() {
         historyList.add(0, CoinHistory(HistoryType.SPENT, cost, today, description))
         updateDisplayedHistory()
         saveCoinHistory()
+        
+        // Trigger animated border when pro timer is started
+        val animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
+        animatedBorderManager.setShouldShowAfterNavigation(true)
+        
         Toast.makeText(requireContext(), "Pro timer started!", Toast.LENGTH_SHORT).show()
     }
 

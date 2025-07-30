@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.ActivityHomeBinding
 import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.AuthFlowManager
 import me.ibrahimsn.lib.SmoothBottomBar
 import com.example.nocturnevpn.utils.RatingDialogManager
 
@@ -66,6 +68,12 @@ class HomeActivity : AppCompatActivity() {
 
         // Set up navigation logic for bottom navigation bar
         setupNavigation()
+        
+        // Add long press listener for testing first-time login reset
+        binding.root.setOnLongClickListener {
+            resetFirstTimeLoginForTesting()
+            true
+        }
     }
 
     private fun askNotificationPermission() {
@@ -90,6 +98,30 @@ class HomeActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+    
+    /**
+     * Check if user is signed in and show appropriate UI
+     */
+    fun checkAuthState() {
+        val authManager = AuthManager.getInstance(this)
+        val isSignedIn = authManager.isUserSignedIn()
+        
+
+        Log.d("HomeActivity", "User signed in: $isSignedIn")
+        
+        // You can add UI logic here to show/hide elements based on auth state
+        // For example, show login button in profile fragment if not signed in
+    }
+    
+    /**
+     * Reset first-time login flag for testing (long press on home screen)
+     */
+    fun resetFirstTimeLoginForTesting() {
+        val authFlowManager = AuthFlowManager.getInstance(this)
+        authFlowManager.resetFirstTimeLogin()
+        Toast.makeText(this, "First-time login reset for testing", Toast.LENGTH_SHORT).show()
+        Log.d("HomeActivity", "First-time login reset for testing")
     }
 
 
