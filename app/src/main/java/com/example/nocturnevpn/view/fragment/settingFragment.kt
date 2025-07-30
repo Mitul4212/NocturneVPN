@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentSettingBinding
+import com.example.nocturnevpn.utils.AuthManager
 import java.util.concurrent.TimeUnit
 
 class settingFragment : Fragment() {
@@ -27,6 +28,7 @@ class settingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
     private var sharedPreference: SharedPreference? = null
+    private lateinit var authManager: AuthManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)// Non-null assertion operator to safely access binding
@@ -40,6 +42,7 @@ class settingFragment : Fragment() {
         // Inflate the layout using View Binding
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
         sharedPreference = SharedPreference(requireContext())
+        authManager = AuthManager.getInstance(requireContext())
         return binding.root // Use binding.root, not binding.roots
     }
 
@@ -108,11 +111,32 @@ class settingFragment : Fragment() {
     }
 
     private fun updateAccountName() {
-        val userName = sharedPreference?.getUserName()
-        if (userName != null && userName.isNotEmpty()) {
-            binding.accountName.text = userName
+        // Check if user is signed in using AuthManager
+        val isUserSignedIn = authManager.isUserSignedIn()
+        
+        if (isUserSignedIn) {
+            // Try to get user name from AuthManager first, then fallback to SharedPreference
+            val authUserName = authManager.getCurrentUserName()
+            val sharedPrefUserName = sharedPreference?.getUserName()
+            
+            val userName = authUserName ?: sharedPrefUserName
+            if (userName != null && userName.isNotEmpty()) {
+                binding.accountName.text = userName
+            } else {
+                // If no cached name, fetch from Firestore
+                binding.accountName.text = "Loading..." // Show loading state
+                authManager.fetchUserNameFromFirestore { firestoreUserName ->
+                    activity?.runOnUiThread {
+                        if (firestoreUserName != null && firestoreUserName.isNotEmpty()) {
+                            binding.accountName.text = firestoreUserName
+                        } else {
+                            binding.accountName.text = "Signed In User"
+                        }
+                    }
+                }
+            }
         } else {
-            // If no user name is set, show a default or placeholder
+            // User is not signed in
             binding.accountName.text = "Guest User"
         }
     }
@@ -146,8 +170,11 @@ class settingFragment : Fragment() {
 
     private fun performSignOut() {
         try {
-            // Clear user data using the new method
+            // Clear user data from SharedPreference
             sharedPreference?.clearUserData()
+            
+            // Clear authentication state from AuthManager
+            authManager.clearAuthState()
             
             // Show success message
             Toast.makeText(context, "Signed out successfully", Toast.LENGTH_SHORT).show()

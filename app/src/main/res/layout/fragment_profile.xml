@@ -5,9 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".view.fragment.profileFragment">
-
-
+    tools:context=".view.fragment.ProfileFragment">
 
     <include
         android:id="@+id/guestProfile"
@@ -89,6 +87,7 @@
                         android:textSize="14sp" />
 
                     <TextView
+                        android:id="@+id/userEmail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="test@gmail.com"
@@ -152,6 +151,7 @@
                         android:textColor="@color/black" />
 
                     <ImageView
+                        android:id="@+id/deviceIdCopyBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
@@ -185,6 +185,7 @@
                         android:textColor="@color/black" />
 
                     <ImageView
+                        android:id="@+id/ipAddressCopyBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"

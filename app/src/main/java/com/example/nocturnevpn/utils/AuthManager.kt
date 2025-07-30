@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthManager private constructor(context: Context) {
     
@@ -27,6 +28,7 @@ class AuthManager private constructor(context: Context) {
     
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     
     /**
      * Check if user is currently signed in
@@ -38,11 +40,11 @@ class AuthManager private constructor(context: Context) {
         Log.d("AuthManager", "Checking auth state - SharedPrefs: $isSignedIn, FirebaseUser: ${firebaseUser != null}")
         
         // If SharedPreferences says signed in but Firebase user is null, 
-        // wait a bit for Firebase to initialize and try again
+        // this indicates a state mismatch - clear the invalid state
         if (isSignedIn && firebaseUser == null) {
-            Log.d("AuthManager", "SharedPrefs says signed in but Firebase user is null - waiting for Firebase to initialize")
-            // Return true if SharedPreferences says signed in, Firebase will catch up
-            return true
+            Log.d("AuthManager", "SharedPrefs says signed in but Firebase user is null - clearing invalid state")
+            clearAuthState()
+            return false
         }
         
         // If Firebase user exists but SharedPreferences says not signed in, update state
@@ -55,12 +57,6 @@ class AuthManager private constructor(context: Context) {
         // If both say signed in, return true
         if (isSignedIn && firebaseUser != null) {
             Log.d("AuthManager", "Both SharedPrefs and Firebase confirm user is signed in")
-            return true
-        }
-        
-        // If SharedPreferences says signed in, trust it (Firebase might not be ready yet)
-        if (isSignedIn) {
-            Log.d("AuthManager", "Trusting SharedPrefs state - user is signed in")
             return true
         }
         
@@ -117,21 +113,143 @@ class AuthManager private constructor(context: Context) {
      * Get current user ID
      */
     fun getCurrentUserId(): String? {
-        return sharedPreferences.getString(KEY_USER_ID, null)
+        // First try to get from SharedPreferences (fast)
+        val cachedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+        if (cachedUserId != null && cachedUserId.isNotEmpty()) {
+            // Verify that Firebase Auth also has a user (state consistency)
+            val firebaseUser = auth.currentUser
+            if (firebaseUser != null && firebaseUser.uid == cachedUserId) {
+                return cachedUserId
+            } else if (firebaseUser == null) {
+                // Firebase user is null but we have cached ID - clear invalid state
+                Log.d("AuthManager", "Firebase user is null but cached ID exists - clearing invalid state")
+                clearAuthState()
+                return null
+            }
+        }
+        
+        // If not in SharedPreferences, try to get from Firebase Auth
+        val firebaseUser = auth.currentUser
+        if (firebaseUser != null && firebaseUser.uid.isNotEmpty()) {
+            Log.d("AuthManager", "Getting user ID from Firebase Auth: ${firebaseUser.uid}")
+            // Update SharedPreferences with the Firebase user ID
+            sharedPreferences.edit().putString(KEY_USER_ID, firebaseUser.uid).apply()
+            return firebaseUser.uid
+        }
+        
+        // If still not found, return null
+        Log.d("AuthManager", "No user ID found in SharedPreferences or Firebase Auth")
+        return null
     }
     
     /**
      * Get current user email
      */
     fun getCurrentUserEmail(): String? {
-        return sharedPreferences.getString(KEY_USER_EMAIL, null)
+        // First try to get from SharedPreferences (fast)
+        val cachedEmail = sharedPreferences.getString(KEY_USER_EMAIL, null)
+        if (cachedEmail != null && cachedEmail.isNotEmpty()) {
+            return cachedEmail
+        }
+        
+        // If not in SharedPreferences, try to get from Firebase Auth
+        val firebaseUser = auth.currentUser
+        if (firebaseUser != null && firebaseUser.email != null && firebaseUser.email!!.isNotEmpty()) {
+            return firebaseUser.email
+        }
+        
+        // If still not found, return null (will be fetched from Firestore by the calling code)
+        return null
+    }
+    
+    /**
+     * Fetch user email from Firestore database
+     */
+    fun fetchUserEmailFromFirestore(callback: (String?) -> Unit) {
+        val userId = getCurrentUserId()
+        if (userId == null) {
+            Log.d("AuthManager", "No user ID found, cannot fetch email from Firestore")
+            callback(null)
+            return
+        }
+        
+        Log.d("AuthManager", "Fetching user email from Firestore for user: $userId")
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val userEmail = document.getString("email")
+                    Log.d("AuthManager", "Fetched user email from Firestore: $userEmail")
+                    
+                    // Update SharedPreferences with the fetched email
+                    if (userEmail != null && userEmail.isNotEmpty()) {
+                        sharedPreferences.edit().putString(KEY_USER_EMAIL, userEmail).apply()
+                    }
+                    
+                    callback(userEmail)
+                } else {
+                    Log.d("AuthManager", "No user document found in Firestore")
+                    callback(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("AuthManager", "Error fetching user email from Firestore: ${exception.message}")
+                callback(null)
+            }
     }
     
     /**
      * Get current user name
      */
     fun getCurrentUserName(): String? {
-        return sharedPreferences.getString(KEY_USER_NAME, null)
+        // First try to get from SharedPreferences (fast)
+        val cachedName = sharedPreferences.getString(KEY_USER_NAME, null)
+        if (cachedName != null && cachedName.isNotEmpty()) {
+            return cachedName
+        }
+        
+        // If not in SharedPreferences, try to get from Firebase Auth
+        val firebaseUser = auth.currentUser
+        if (firebaseUser != null && firebaseUser.displayName != null && firebaseUser.displayName!!.isNotEmpty()) {
+            return firebaseUser.displayName
+        }
+        
+        // If still not found, return null (will be fetched from Firestore by the calling code)
+        return null
+    }
+    
+    /**
+     * Fetch user name from Firestore database
+     */
+    fun fetchUserNameFromFirestore(callback: (String?) -> Unit) {
+        val userId = getCurrentUserId()
+        if (userId == null) {
+            Log.d("AuthManager", "No user ID found, cannot fetch from Firestore")
+            callback(null)
+            return
+        }
+        
+        Log.d("AuthManager", "Fetching user name from Firestore for user: $userId")
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val userName = document.getString("name")
+                    Log.d("AuthManager", "Fetched user name from Firestore: $userName")
+                    
+                    // Update SharedPreferences with the fetched name
+                    if (userName != null && userName.isNotEmpty()) {
+                        sharedPreferences.edit().putString(KEY_USER_NAME, userName).apply()
+                    }
+                    
+                    callback(userName)
+                } else {
+                    Log.d("AuthManager", "No user document found in Firestore")
+                    callback(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("AuthManager", "Error fetching user name from Firestore: ${exception.message}")
+                callback(null)
+            }
     }
     
     /**
@@ -158,6 +276,13 @@ class AuthManager private constructor(context: Context) {
     }
     
     /**
+     * Get current Firebase user
+     */
+    fun getCurrentFirebaseUser(): com.google.firebase.auth.FirebaseUser? {
+        return auth.currentUser
+    }
+    
+    /**
      * Add auth state listener to handle Firebase auth state changes
      */
     fun addAuthStateListener(listener: FirebaseAuth.AuthStateListener) {
@@ -169,5 +294,42 @@ class AuthManager private constructor(context: Context) {
      */
     fun removeAuthStateListener(listener: FirebaseAuth.AuthStateListener) {
         auth.removeAuthStateListener(listener)
+    }
+    
+    /**
+     * Update user name in SharedPreferences (for caching)
+     */
+    fun updateUserName(newUserName: String) {
+        Log.d("AuthManager", "Updating cached user name: $newUserName")
+        sharedPreferences.edit().putString(KEY_USER_NAME, newUserName).apply()
+    }
+    
+    /**
+     * Force refresh authentication state
+     */
+    fun refreshAuthState(): Boolean {
+        Log.d("AuthManager", "Refreshing authentication state")
+        
+        // Check if we have cached user data
+        val cachedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+        val cachedEmail = sharedPreferences.getString(KEY_USER_EMAIL, null)
+        
+        if (cachedUserId != null && cachedEmail != null) {
+            Log.d("AuthManager", "Found cached user data - attempting to restore session")
+            
+            // Try to get current Firebase user
+            val firebaseUser = auth.currentUser
+            if (firebaseUser != null) {
+                Log.d("AuthManager", "Firebase user exists - updating state")
+                saveAuthState(firebaseUser.uid, firebaseUser.email ?: "", firebaseUser.displayName ?: "", "firebase")
+                return true
+            } else {
+                Log.d("AuthManager", "No Firebase user - user needs to sign in again")
+                clearAuthState()
+                return false
+            }
+        }
+        
+        return false
     }
 } 

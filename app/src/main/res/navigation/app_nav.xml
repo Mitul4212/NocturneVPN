@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.nocturnevpn.view.fragment.profileFragment"
+        android:name="com.example.nocturnevpn.view.fragment.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
         <action
