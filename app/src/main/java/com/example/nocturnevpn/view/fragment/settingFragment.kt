@@ -21,6 +21,8 @@ import com.example.nocturnevpn.R
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentSettingBinding
 import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.UserDataLoader
+import android.util.Log
 import java.util.concurrent.TimeUnit
 
 class settingFragment : Fragment() {
@@ -109,36 +111,17 @@ class settingFragment : Fragment() {
             }
         }
     }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh account name when fragment becomes visible
+        updateAccountName()
+        // Show rating dialog if needed
+        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+    }
 
     private fun updateAccountName() {
-        // Check if user is signed in using AuthManager
-        val isUserSignedIn = authManager.isUserSignedIn()
-        
-        if (isUserSignedIn) {
-            // Try to get user name from AuthManager first, then fallback to SharedPreference
-            val authUserName = authManager.getCurrentUserName()
-            val sharedPrefUserName = sharedPreference?.getUserName()
-            
-            val userName = authUserName ?: sharedPrefUserName
-            if (userName != null && userName.isNotEmpty()) {
-                binding.accountName.text = userName
-            } else {
-                // If no cached name, fetch from Firestore
-                binding.accountName.text = "Loading..." // Show loading state
-                authManager.fetchUserNameFromFirestore { firestoreUserName ->
-                    activity?.runOnUiThread {
-                        if (firestoreUserName != null && firestoreUserName.isNotEmpty()) {
-                            binding.accountName.text = firestoreUserName
-                        } else {
-                            binding.accountName.text = "Signed In User"
-                        }
-                    }
-                }
-            }
-        } else {
-            // User is not signed in
-            binding.accountName.text = "Guest User"
-        }
+        UserDataLoader.loadUserName(requireContext(), binding.accountName, authManager, sharedPreference)
     }
 
     private fun showSignOutConfirmationDialog() {
@@ -170,19 +153,42 @@ class settingFragment : Fragment() {
 
     private fun performSignOut() {
         try {
-            // Clear user data from SharedPreference
+            Log.d("SettingFragment", "Starting sign out process...")
+            
+            // 1. Sign out from Firebase Auth (MOST IMPORTANT STEP)
+            val firebaseAuth = com.google.firebase.auth.FirebaseAuth.getInstance()
+            firebaseAuth.signOut()
+            Log.d("SettingFragment", "Firebase Auth sign out completed")
+            
+            // 2. Clear user data from SharedPreference
             sharedPreference?.clearUserData()
+            Log.d("SettingFragment", "SharedPreference cleared")
             
-            // Clear authentication state from AuthManager
+            // 3. Clear authentication state from AuthManager
             authManager.clearAuthState()
+            Log.d("SettingFragment", "AuthManager state cleared")
             
-            // Show success message
+            // 4. Sign out from Google (if user signed in with Google)
+            try {
+                val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(
+                    requireActivity(),
+                    com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
+                )
+                googleSignInClient.signOut()
+                Log.d("SettingFragment", "Google sign out completed")
+            } catch (e: Exception) {
+                Log.d("SettingFragment", "Google sign out failed (user might not have signed in with Google): ${e.message}")
+            }
+            
+            // 5. Show success message
             Toast.makeText(context, "Signed out successfully", Toast.LENGTH_SHORT).show()
+            Log.d("SettingFragment", "Sign out process completed successfully")
             
-            // Navigate back to home/profile to show guest profile
+            // 6. Navigate back to home/profile to show guest profile
             findNavController().navigate(R.id.action_settingFragment3_to_profileFragment)
             
         } catch (e: Exception) {
+            Log.e("SettingFragment", "Error during sign out: ${e.message}", e)
             Toast.makeText(context, "Error signing out: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -229,12 +235,7 @@ class settingFragment : Fragment() {
         dialog.show()
     }
 
-    override fun onResume() {
-        super.onResume()
-        com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
-        // Refresh account name when returning to settings
-        updateAccountName()
-    }
+
 
     companion object {
 

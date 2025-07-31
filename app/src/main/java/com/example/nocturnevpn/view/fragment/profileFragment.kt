@@ -14,13 +14,14 @@ import com.example.nocturnevpn.R
 import com.example.nocturnevpn.adapter.SimpleHistoryAdapter
 import com.example.nocturnevpn.databinding.FragmentProfileBinding
 import com.example.nocturnevpn.db.HistoryHelper
-import com.example.nocturnevpn.utils.SampleDataGenerator
+
 import com.example.nocturnevpn.view.activitys.AppAuthActivity
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.model.Server
 import android.provider.Settings
 import com.example.nocturnevpn.utils.getUserFriendlyDeviceId
 import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.UserDataLoader
 import android.util.Log
 
 
@@ -53,73 +54,22 @@ class ProfileFragment : Fragment() {
         setupFragmentResultListener()
         setupProfileVisibility()
         
-        // Temporary: Add sample data generation for testing
-        addSampleDataButton()
+
         updateSelectedServerIp()
         updateDeviceUniqueId()
         loadUserName()
         loadUserEmail()
         setupGuestProfileClickListeners()
     }
+    
+
 
     private fun loadUserName() {
-        // Check if user is signed in using AuthManager
-        val isUserSignedIn = authManager.isUserSignedIn()
-        
-        if (isUserSignedIn) {
-            // Try to get user name from AuthManager first, then fallback to SharedPreference
-            val authUserName = authManager.getCurrentUserName()
-            val sharedPrefUserName = sharedPreference?.getUserName()
-            
-            val userName = authUserName ?: sharedPrefUserName
-            if (userName != null && userName.isNotEmpty()) {
-                binding.userName.text = userName
-            } else {
-                // If no cached name, fetch from Firestore
-                binding.userName.text = "Loading..." // Show loading state
-                authManager.fetchUserNameFromFirestore { firestoreUserName ->
-                    activity?.runOnUiThread {
-                        if (firestoreUserName != null && firestoreUserName.isNotEmpty()) {
-                            binding.userName.text = firestoreUserName
-                        } else {
-                            binding.userName.text = "Signed In User"
-                        }
-                    }
-                }
-            }
-        } else {
-            // User is not signed in
-            binding.userName.text = "Guest User"
-        }
+        UserDataLoader.loadUserName(requireContext(), binding.userName, authManager, sharedPreference)
     }
     
     private fun loadUserEmail() {
-        // Check if user is signed in using AuthManager
-        val isUserSignedIn = authManager.isUserSignedIn()
-        
-        if (isUserSignedIn) {
-            // Try to get user email from AuthManager first
-            val authUserEmail = authManager.getCurrentUserEmail()
-            
-            if (authUserEmail != null && authUserEmail.isNotEmpty()) {
-                binding.userEmail.text = authUserEmail
-            } else {
-                // If no cached email, fetch from Firestore
-                binding.userEmail.text = "Loading..." // Show loading state
-                authManager.fetchUserEmailFromFirestore { firestoreUserEmail ->
-                    activity?.runOnUiThread {
-                        if (firestoreUserEmail != null && firestoreUserEmail.isNotEmpty()) {
-                            binding.userEmail.text = firestoreUserEmail
-                        } else {
-                            binding.userEmail.text = "No email available"
-                        }
-                    }
-                }
-            }
-        } else {
-            // User is not signed in
-            binding.userEmail.text = "Guest User"
-        }
+        UserDataLoader.loadUserEmail(requireContext(), binding.userEmail, authManager)
     }
 
     private fun setupSimpleHistoryRecyclerView() {
@@ -150,13 +100,12 @@ class ProfileFragment : Fragment() {
         binding.rewardHub.setOnClickListener {
             this.findNavController().navigate(R.id.action_profileFragment_to_rewardFragment)
         }
-        
-        // Add click listener for Device ID copy button
+
+        // Add click listeners for copy buttons
         binding.deviceIdCopyBtn.setOnClickListener {
             copyDeviceIdToClipboard()
         }
-        
-        // Add click listener for IP Address copy button
+
         binding.ipAddressCopyBtn.setOnClickListener {
             copyIpAddressToClipboard()
         }
@@ -208,15 +157,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // Temporary method for testing - remove this in production
-    private fun addSampleDataButton() {
-        binding.moreButton.setOnLongClickListener {
-            SampleDataGenerator.generateSampleHistory(requireContext())
-            loadRecentHistory()
-            Toast.makeText(context, "Sample history data generated!", Toast.LENGTH_SHORT).show()
-            true
-        }
-    }
+
 
     override fun onResume() {
         super.onResume()
@@ -251,56 +192,44 @@ class ProfileFragment : Fragment() {
         if (isUserSignedIn) {
             // Show signed-in profile page
             Log.d("PROFILE_FRAGMENT", "User is signed in - showing profile page")
-            binding.guestProfile.root.visibility = View.GONE
-            binding.profilePageAfterSignin.visibility = View.VISIBLE
+            binding.guestProfilePage.visibility = View.GONE
+            binding.profilePage.visibility = View.VISIBLE
         } else {
             // Show guest profile page
             Log.d("PROFILE_FRAGMENT", "User is NOT signed in - showing guest profile")
-            binding.guestProfile.root.visibility = View.VISIBLE
-            binding.profilePageAfterSignin.visibility = View.GONE
+            binding.guestProfilePage.visibility = View.VISIBLE
+            binding.profilePage.visibility = View.GONE
             updateGuestDeviceUniqueId()
         }
     }
 
     private fun setupGuestProfileClickListeners() {
-        // Setup click listeners for guest profile buttons
-        val guestProfileView = binding.guestProfile.root
+        // Setup click listeners for guest profile buttons directly in the main layout
         
         // Setup sign in button
-        val signInButton = guestProfileView.findViewById<android.widget.Button>(R.id.sign_in_button)
-        if (signInButton != null) {
-            signInButton.setOnClickListener {
-                val intent = Intent(requireContext(), AppAuthActivity::class.java)
-                startActivity(intent)
-            }
+        binding.signInButton.setOnClickListener {
+            val intent = Intent(requireContext(), AppAuthActivity::class.java)
+            startActivity(intent)
         }
 
         // Setup upgrade button
-        val upgradeButton = guestProfileView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.upgrade_button)
-        if (upgradeButton != null) {
-            upgradeButton.setOnClickListener {
-                this.findNavController().navigate(R.id.action_profileFragment_to_premiumFragment)
-            }
+        binding.upgradeButton.setOnClickListener {
+            this.findNavController().navigate(R.id.action_profileFragment_to_premiumFragment)
         }
 
         // Setup copy button
-        val copyButton = guestProfileView.findViewById<android.widget.ImageView>(R.id.copy_button)
-        if (copyButton != null) {
-            copyButton.setOnClickListener {
-                copyUserIdToClipboard()
-            }
+        binding.copyButton.setOnClickListener {
+            copyUserIdToClipboard()
         }
     }
 
     private fun updateGuestDeviceUniqueId() {
         val userFriendlyId = requireContext().getUserFriendlyDeviceId()
-        val guestProfileView = binding.guestProfile.root
-        guestProfileView.findViewById<android.widget.TextView>(R.id.user_id).text = userFriendlyId
+        binding.userId.text = userFriendlyId
     }
 
     private fun copyUserIdToClipboard() {
-        val guestProfileView = binding.guestProfile.root
-        val userId = guestProfileView.findViewById<android.widget.TextView>(R.id.user_id).text.toString()
+        val userId = binding.userId.text.toString()
         val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
         val clip = android.content.ClipData.newPlainText("User ID", userId)
         clipboard.setPrimaryClip(clip)

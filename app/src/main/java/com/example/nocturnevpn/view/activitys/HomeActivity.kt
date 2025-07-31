@@ -69,11 +69,7 @@ class HomeActivity : AppCompatActivity() {
         // Set up navigation logic for bottom navigation bar
         setupNavigation()
         
-        // Add long press listener for testing first-time login reset
-        binding.root.setOnLongClickListener {
-            resetFirstTimeLoginForTesting()
-            true
-        }
+
     }
 
     private fun askNotificationPermission() {
@@ -114,15 +110,7 @@ class HomeActivity : AppCompatActivity() {
         // For example, show login button in profile fragment if not signed in
     }
     
-    /**
-     * Reset first-time login flag for testing (long press on home screen)
-     */
-    fun resetFirstTimeLoginForTesting() {
-        val authFlowManager = AuthFlowManager.getInstance(this)
-        authFlowManager.resetFirstTimeLogin()
-        Toast.makeText(this, "First-time login reset for testing", Toast.LENGTH_SHORT).show()
-        Log.d("HomeActivity", "First-time login reset for testing")
-    }
+
 
 
     private fun setupNavigation() {

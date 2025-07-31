@@ -57,7 +57,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private var connection: CheckInternetConnection? = null
     private var sharedPreference: SharedPreference? = null
     var wasConnectedOnce = false
-    private var lastClickTime = 0L
+
 
     private val PREFS = "reward_prefs"
     private val KEY_PRO_TIMER_END = "pro_timer_end"
@@ -147,13 +147,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
         }
         
-        // Long press to manually trigger animation for testing
-        goProButton.setOnLongClickListener {
-            android.util.Log.d("AnimatedBorderTest", "Long press - manually triggering animation")
-            animatedBorderManager.debugAnimationState() // Debug current state
-            animatedBorderManager.triggerAnimation(goProButton, 60000) // 1 minute
-            true
-        }
+
     }
 
     private fun initializeBindingDependentManagers() {
@@ -225,25 +219,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             handleConnectButtonClick()
         }
 
-        // Add test button for debugging globe (you can remove this later)
-        binding?.globeWebView?.setOnLongClickListener {
-            Log.d("HomeFragment", "Long press on globe - testing globe functionality")
-            globeManager?.testGlobe()
-            mContext.toast("Testing globe with New York coordinates")
-            true
-        }
 
-        // Add double tap for test globe (you can remove this later)
-        binding?.globeWebView?.setOnClickListener {
-            // Simple click counter for double tap detection
-            if (System.currentTimeMillis() - lastClickTime < 300) {
-                // Double tap detected
-                Log.d("HomeFragment", "Double tap on globe - loading test globe")
-                globeManager?.loadTestGlobe()
-                mContext.toast("Loading test globe")
-            }
-            lastClickTime = System.currentTimeMillis()
-        }
     }
 
     private fun handleConnectButtonClick() {
