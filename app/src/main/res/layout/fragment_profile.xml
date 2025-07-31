@@ -8,14 +8,14 @@
     tools:context=".view.fragment.ProfileFragment">
 
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/guestProfilePage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
         android:visibility="visible"
-        >
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="-158dp">
 
         <ImageView
             android:id="@+id/imageView"
@@ -46,11 +46,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/strong_violet"
+            android:clickable="true"
+            android:focusable="true"
             android:text="SIGN IN"
             android:textColor="@color/white"
             app:cornerRadius="18dp"
-            android:clickable="true"
-            android:focusable="true"
             app:layout_constraintBottom_toTopOf="@+id/guideline5"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline1"
@@ -191,10 +191,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:background="@drawable/gradient_drawable"
-                android:shadowColor="@color/strong_violet"
-                android:text="@string/upgrade"
                 android:clickable="true"
                 android:focusable="true"
+                android:shadowColor="@color/strong_violet"
+                android:text="@string/upgrade"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"

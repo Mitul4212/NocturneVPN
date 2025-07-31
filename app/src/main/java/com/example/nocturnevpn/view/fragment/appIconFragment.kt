@@ -31,7 +31,11 @@ class appIconFragment : Fragment() {
         R.id.radio_dark2 to "com.example.nocturnevpn.Icon3Alias",
         R.id.radio_3d_1 to "com.example.nocturnevpn.Icon4Alias",
         R.id.radio_3d_2 to "com.example.nocturnevpn.Icon5Alias",
-        R.id.radio_retro to "com.example.nocturnevpn.Icon6Alias"
+        R.id.radio_retro to "com.example.nocturnevpn.Icon6Alias",
+        // Discreet icons for Row 3
+        R.id.radio_wether to "com.example.nocturnevpn.WeatherAlias",
+        R.id.radio_notes to "com.example.nocturnevpn.NotesAlias",
+        R.id.radio_calculeter to "com.example.nocturnevpn.CalculatorAlias"
     )
 
     override fun onCreateView(
@@ -67,13 +71,49 @@ class appIconFragment : Fragment() {
                 }
             }
         }
+
+        // Add click listeners for the discreet icon layouts (Row 3)
+        binding.wetherIconLayout.setOnClickListener {
+            val alias = iconComponentMap[R.id.radio_wether]
+            if (alias != null) {
+                showConfirmDialog(R.id.radio_wether, alias)
+            }
+        }
+
+        binding.notesIconLayout.setOnClickListener {
+            val alias = iconComponentMap[R.id.radio_notes]
+            if (alias != null) {
+                showConfirmDialog(R.id.radio_notes, alias)
+            }
+        }
+
+        binding.calculeterIconLayout.setOnClickListener {
+            val alias = iconComponentMap[R.id.radio_calculeter]
+            if (alias != null) {
+                showConfirmDialog(R.id.radio_calculeter, alias)
+            }
+        }
     }
 
     // ✅ Show confirmation dialog before changing icon
     private fun showConfirmDialog(selectedRadioId: Int, alias: String) {
         val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Change App Icon")
-        builder.setMessage("Are you sure you want to change the app icon?")
+        
+        // Check if this is a discreet icon
+        val isDiscreetIcon = selectedRadioId in listOf(
+            R.id.radio_wether, 
+            R.id.radio_notes, 
+            R.id.radio_calculeter
+        )
+        
+        if (isDiscreetIcon) {
+            builder.setTitle("Change to Discreet Icon")
+            builder.setMessage("This will disguise your VPN app with a different icon. The app will still function as NocturneVPN but will appear as a different app on your home screen. Continue?")
+        } else {
+            builder.setTitle("Change App Icon")
+            builder.setMessage("Are you sure you want to change the app icon?")
+        }
+        
         builder.setPositiveButton("Yes") { _, _ ->
             proceedIconChange(selectedRadioId, alias)
         }
@@ -168,7 +208,16 @@ class appIconFragment : Fragment() {
             PackageManager.DONT_KILL_APP
         )
 
-        Toast.makeText(context, "App icon changed!", Toast.LENGTH_SHORT).show()
+        // Check if this is a discreet icon
+        val isDiscreetIcon = enabledAlias.contains("WeatherAlias") || 
+                            enabledAlias.contains("NotesAlias") || 
+                            enabledAlias.contains("CalculatorAlias")
+        
+        if (isDiscreetIcon) {
+            Toast.makeText(context, "App disguised successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "App icon changed!", Toast.LENGTH_SHORT).show()
+        }
 
         restartApp(context)
     }

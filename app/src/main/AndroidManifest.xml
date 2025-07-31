@@ -181,6 +181,48 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Weather Icon (Discreet) -->
+        <activity-alias
+            android:name=".WeatherAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_weather"
+            android:label="Weather"
+            android:targetActivity=".view.activitys.HomeActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Notes Icon (Discreet) -->
+        <activity-alias
+            android:name=".NotesAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_notes"
+            android:label="Notes"
+            android:targetActivity=".view.activitys.HomeActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Calculator Icon (Discreet) -->
+        <activity-alias
+            android:name=".CalculatorAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_calculeter"
+            android:label="Calculator"
+            android:targetActivity=".view.activitys.HomeActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <service
             android:name="de.blinkt.openvpn.core.OpenVPNService"
             android:exported="false"
