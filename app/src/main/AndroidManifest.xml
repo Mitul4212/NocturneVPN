@@ -86,20 +86,16 @@
             android:exported="true"
             android:theme="@style/Theme.NocturneVPN"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <!-- Default Icon -->
         <activity-alias
-            android:name=".DefaultAlias"
-            android:enabled="false"
+            android:name="com.example.nocturnevpn.DefaultAlias"
+            android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity">
+            android:targetActivity=".view.activitys.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -108,12 +104,12 @@
 
         <!-- Icon 2 -->
         <activity-alias
-            android:name=".Icon2Alias"
+            android:name="com.example.nocturnevpn.Icon2Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -123,12 +119,12 @@
 
         <!-- Icon 3 -->
         <activity-alias
-            android:name=".Icon3Alias"
+            android:name="com.example.nocturnevpn.Icon3Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark_2"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -138,12 +134,12 @@
 
         <!-- Icon 4 -->
         <activity-alias
-            android:name=".Icon4Alias"
+            android:name="com.example.nocturnevpn.Icon4Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_1"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -153,12 +149,12 @@
 
         <!-- Icon 5 -->
         <activity-alias
-            android:name=".Icon5Alias"
+            android:name="com.example.nocturnevpn.Icon5Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_2"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -168,12 +164,12 @@
 
         <!-- Icon 6 -->
         <activity-alias
-            android:name=".Icon6Alias"
+            android:name="com.example.nocturnevpn.Icon6Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_retro"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -183,12 +179,12 @@
 
         <!-- Weather Icon (Discreet) -->
         <activity-alias
-            android:name=".WeatherAlias"
+            android:name="com.example.nocturnevpn.WeatherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_weather"
             android:label="Weather"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -197,12 +193,12 @@
 
         <!-- Notes Icon (Discreet) -->
         <activity-alias
-            android:name=".NotesAlias"
+            android:name="com.example.nocturnevpn.NotesAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_notes"
             android:label="Notes"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -211,12 +207,12 @@
 
         <!-- Calculator Icon (Discreet) -->
         <activity-alias
-            android:name=".CalculatorAlias"
+            android:name="com.example.nocturnevpn.CalculatorAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_calculeter"
             android:label="Calculator"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
