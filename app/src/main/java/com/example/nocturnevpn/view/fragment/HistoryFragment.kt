@@ -3,6 +3,7 @@ package com.example.nocturnevpn.view.fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.app.Dialog
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -77,14 +78,25 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showClearHistoryDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Clear History")
-            .setMessage("Are you sure you want to clear all connection history? This action cannot be undone.")
-            .setPositiveButton("Clear") { _, _ ->
-                clearHistory()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.clear_history_dialog)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Clear button
+        val btnClear = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_clear)
+        btnClear.setOnClickListener {
+            clearHistory()
+            dialog.dismiss()
+        }
+
+        // Cancel button
+        val btnCancel = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_cancel)
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun clearHistory() {

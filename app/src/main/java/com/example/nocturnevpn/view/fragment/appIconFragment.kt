@@ -2,6 +2,7 @@ package com.example.nocturnevpn.view.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -107,18 +108,33 @@ class appIconFragment : Fragment() {
             "Are you sure you want to change the app icon?"
         }
 
-        AlertDialog.Builder(requireContext())
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("Yes") { _, _ ->
-                changeAppIcon(selectedRadioId, alias)
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                // Restore previous selection if user cancels
-                restorePreviousSelection()
-                dialog.dismiss()
-            }
-            .show()
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.app_icon_change_dialog)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Update title and message
+        val titleTextView = dialog.findViewById<android.widget.TextView>(R.id.app_icon_dialog_title)
+        val messageTextView = dialog.findViewById<android.widget.TextView>(R.id.app_icon_dialog_message)
+        titleTextView.text = title
+        messageTextView.text = message
+
+        // Yes button
+        val btnYes = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_yes)
+        btnYes.setOnClickListener {
+            changeAppIcon(selectedRadioId, alias)
+            dialog.dismiss()
+        }
+
+        // Cancel button
+        val btnCancel = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_cancel)
+        btnCancel.setOnClickListener {
+            // Restore previous selection if user cancels
+            restorePreviousSelection()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun changeAppIcon(selectedRadioId: Int, enabledAlias: String) {

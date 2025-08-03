@@ -2,6 +2,7 @@ package com.example.nocturnevpn.view.fragment
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -391,14 +392,29 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
 
 
     private fun confirmDisconnect() {
-        AlertDialog.Builder(mContext)
-            .setMessage(mContext.getString(R.string.connection_close_confirm))
-            .setPositiveButton(mContext.getString(R.string.yes)) { _, _ -> 
-                vpnManager.stopVPN()
-            }
-            .setNegativeButton(mContext.getString(R.string.no)) { _, _ -> }
-            .create()
-            .show()
+        val dialog = Dialog(mContext)
+        dialog.setContentView(R.layout.vpn_disconnect_confirm_dialog)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Update message with string resource
+        val messageTextView = dialog.findViewById<android.widget.TextView>(R.id.vpn_disconnect_confirm_dialog_message)
+        messageTextView.text = mContext.getString(R.string.connection_close_confirm)
+
+        // Yes button
+        val btnYes = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_yes)
+        btnYes.setOnClickListener {
+            vpnManager.stopVPN()
+            dialog.dismiss()
+        }
+
+        // No button
+        val btnNo = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_no)
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     override fun onResume() {

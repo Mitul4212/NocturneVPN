@@ -9,6 +9,9 @@
     
     <!-- Facebook Login Permissions -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <!-- Attachment Permissions -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 
     <application
@@ -33,6 +36,17 @@
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
+        
+        <!-- FileProvider for attachments -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         
         <!-- Facebook Login Activity -->
         <activity
@@ -61,6 +75,7 @@
             android:name=".view.activitys.ReportIssueActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".view.activitys.ChangeServerActivity"
             android:exported="false"
