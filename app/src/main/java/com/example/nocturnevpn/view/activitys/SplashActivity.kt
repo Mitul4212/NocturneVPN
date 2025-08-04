@@ -95,4 +95,5 @@ class SplashActivity : AppCompatActivity() {
         // Remove auth state listener
         authStateListener?.let { authManager.removeAuthStateListener(it) }
     }
+    
 } 

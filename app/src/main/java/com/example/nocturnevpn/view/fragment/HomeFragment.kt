@@ -30,6 +30,7 @@ import com.example.nocturnevpn.model.Server
 import com.example.nocturnevpn.utils.Utils
 import com.example.nocturnevpn.utils.toast
 import com.example.nocturnevpn.utils.AnimatedBorderManager
+import com.example.nocturnevpn.utils.ConsentManager
 import com.example.nocturnevpn.view.activitys.ChangeServerActivity
 import com.example.nocturnevpn.view.managers.ConnectionStatusManager
 import com.example.nocturnevpn.view.managers.GlobeManager
@@ -68,6 +69,9 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     
     // Animated border manager
     private lateinit var animatedBorderManager: AnimatedBorderManager
+    
+    // Consent manager
+    private lateinit var consentManager: ConsentManager
 
 
     @SuppressLint("SuspiciousIndentation")
@@ -105,6 +109,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         vpnManager = VPNManager(requireContext(), sharedPreference!!)
         notificationManager = NotificationManager(requireContext())
         animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
+        consentManager = ConsentManager.getInstance(requireContext())
         
         // Set up VPN result launcher
         vpnManager.setVPNResultLauncher(vpnResult)
@@ -147,6 +152,9 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             animatedBorderManager.setShouldShowAfterNavigation(true)
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
         }
+        
+        // Initialize consent popup after everything else is set up
+        initializeConsentPopup()
         
 
     }
@@ -495,5 +503,54 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
 
     override fun setConnectedVPN(uuid: String?) {
         vpnManager.setConnectedVPN(uuid)
+    }
+    
+    /**
+     * Initialize and show consent popup if required
+     * This is called after HomeFragment is fully loaded
+     */
+    private fun initializeConsentPopup() {
+        Log.d("HomeFragment", "🏠 === INITIALIZING CONSENT POPUP IN HOME FRAGMENT ===")
+        
+        // Add a small delay to ensure fragment is fully loaded
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                // Check if activity is still valid
+                if (!isAdded || activity == null || activity?.isFinishing == true) {
+                    Log.w("HomeFragment", "⚠️ Activity not valid, skipping consent popup")
+                    return@postDelayed
+                }
+                
+                Log.d("HomeFragment", "📱 Activity valid, checking consent requirements...")
+                
+                // Initialize consent manager with HomeFragment activity
+                consentManager.initializeConsent(requireActivity()) { consentStatus ->
+                    Log.d("HomeFragment", "✅ Consent initialization completed with status: $consentStatus")
+                    
+                    // You can add additional logic here based on consent status
+                    when (consentStatus) {
+                        ConsentManager.ConsentStatus.PERSONALIZED -> {
+                            Log.d("HomeFragment", "🎯 User chose personalized ads")
+                            // Initialize AppLovin with personalized ads
+                        }
+                        ConsentManager.ConsentStatus.NON_PERSONALIZED -> {
+                            Log.d("HomeFragment", "🔒 User chose non-personalized ads")
+                            // Initialize AppLovin with non-personalized ads
+                        }
+                        ConsentManager.ConsentStatus.NOT_REQUIRED -> {
+                            Log.d("HomeFragment", "🌍 Consent not required for this region")
+                            // Initialize AppLovin normally
+                        }
+                        ConsentManager.ConsentStatus.UNKNOWN -> {
+                            Log.d("HomeFragment", "❓ Consent status unknown")
+                            // Handle unknown status
+                        }
+                    }
+                }
+                
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "❌ Error initializing consent popup: ${e.message}")
+            }
+        }, 1000) // 1 second delay to ensure fragment is stable
     }
 }

@@ -113,5 +113,7 @@ dependencies {
     
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // Google UMP SDK for GDPR/CCPA compliance
+    implementation("com.google.android.ump:user-messaging-platform:2.1.0")
 
 }
