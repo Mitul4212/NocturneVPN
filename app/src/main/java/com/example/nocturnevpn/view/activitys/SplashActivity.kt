@@ -65,21 +65,29 @@ class SplashActivity : AppCompatActivity() {
     private fun checkAuthState() {
         if (hasNavigated) return
         
-        val isSignedIn = authManager.isUserSignedIn()
-        
-        Log.d("SplashActivity", "User signed in: $isSignedIn")
-        
-        hasNavigated = true
-        
-        // Use AuthFlowManager to determine destination
-        val destinationClass = authFlowManager.getDestinationClass(authManager)
-        
-        Log.d("SplashActivity", "Navigating to: ${destinationClass.simpleName}")
-        val intent = Intent(this, destinationClass)
-        startActivity(intent)
-        
-        // Finish splash activity
-        finish()
+        // Wait for Firebase Auth to restore session if needed
+        authManager.waitForAuthRestoration { isSignedIn ->
+            if (hasNavigated) return@waitForAuthRestoration
+            
+            Log.d("SplashActivity", "Auth restoration completed - User signed in: $isSignedIn")
+            
+            // Validate and clean auth state if needed
+            if (!isSignedIn) {
+                authManager.validateAndCleanAuthState()
+            }
+            
+            hasNavigated = true
+            
+            // Use AuthFlowManager to determine destination
+            val destinationClass = authFlowManager.getDestinationClass(authManager)
+            
+            Log.d("SplashActivity", "Navigating to: ${destinationClass.simpleName}")
+            val intent = Intent(this@SplashActivity, destinationClass)
+            startActivity(intent)
+            
+            // Finish splash activity
+            finish()
+        }
     }
     
     override fun onDestroy() {

@@ -254,6 +254,10 @@ class SignUpFragment : Fragment() {
                 val isSignedIn = authManager.isUserSignedIn()
                 Log.d("SignUpFragment", "Auth state verification - isSignedIn: $isSignedIn")
                 
+                // Mark login as seen in AuthFlowManager
+                val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+                authFlowManager.markSuccessfulLogin()
+                
                 Toast.makeText(context, "Google sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }
@@ -284,6 +288,10 @@ class SignUpFragment : Fragment() {
                 val authManager = AuthManager.getInstance(requireContext())
                 val isSignedIn = authManager.isUserSignedIn()
                 Log.d("SignUpFragment", "Auth state verification - isSignedIn: $isSignedIn")
+                
+                // Mark login as seen in AuthFlowManager
+                val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+                authFlowManager.markSuccessfulLogin()
                 
                 Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()

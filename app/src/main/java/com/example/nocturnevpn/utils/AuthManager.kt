@@ -37,30 +37,48 @@ class AuthManager private constructor(context: Context) {
         val isSignedIn = sharedPreferences.getBoolean(KEY_IS_USER_SIGNED_IN, false)
         val firebaseUser = auth.currentUser
         
-        Log.d("AuthManager", "Checking auth state - SharedPrefs: $isSignedIn, FirebaseUser: ${firebaseUser != null}")
+        Log.d("AuthManager", "=== AUTH STATE CHECK ===")
+        Log.d("AuthManager", "SharedPreferences isSignedIn: $isSignedIn")
+        Log.d("AuthManager", "Firebase currentUser: ${firebaseUser?.email ?: "null"}")
+        Log.d("AuthManager", "Firebase user ID: ${firebaseUser?.uid ?: "null"}")
         
         // If SharedPreferences says signed in but Firebase user is null, 
-        // this indicates a state mismatch - clear the invalid state
+        // this might be a temporary state during Firebase Auth restoration
+        // Let's give Firebase a chance to restore the session
         if (isSignedIn && firebaseUser == null) {
-            Log.d("AuthManager", "SharedPrefs says signed in but Firebase user is null - clearing invalid state")
-            clearAuthState()
-            return false
+            Log.d("AuthManager", "⚠️ SharedPrefs says signed in but Firebase user is null - this might be temporary")
+            Log.d("AuthManager", "Firebase Auth might still be restoring the session...")
+            
+            // Check if we have valid cached user data
+            val cachedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+            val cachedEmail = sharedPreferences.getString(KEY_USER_EMAIL, null)
+            
+            if (cachedUserId != null && cachedEmail != null && 
+                cachedUserId.isNotEmpty() && cachedEmail.isNotEmpty()) {
+                Log.d("AuthManager", "✅ Valid cached user data found - user considered signed in")
+                return true
+            } else {
+                Log.d("AuthManager", "❌ No valid cached user data - clearing invalid state")
+                clearAuthState()
+                return false
+            }
         }
         
         // If Firebase user exists but SharedPreferences says not signed in, update state
         if (!isSignedIn && firebaseUser != null) {
-            Log.d("AuthManager", "Firebase user exists but SharedPreferences says not signed in - updating state")
+            Log.d("AuthManager", "⚠️ Firebase user exists but SharedPreferences says not signed in - updating state")
             saveAuthState(firebaseUser.uid, firebaseUser.email ?: "", firebaseUser.displayName ?: "", "firebase")
             return true
         }
         
         // If both say signed in, return true
         if (isSignedIn && firebaseUser != null) {
-            Log.d("AuthManager", "Both SharedPrefs and Firebase confirm user is signed in")
+            Log.d("AuthManager", "✅ Both SharedPrefs and Firebase confirm user is signed in")
             return true
         }
         
-        Log.d("AuthManager", "User is not signed in")
+        Log.d("AuthManager", "❌ User is not signed in")
+        Log.d("AuthManager", "=======================")
         return false
     }
     
@@ -68,7 +86,12 @@ class AuthManager private constructor(context: Context) {
      * Save authentication state after successful sign in
      */
     fun saveAuthState(userId: String, email: String, name: String, provider: String) {
-        Log.d("AuthManager", "Saving auth state for user: $email")
+        Log.d("AuthManager", "=== SAVING AUTH STATE ===")
+        Log.d("AuthManager", "User ID: $userId")
+        Log.d("AuthManager", "Email: $email")
+        Log.d("AuthManager", "Name: $name")
+        Log.d("AuthManager", "Provider: $provider")
+        
         try {
             val success = sharedPreferences.edit().apply {
                 putBoolean(KEY_IS_USER_SIGNED_IN, true)
@@ -79,17 +102,19 @@ class AuthManager private constructor(context: Context) {
             }.commit() // Use commit() instead of apply() for immediate save
             
             if (success) {
-                Log.d("AuthManager", "Auth state committed successfully")
+                Log.d("AuthManager", "✅ Auth state committed successfully")
             } else {
-                Log.e("AuthManager", "Failed to commit auth state")
+                Log.e("AuthManager", "❌ Failed to commit auth state")
             }
             
             // Verify the save was successful
             val savedState = sharedPreferences.getBoolean(KEY_IS_USER_SIGNED_IN, false)
             val savedUserId = sharedPreferences.getString(KEY_USER_ID, null)
-            Log.d("AuthManager", "Auth state saved successfully - isSignedIn: $savedState, userId: $savedUserId")
+            val savedEmail = sharedPreferences.getString(KEY_USER_EMAIL, null)
+            Log.d("AuthManager", "Verification - isSignedIn: $savedState, userId: $savedUserId, email: $savedEmail")
+            Log.d("AuthManager", "=======================")
         } catch (e: Exception) {
-            Log.e("AuthManager", "Error saving auth state: ${e.message}")
+            Log.e("AuthManager", "❌ Error saving auth state: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -121,10 +146,10 @@ class AuthManager private constructor(context: Context) {
             if (firebaseUser != null && firebaseUser.uid == cachedUserId) {
                 return cachedUserId
             } else if (firebaseUser == null) {
-                // Firebase user is null but we have cached ID - clear invalid state
-                Log.d("AuthManager", "Firebase user is null but cached ID exists - clearing invalid state")
-                clearAuthState()
-                return null
+                // Firebase user is null but we have cached ID - this might be during session restoration
+                // Don't clear the state immediately, return the cached ID
+                Log.d("AuthManager", "Firebase user is null but cached ID exists - returning cached ID (session may be restoring)")
+                return cachedUserId
             }
         }
         
@@ -324,12 +349,119 @@ class AuthManager private constructor(context: Context) {
                 saveAuthState(firebaseUser.uid, firebaseUser.email ?: "", firebaseUser.displayName ?: "", "firebase")
                 return true
             } else {
-                Log.d("AuthManager", "No Firebase user - user needs to sign in again")
-                clearAuthState()
-                return false
+                Log.d("AuthManager", "No Firebase user - but keeping cached state for session restoration")
+                // Don't clear the state - let Firebase Auth try to restore
+                return true
             }
         }
         
         return false
+    }
+    
+    /**
+     * Validate authentication state and clear if invalid
+     * This should be called periodically to ensure state consistency
+     */
+    fun validateAndCleanAuthState(): Boolean {
+        Log.d("AuthManager", "Validating authentication state...")
+        
+        val isSignedIn = sharedPreferences.getBoolean(KEY_IS_USER_SIGNED_IN, false)
+        val firebaseUser = auth.currentUser
+        
+        // If SharedPreferences says signed in but Firebase user is null for too long,
+        // the session might be invalid
+        if (isSignedIn && firebaseUser == null) {
+            Log.d("AuthManager", "Invalid authentication state detected - clearing")
+            clearAuthState()
+            return false
+        }
+        
+        // If both are consistent, state is valid
+        if (isSignedIn && firebaseUser != null) {
+            Log.d("AuthManager", "Authentication state is valid")
+            return true
+        }
+        
+        // If neither is signed in, state is valid (user not signed in)
+        if (!isSignedIn && firebaseUser == null) {
+            Log.d("AuthManager", "Authentication state is valid (user not signed in)")
+            return true
+        }
+        
+        return false
+    }
+    
+    /**
+     * Wait for Firebase Auth to restore session and then check state
+     * This is useful when the app starts and Firebase Auth might still be restoring
+     */
+    fun waitForAuthRestoration(callback: (Boolean) -> Unit) {
+        Log.d("AuthManager", "Waiting for Firebase Auth session restoration...")
+        
+        // Check if we have cached authentication data
+        val isSignedIn = sharedPreferences.getBoolean(KEY_IS_USER_SIGNED_IN, false)
+        val cachedUserId = sharedPreferences.getString(KEY_USER_ID, null)
+        val cachedEmail = sharedPreferences.getString(KEY_USER_EMAIL, null)
+        
+        if (!isSignedIn || cachedUserId == null || cachedEmail == null) {
+            Log.d("AuthManager", "No valid cached authentication data - user not signed in")
+            callback(false)
+            return
+        }
+        
+        // If Firebase user is already available, return immediately
+        val firebaseUser = auth.currentUser
+        if (firebaseUser != null) {
+            Log.d("AuthManager", "Firebase user already available - session restored")
+            callback(true)
+            return
+        }
+        
+        // Create a variable to track if callback has been called
+        var callbackCalled = false
+        var authStateListener: FirebaseAuth.AuthStateListener? = null
+        
+        // Wait for Firebase Auth to restore the session
+        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user != null && !callbackCalled) {
+                callbackCalled = true
+                Log.d("AuthManager", "Firebase Auth session restored for user: ${user.email}")
+                authStateListener?.let { auth.removeAuthStateListener(it) }
+                callback(true)
+            }
+        }
+        
+        auth.addAuthStateListener(authStateListener)
+        
+        // Set a timeout in case Firebase Auth doesn't restore the session
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            if (!callbackCalled) {
+                callbackCalled = true
+                authStateListener?.let { auth.removeAuthStateListener(it) }
+                Log.d("AuthManager", "Firebase Auth session restoration timeout")
+                
+                // After timeout, check if we have valid cached data
+                val currentFirebaseUser = auth.currentUser
+                if (currentFirebaseUser == null) {
+                    Log.d("AuthManager", "Firebase user still null after timeout")
+                    Log.d("AuthManager", "Cached user data: ID=$cachedUserId, Email=$cachedEmail")
+                    
+                    // If we have valid cached data, consider the user signed in
+                    // This prevents the "login every time" issue
+                    if (cachedUserId.isNotEmpty() && cachedEmail.isNotEmpty()) {
+                        Log.d("AuthManager", "Using cached authentication data - user considered signed in")
+                        callback(true)
+                    } else {
+                        Log.d("AuthManager", "No valid cached data - clearing auth state")
+                        clearAuthState()
+                        callback(false)
+                    }
+                } else {
+                    Log.d("AuthManager", "Firebase user restored after timeout")
+                    callback(true)
+                }
+            }
+        }, 5000) // Increased timeout to 5 seconds
     }
 } 

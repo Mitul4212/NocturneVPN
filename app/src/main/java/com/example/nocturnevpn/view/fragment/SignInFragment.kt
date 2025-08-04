@@ -186,6 +186,10 @@ class SignInFragment : Fragment() {
                 // Save user data to AuthManager and SharedPreferences
                 saveUserDataToLocalStorage(user)
                 
+                // Mark login as seen in AuthFlowManager
+                val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+                authFlowManager.markSuccessfulLogin()
+                
                 Toast.makeText(context, "Sign in successful!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(requireContext(), HomeActivity::class.java)
                 startActivity(intent)
@@ -367,6 +371,11 @@ class SignInFragment : Fragment() {
         socialAuthHelper.signInWithGoogleModern(googleSignInLauncher, object : SocialAuthHelper.AuthCallback {
             override fun onSuccess(userId: String, email: String, name: String) {
                 Log.d("SignInFragment", "Google sign-in successful for user: $email")
+                
+                // Mark login as seen in AuthFlowManager
+                val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+                authFlowManager.markSuccessfulLogin()
+                
                 Toast.makeText(context, "Google sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }
@@ -381,6 +390,10 @@ class SignInFragment : Fragment() {
     private fun signInWithFacebook() {
         socialAuthHelper.signInWithFacebook(object : SocialAuthHelper.AuthCallback {
             override fun onSuccess(userId: String, email: String, name: String) {
+                // Mark login as seen in AuthFlowManager
+                val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+                authFlowManager.markSuccessfulLogin()
+                
                 Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             }

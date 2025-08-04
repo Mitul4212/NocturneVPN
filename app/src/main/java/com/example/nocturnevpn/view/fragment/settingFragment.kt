@@ -168,7 +168,12 @@ class settingFragment : Fragment() {
             authManager.clearAuthState()
             Log.d("SettingFragment", "AuthManager state cleared")
             
-            // 4. Sign out from Google (if user signed in with Google)
+            // 4. Reset AuthFlowManager to show login page on next app launch
+            val authFlowManager = com.example.nocturnevpn.utils.AuthFlowManager.getInstance(requireContext())
+            authFlowManager.resetFirstTimeLogin()
+            Log.d("SettingFragment", "AuthFlowManager reset completed")
+            
+            // 5. Sign out from Google (if user signed in with Google)
             try {
                 val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(
                     requireActivity(),
@@ -180,11 +185,11 @@ class settingFragment : Fragment() {
                 Log.d("SettingFragment", "Google sign out failed (user might not have signed in with Google): ${e.message}")
             }
             
-            // 5. Show success message
+            // 6. Show success message
             Toast.makeText(context, "Signed out successfully", Toast.LENGTH_SHORT).show()
             Log.d("SettingFragment", "Sign out process completed successfully")
             
-            // 6. Navigate back to home/profile to show guest profile
+            // 7. Navigate back to home/profile to show guest profile
             findNavController().navigate(R.id.action_settingFragment3_to_profileFragment)
             
         } catch (e: Exception) {

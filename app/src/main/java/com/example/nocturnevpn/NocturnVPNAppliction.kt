@@ -6,9 +6,9 @@ import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.nocturnevpn.workers.ServerFetchWorker
-import com.example.nocturnevpn.utils.KeyHashGenerator
 import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.KeyHashGenerator
+import com.example.nocturnevpn.workers.ServerFetchWorker
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import java.util.concurrent.TimeUnit
@@ -31,7 +31,12 @@ class NocturnVPNAppliction : Application() {
         // Initialize Firebase Auth state
         try {
             val authManager = AuthManager.getInstance(this)
-            Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${authManager.getFirebaseAuth().currentUser != null}")
+            val firebaseAuth = authManager.getFirebaseAuth()
+            
+            // Firebase Auth persistence is enabled by default
+            // We'll handle session restoration in AuthManager with better logic
+            
+            Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${firebaseAuth.currentUser != null}")
         } catch (e: Exception) {
             Log.e("NocturnVPNAppliction", "Error initializing Firebase Auth: ${e.message}")
             e.printStackTrace()

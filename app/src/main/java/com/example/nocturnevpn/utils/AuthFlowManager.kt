@@ -78,19 +78,26 @@ class AuthFlowManager private constructor(context: Context) {
     
     /**
      * Determine if user should see login page or go directly to home
+     * Updated logic: Show login page only if user is not signed in AND it's first time
      */
-    fun shouldShowLoginPage(): Boolean {
-        val shouldShow = isFirstTimeLogin()
-        Log.d("AuthFlowManager", "Should show login page: $shouldShow (isFirstTime: ${isFirstTimeLogin()}, hasSeenLogin: ${hasSeenLogin()})")
+    fun shouldShowLoginPage(authManager: AuthManager): Boolean {
+        val isSignedIn = authManager.isUserSignedIn()
+        val isFirstTime = isFirstTimeLogin()
+        
+        // Show login page only if user is not signed in AND it's first time
+        val shouldShow = !isSignedIn && isFirstTime
+        
+        Log.d("AuthFlowManager", "Should show login page: $shouldShow (isSignedIn: $isSignedIn, isFirstTime: $isFirstTime, hasSeenLogin: ${hasSeenLogin()})")
         return shouldShow
     }
     
     /**
      * Get the appropriate destination based on auth state and first-time logic
+     * Updated logic: Prioritize authentication state over first-time logic
      */
     fun getDestinationClass(authManager: AuthManager): Class<*> {
         val isSignedIn = authManager.isUserSignedIn()
-        val shouldShowLogin = shouldShowLoginPage()
+        val shouldShowLogin = shouldShowLoginPage(authManager)
         
         Log.d("AuthFlowManager", "Getting destination - isSignedIn: $isSignedIn, shouldShowLogin: $shouldShowLogin")
         
@@ -101,13 +108,13 @@ class AuthFlowManager private constructor(context: Context) {
                 Class.forName("com.example.nocturnevpn.view.activitys.HomeActivity")
             }
             shouldShowLogin -> {
-                // First time user, show login page
-                Log.d("AuthFlowManager", "First time user, going to AppAuthActivity")
+                // First time user and not signed in, show login page
+                Log.d("AuthFlowManager", "First time user and not signed in, going to AppAuthActivity")
                 Class.forName("com.example.nocturnevpn.view.activitys.AppAuthActivity")
             }
             else -> {
                 // User has seen login before but not signed in, go to home
-                Log.d("AuthFlowManager", "User has seen login before, going to HomeActivity")
+                Log.d("AuthFlowManager", "User has seen login before but not signed in, going to HomeActivity")
                 Class.forName("com.example.nocturnevpn.view.activitys.HomeActivity")
             }
         }
@@ -120,7 +127,6 @@ class AuthFlowManager private constructor(context: Context) {
         Log.d("AuthFlowManager", "=== AUTH FLOW STATE ===")
         Log.d("AuthFlowManager", "isFirstTimeLogin: ${isFirstTimeLogin()}")
         Log.d("AuthFlowManager", "hasSeenLogin: ${hasSeenLogin()}")
-        Log.d("AuthFlowManager", "shouldShowLoginPage: ${shouldShowLoginPage()}")
         Log.d("AuthFlowManager", "=======================")
     }
 } 
