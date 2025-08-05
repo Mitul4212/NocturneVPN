@@ -69,19 +69,33 @@ class AdvanceSetttingFragment : Fragment() {
      * Initialize consent settings and display current status
      */
     private fun initializeConsentSettings() {
-        Log.d("AdvanceSettings", "🔧 === INITIALIZING CONSENT SETTINGS ===")
+        Log.d("AdvanceSettings", "🔧 Initializing consent settings")
         
         // Get current consent status
         val currentStatus = consentManager.getSavedConsentStatus()
-        Log.d("AdvanceSettings", "📊 Current consent status: $currentStatus")
         
-        // Update UI with current consent status
-        updateConsentStatusUI(currentStatus)
+        // Check if consent is required for this region
+        val consentRequired = consentManager.isConsentRequired()
         
-        // Set up click listener for consent button
-        binding.consentButton.setOnClickListener {
-            Log.d("AdvanceSettings", "👆 Consent button clicked")
-            showConsentManagementDialog()
+        if (consentRequired) {
+            Log.d("AdvanceSettings", "📋 Showing consent settings for consent-required region")
+            // Show consent UI for regions that require consent
+            binding.consentHeading.visibility = View.VISIBLE
+            binding.consentButton.visibility = View.VISIBLE
+            
+            // Update UI with current consent status
+            updateConsentStatusUI(currentStatus)
+            
+            // Set up click listener for consent button
+            binding.consentButton.setOnClickListener {
+                Log.d("AdvanceSettings", "👆 Consent button clicked")
+                showConsentManagementDialog()
+            }
+        } else {
+            Log.d("AdvanceSettings", "📋 Hiding consent settings for non-consent region")
+            // Hide consent UI for regions that don't require consent
+            binding.consentHeading.visibility = View.GONE
+            binding.consentButton.visibility = View.GONE
         }
     }
     
@@ -114,6 +128,14 @@ class AdvanceSetttingFragment : Fragment() {
      */
     private fun showConsentManagementDialog() {
         Log.d("AdvanceSettings", "📋 === SHOWING CONSENT MANAGEMENT DIALOG ===")
+        
+        // Double-check if consent is required for this region
+        if (!consentManager.isConsentRequired()) {
+            Log.d("AdvanceSettings", "📋 Consent not required for this region")
+            val message = consentManager.getConsentRequirementMessage()
+            showErrorMessage(message)
+            return
+        }
         
         try {
             consentManager.showPrivacyOptionsForm(requireActivity()) { newConsentStatus ->

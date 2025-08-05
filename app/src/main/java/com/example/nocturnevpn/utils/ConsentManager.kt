@@ -72,9 +72,6 @@ class ConsentManager private constructor(private val context: Context) {
 
     private val ccpaRegions = setOf("US")
     
-    // For testing purposes, let's also include India
-    private val testRegions = setOf("IN")
-
     // IP Location data
     private var userCountryCode: String? = null
     private var userIPLocation: String? = null
@@ -84,60 +81,74 @@ class ConsentManager private constructor(private val context: Context) {
      * Initialize consent management with real IP location detection
      */
     fun initializeConsent(activity: Activity, callback: (ConsentStatus) -> Unit) {
-        Log.d(TAG, "🚀 === CONSENT MANAGER INITIALIZATION STARTED ===")
-        Log.d(TAG, "📱 Activity: ${activity.javaClass.simpleName}")
+        Log.d(TAG, "🚀 Initializing consent management")
         
         // Add initial delay to allow app to load properly
         Handler(Looper.getMainLooper()).postDelayed({
-            Log.d(TAG, "⏰ Starting IP location detection after initial delay...")
+            Log.d(TAG, "⏰ Starting IP location detection")
             
             // First, try to get IP location for accurate region detection
             detectUserIPLocation { success ->
                 if (success) {
-                    Log.d(TAG, "✅ IP location detected successfully")
-                    Log.d(TAG, "🌍 User country from IP: $userCountryCode")
-                    Log.d(TAG, "📍 User location: $userIPLocation")
-                    Log.d(TAG, "🔍 Consent required: ${isConsentRequired()}")
-                    Log.d(TAG, "💾 Saved consent status: ${getSavedConsentStatus()}")
+                    Log.d(TAG, "✅ IP location detected: ${getCountryCode()}")
                     
                     // Check if consent is required for this region
                     if (isConsentRequired()) {
-                        Log.d(TAG, "📋 Consent is required for this region")
+                        Log.d(TAG, "📋 Consent required for region: ${getCountryCode()}")
                         
                         // Check if consent popup has been shown before
                         if (shouldShowConsentPopup()) {
-                            Log.d(TAG, "📱 Showing consent popup for first time")
+                            Log.d(TAG, "📱 Showing consent popup")
                             // Show real consent popup
                             showUMPConsentForm(activity) { consentStatus ->
-                                Log.d(TAG, "✅ Consent popup completed with status: $consentStatus")
+                                Log.d(TAG, "✅ Consent popup completed: $consentStatus")
                                 saveConsentStatus(consentStatus)
                                 markConsentPopupShown()
                                 callback(consentStatus)
                             }
                         } else {
-                            Log.d(TAG, "📱 Consent popup already shown, using saved status")
+                            Log.d(TAG, "📱 Using saved consent status")
                             val savedStatus = getSavedConsentStatus()
                             callback(savedStatus)
                         }
                     } else {
-                        Log.d(TAG, "📋 Consent not required for this region")
+                        Log.d(TAG, "📋 Consent not required for region: ${getCountryCode()}")
                         val status = ConsentStatus.NOT_REQUIRED
                         saveConsentStatus(status)
+                        // Don't show popup for non-consent regions
                         callback(status)
                     }
                 } else {
-                    Log.w(TAG, "⚠️ IP location detection failed, using fallback methods")
+                    Log.w(TAG, "⚠️ IP location detection failed, using fallback")
                     // Fallback to device locale detection
                     val fallbackCountry = getFallbackCountryCode()
                     Log.d(TAG, "🔄 Using fallback country: $fallbackCountry")
                     userCountryCode = fallbackCountry
                     
                     val consentRequired = isConsentRequired()
-                    Log.d(TAG, "🔍 Consent required (fallback): $consentRequired")
                     
-                    val status = if (consentRequired) ConsentStatus.NOT_REQUIRED else ConsentStatus.NOT_REQUIRED
-                    saveConsentStatus(status)
-                    callback(status)
+                    if (consentRequired) {
+                        Log.d(TAG, "📋 Consent required in fallback mode")
+                        if (shouldShowConsentPopup()) {
+                            Log.d(TAG, "📱 Showing consent popup in fallback mode")
+                            showUMPConsentForm(activity) { consentStatus ->
+                                Log.d(TAG, "✅ Consent popup completed: $consentStatus")
+                                saveConsentStatus(consentStatus)
+                                markConsentPopupShown()
+                                callback(consentStatus)
+                            }
+                        } else {
+                            Log.d(TAG, "📱 Using saved consent status in fallback mode")
+                            val savedStatus = getSavedConsentStatus()
+                            callback(savedStatus)
+                        }
+                    } else {
+                        Log.d(TAG, "📋 Consent not required in fallback mode")
+                        val status = ConsentStatus.NOT_REQUIRED
+                        saveConsentStatus(status)
+                        // Don't show popup for non-consent regions
+                        callback(status)
+                    }
                 }
                 
                 Log.d(TAG, "✅ Consent initialization completed")
@@ -259,7 +270,7 @@ class ConsentManager private constructor(private val context: Context) {
         try {
             val localeCountry = context.resources.configuration.locales[0].country
             Log.d(TAG, "📱 Device locale country: $localeCountry")
-            if (!localeCountry.isNullOrEmpty() && localeCountry != "US") {
+            if (!localeCountry.isNullOrEmpty()) {
                 Log.d(TAG, "✅ Using device locale country: $localeCountry")
                 return localeCountry
             }
@@ -271,7 +282,7 @@ class ConsentManager private constructor(private val context: Context) {
         try {
             val systemCountry = context.resources.configuration.locale.country
             Log.d(TAG, "🖥️ System locale country: $systemCountry")
-            if (!systemCountry.isNullOrEmpty() && systemCountry != "US") {
+            if (!systemCountry.isNullOrEmpty()) {
                 Log.d(TAG, "✅ Using system locale country: $systemCountry")
                 return systemCountry
             }
@@ -283,7 +294,7 @@ class ConsentManager private constructor(private val context: Context) {
         try {
             val defaultCountry = java.util.Locale.getDefault().country
             Log.d(TAG, "🌐 Default locale country: $defaultCountry")
-            if (!defaultCountry.isNullOrEmpty() && defaultCountry != "US") {
+            if (!defaultCountry.isNullOrEmpty()) {
                 Log.d(TAG, "✅ Using default locale country: $defaultCountry")
                 return defaultCountry
             }
@@ -291,37 +302,9 @@ class ConsentManager private constructor(private val context: Context) {
             Log.e(TAG, "❌ Error getting default locale country: ${e.message}")
         }
         
-        // Method 4: Check if we can detect India specifically
-        try {
-            val timeZone = java.util.TimeZone.getDefault()
-            val timeZoneId = timeZone.id
-            Log.d(TAG, "⏰ Timezone: $timeZoneId")
-            
-            // Check for Indian timezone
-            if (timeZoneId.contains("Asia/Kolkata") || timeZoneId.contains("IST")) {
-                Log.d(TAG, "🇮🇳 Detected Indian timezone, using IN")
-                return "IN"
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Error getting timezone: ${e.message}")
-        }
-        
-        // Method 5: Check language settings for Hindi/Gujarati
-        try {
-            val language = context.resources.configuration.locales[0].language
-            Log.d(TAG, "🗣️ Device language: $language")
-            
-            if (language == "hi" || language == "gu") {
-                Log.d(TAG, "🇮🇳 Detected Indian language ($language), using IN")
-                return "IN"
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Error getting language: ${e.message}")
-        }
-        
-        // Fallback: Since you mentioned you're in India, let's default to IN for testing
-        Log.d(TAG, "🔄 All fallback methods failed, defaulting to IN (India) for testing")
-        return "IN"
+        // Fallback: Use US as default if all methods fail
+        Log.d(TAG, "🔄 All fallback methods failed, defaulting to US")
+        return "US"
     }
 
     /**
@@ -394,16 +377,9 @@ class ConsentManager private constructor(private val context: Context) {
         val countryCode = getCountryCode()
         val isGdprRegion = gdprRegions.contains(countryCode)
         val isCcpaRegion = ccpaRegions.contains(countryCode)
-        val isTestRegion = testRegions.contains(countryCode)
-        val consentRequired = isGdprRegion || isCcpaRegion || isTestRegion
+        val consentRequired = isGdprRegion || isCcpaRegion
         
-        Log.d(TAG, "🌍 === REGION CHECK (IP-Based) ===")
-        Log.d(TAG, "🏳️ Country code: $countryCode")
-        Log.d(TAG, "📡 IP location detected: $isIPLocationDetected")
-        Log.d(TAG, "🇪🇺 GDPR region: $isGdprRegion")
-        Log.d(TAG, "🇺🇸 CCPA region: $isCcpaRegion")
-        Log.d(TAG, "🇮🇳 Test region (India): $isTestRegion")
-        Log.d(TAG, "📋 Consent required: $consentRequired")
+        Log.d(TAG, "🌍 Region check: $countryCode, GDPR: $isGdprRegion, CCPA: $isCcpaRegion, Required: $consentRequired")
         
         return consentRequired
     }
@@ -434,7 +410,6 @@ class ConsentManager private constructor(private val context: Context) {
             "ipLocationDetected" to isIPLocationDetected(),
             "isGdprRegion" to gdprRegions.contains(getCountryCode()),
             "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
-            "isTestRegion" to testRegions.contains(getCountryCode()),
             "appVersion" to getAppVersion(),
             "deviceInfo" to getDeviceInfo(),
             "consentSource" to "popup_dialog"
@@ -471,7 +446,6 @@ class ConsentManager private constructor(private val context: Context) {
             "ipLocation" to getUserIPLocation(),
             "isGdprRegion" to gdprRegions.contains(getCountryCode()),
             "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
-            "isTestRegion" to testRegions.contains(getCountryCode()),
             "appVersion" to getAppVersion(),
             "deviceInfo" to getDeviceInfo()
         )
@@ -706,99 +680,37 @@ class ConsentManager private constructor(private val context: Context) {
      * Debug method to show current consent state
      */
     fun debugConsentState() {
-        Log.d(TAG, "🔍 === CONSENT STATE DEBUG ===")
-        Log.d(TAG, "📊 Saved consent status: ${getSavedConsentStatus()}")
-        Log.d(TAG, "🌍 Country code: ${getCountryCode()}")
-        Log.d(TAG, "📡 IP location detected: $isIPLocationDetected")
-        Log.d(TAG, "📍 IP location: ${getUserIPLocation()}")
-        Log.d(TAG, "📋 Consent required: ${isConsentRequired()}")
-        Log.d(TAG, "⏰ Should refresh: ${shouldRefreshConsent()}")
-        Log.d(TAG, "👤 User ID: ${getCurrentUserId()}")
-        Log.d(TAG, "💾 Consent timestamp: ${prefs.getLong(KEY_CONSENT_TIMESTAMP, 0L)}")
-        Log.d(TAG, "🔄 Last check timestamp: ${prefs.getLong(KEY_LAST_CONSENT_CHECK, 0L)}")
-        Log.d(TAG, "========================")
-    }
-    
-    /**
-     * Test method to verify ConsentManager functionality
-     */
-    fun testConsentManager() {
-        Log.d(TAG, "🧪 === TESTING CONSENT MANAGER (IP-Based) ===")
-        
-        // Test 1: Check saved status
-        val savedStatus = getSavedConsentStatus()
-        Log.d(TAG, "✅ Test 1 - Saved status: $savedStatus")
-        
-        // Test 2: Check IP location detection
-        Log.d(TAG, "✅ Test 2 - IP location detected: $isIPLocationDetected")
-        Log.d(TAG, "✅ Test 2 - Country from IP: ${getCountryCode()}")
-        Log.d(TAG, "✅ Test 2 - IP location: ${getUserIPLocation()}")
-        
-        // Test 3: Check region detection
-        val consentRequired = isConsentRequired()
-        Log.d(TAG, "✅ Test 3 - Consent required: $consentRequired")
-        
-        // Test 4: Check user ID
-        val userId = getCurrentUserId()
-        Log.d(TAG, "✅ Test 4 - User ID: $userId")
-        
-        // Test 5: Check timestamps
-        val consentTimestamp = prefs.getLong(KEY_CONSENT_TIMESTAMP, 0L)
-        val lastCheckTimestamp = prefs.getLong(KEY_LAST_CONSENT_CHECK, 0L)
-        Log.d(TAG, "✅ Test 5 - Consent timestamp: $consentTimestamp, Last check: $lastCheckTimestamp")
-        
-        // Test 6: Check refresh requirement
-        val shouldRefresh = shouldRefreshConsent()
-        Log.d(TAG, "✅ Test 6 - Should refresh: $shouldRefresh")
-        
-        // Test 7: Check ad consent methods
-        Log.d(TAG, "✅ Test 7 - Can show personalized ads: ${canShowPersonalizedAds()}")
-        Log.d(TAG, "✅ Test 7 - Can show non-personalized ads: ${canShowNonPersonalizedAds()}")
-        Log.d(TAG, "✅ Test 7 - AppLovin consent status: ${getAppLovinConsentStatus()}")
-        
-        // Test 8: Check consent popup status
-        Log.d(TAG, "✅ Test 8 - Should show consent popup: ${shouldShowConsentPopup()}")
-        
-        Log.d(TAG, "🎯 === CONSENT MANAGER TEST COMPLETED ===")
-        
-        // Test 9: Trigger actual IP location detection (for testing)
-        Log.d(TAG, "🧪 === TRIGGERING ACTUAL IP LOCATION DETECTION ===")
-        forceRefreshIPLocation { success ->
-            Log.d(TAG, "🎯 IP Location Detection Result: $success")
-            if (success) {
-                Log.d(TAG, "✅ IP Location: ${getUserIPLocation()}")
-                Log.d(TAG, "✅ Country Code: ${getCountryCode()}")
-                Log.d(TAG, "✅ IP Detected: $isIPLocationDetected")
-            } else {
-                Log.d(TAG, "❌ IP Location detection failed, using fallback")
-            }
-        }
+        Log.d(TAG, "🔍 Consent state: ${getSavedConsentStatus()}, Country: ${getCountryCode()}, Required: ${isConsentRequired()}")
     }
     
     /**
      * Show real consent popup for regions requiring consent
      */
     private fun showUMPConsentForm(activity: Activity, callback: (ConsentStatus) -> Unit) {
-        Log.d(TAG, "📱 === SHOWING REAL CONSENT POPUP ===")
+        Log.d(TAG, "📱 Showing consent popup")
+        
+        // Double-check if consent is required for this region
+        if (!isConsentRequired()) {
+            Log.d(TAG, "📋 Consent not required, skipping popup")
+            callback(ConsentStatus.NOT_REQUIRED)
+            return
+        }
         
         // Show real consent popup dialog
         Handler(Looper.getMainLooper()).post {
             try {
                 // Check if activity is still valid
                 if (activity.isFinishing || activity.isDestroyed) {
-                    Log.w(TAG, "⚠️ Activity is finishing, skipping consent popup")
+                    Log.w(TAG, "⚠️ Activity not valid, skipping popup")
                     callback(ConsentStatus.NON_PERSONALIZED)
                     return@post
                 }
                 
-                Log.d(TAG, "📋 Showing consent popup dialog...")
-                
                 // Get current consent status for default selection
                 val currentStatus = getSavedConsentStatus()
-                Log.d(TAG, "📊 Current consent status for popup: $currentStatus")
                 
                 val consentDialog = ConsentPopupDialog(activity, currentStatus) { consentStatus ->
-                    Log.d(TAG, "📊 User selected consent: $consentStatus")
+                    Log.d(TAG, "✅ User selected consent: $consentStatus")
                     callback(consentStatus)
                 }
                 
@@ -818,18 +730,22 @@ class ConsentManager private constructor(private val context: Context) {
      * Show privacy options form (for settings)
      */
     fun showPrivacyOptionsForm(activity: Activity, callback: (ConsentStatus) -> Unit) {
-        Log.d(TAG, "⚙️ === SHOWING PRIVACY OPTIONS FORM ===")
+        Log.d(TAG, "⚙️ Showing privacy options")
+        
+        // Check if consent is required for this region
+        if (!isConsentRequired()) {
+            Log.d(TAG, "📋 Consent not required, cannot show privacy options")
+            callback(ConsentStatus.NOT_REQUIRED)
+            return
+        }
         
         // Show real privacy options dialog
         Handler(Looper.getMainLooper()).post {
             try {
-                Log.d(TAG, "📋 Showing privacy options dialog...")
-                
                 val currentStatus = getSavedConsentStatus()
-                Log.d(TAG, "📊 Current consent status: $currentStatus")
                 
                 val privacyDialog = ConsentPopupDialog(activity, currentStatus) { newConsentStatus ->
-                    Log.d(TAG, "📊 User changed consent: $currentStatus -> $newConsentStatus")
+                    Log.d(TAG, "✅ User changed consent: $currentStatus -> $newConsentStatus")
                     saveConsentStatus(newConsentStatus)
                     callback(newConsentStatus)
                 }
@@ -848,8 +764,12 @@ class ConsentManager private constructor(private val context: Context) {
      */
     fun shouldShowConsentPopup(): Boolean {
         val hasShown = prefs.getBoolean(KEY_CONSENT_POPUP_SHOWN, false)
-        Log.d(TAG, "📱 Consent popup shown before: $hasShown")
-        return !hasShown
+        val consentRequired = isConsentRequired()
+        val shouldShow = !hasShown && consentRequired
+        
+        Log.d(TAG, "📱 Consent popup: shown=$hasShown, required=$consentRequired, shouldShow=$shouldShow")
+        
+        return shouldShow
     }
     
     /**
@@ -892,5 +812,17 @@ class ConsentManager private constructor(private val context: Context) {
             Log.d(TAG, "⏰ Starting fresh IP location detection...")
             detectUserIPLocation(callback)
         }, 1000) // 1 second delay before fresh detection
+    }
+    
+    /**
+     * Get user-friendly message about consent requirements for current region
+     */
+    fun getConsentRequirementMessage(): String {
+        val countryCode = getCountryCode()
+        return when {
+            gdprRegions.contains(countryCode) -> "GDPR consent is required for your region (EU)"
+            ccpaRegions.contains(countryCode) -> "CCPA consent is required for your region (California, US)"
+            else -> "Consent is not required for your region"
+        }
     }
 } 

@@ -3,6 +3,7 @@ package com.example.nocturnevpn.view.dialogs
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.Button
@@ -39,6 +40,15 @@ class ConsentPopupDialog(
         window?.setBackgroundDrawableResource(android.R.color.transparent)
         setCancelable(false)
         setCanceledOnTouchOutside(false)
+        
+        // Check if consent is actually required for this region
+        val consentManager = ConsentManager.getInstance(context)
+        if (!consentManager.isConsentRequired()) {
+            Log.d("ConsentPopupDialog", "📋 Consent not required for this region, dismissing dialog")
+            onConsentResult(ConsentManager.ConsentStatus.NOT_REQUIRED)
+            dismiss()
+            return
+        }
         
         initializeViews()
         setupClickListeners()
