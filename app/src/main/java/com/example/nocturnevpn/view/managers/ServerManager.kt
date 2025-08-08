@@ -50,7 +50,6 @@ class ServerManager(
             // Update the UI elements with the server details
             binding?.serverFlagName?.text = server.getCountryLong()
             binding?.serverFlagDes?.text = server.getIpAddress()
-            binding?.connectionIp?.text = server.getIpAddress()
 
             // Show country flag using FlagKit
             val countryCode = server.getCountryShort()?.lowercase() ?: ""
@@ -75,7 +74,6 @@ class ServerManager(
             // Handle the case when the server is null
             binding?.serverFlagName?.text = context.getString(R.string.country_name)
             binding?.serverFlagDes?.text = context.getString(R.string.IP_address)
-            binding?.connectionIp?.text = context.getString(R.string.IP_address)
             binding?.countryFlag?.setImageResource(R.drawable.ic_server_flage_icon)
             binding?.selectedServerPing?.setImageResource(R.drawable.ic_signal_no_signal)
             isServerSelected = false

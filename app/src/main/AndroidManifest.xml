@@ -37,6 +37,22 @@
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
         
+        <!-- AdMob Configuration -->
+        <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+        
+        <!-- WebView Configuration for Ads -->
+        <meta-data
+            android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="false" />
+        
+        <!-- Additional WebView Configuration for Ads -->
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+        
         <!-- FileProvider for attachments -->
         <provider
             android:name="androidx.core.content.FileProvider"

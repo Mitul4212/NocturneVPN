@@ -116,4 +116,7 @@ dependencies {
     // Google UMP SDK for GDPR/CCPA compliance
     implementation("com.google.android.ump:user-messaging-platform:2.1.0")
 
+    // Google Ads SDK for banner ads
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
+
 }

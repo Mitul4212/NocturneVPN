@@ -11,6 +11,7 @@ import com.example.nocturnevpn.utils.KeyHashGenerator
 import com.example.nocturnevpn.workers.ServerFetchWorker
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
+import com.google.android.gms.ads.MobileAds
 import java.util.concurrent.TimeUnit
 
 class NocturnVPNAppliction : Application() {
@@ -43,6 +44,28 @@ class NocturnVPNAppliction : Application() {
         }
         
         setupPeriodicServerFetch()
+        
+        // Initialize Google MobileAds
+        try {
+            MobileAds.initialize(this) { initializationStatus ->
+                Log.d("NocturnVPNAppliction", "MobileAds initialization completed: ${initializationStatus.adapterStatusMap}")
+            }
+            Log.d("NocturnVPNAppliction", "MobileAds initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing MobileAds: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Configure WebView for ads compatibility
+        try {
+            // Enable WebView debugging for ads
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+            
+            Log.d("NocturnVPNAppliction", "WebView configured for ads compatibility")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error configuring WebView for ads: ${e.message}")
+            e.printStackTrace()
+        }
         
         // Generate key hashes for Facebook authentication (debug only)
         if (BuildConfig.DEBUG) {
