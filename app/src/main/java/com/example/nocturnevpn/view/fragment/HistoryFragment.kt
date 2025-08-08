@@ -14,6 +14,8 @@ import com.example.nocturnevpn.adapter.HistoryAdapter
 import com.example.nocturnevpn.databinding.FragmentHistoryBinding
 import com.example.nocturnevpn.db.HistoryHelper
 import com.example.nocturnevpn.model.History
+import com.example.nocturnevpn.view.managers.BannerAdManager
+import android.util.Log
 
 class HistoryFragment : Fragment() {
 
@@ -22,6 +24,7 @@ class HistoryFragment : Fragment() {
     
     private lateinit var historyAdapter: HistoryAdapter
     private lateinit var historyHelper: HistoryHelper
+    private lateinit var bannerAdManager: BannerAdManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,6 +32,7 @@ class HistoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+        bannerAdManager = BannerAdManager.getInstance(requireContext())
         return binding.root
     }
 
@@ -38,6 +42,7 @@ class HistoryFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         loadHistory()
+        initializeBannerAd()
     }
 
     private fun setupRecyclerView() {
@@ -105,13 +110,55 @@ class HistoryFragment : Fragment() {
         Toast.makeText(context, "History cleared", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    /**
+     * Initialize banner ad
+     */
+    private fun initializeBannerAd() {
+        try {
+            Log.d("HistoryFragment", "🚀 Initializing banner ad...")
+            bannerAdManager.initializeBannerAd(
+                binding.bannerAdView,
+                onAdLoaded = {
+                    Log.d("HistoryFragment", "✅ Banner ad loaded successfully")
+                },
+                onAdFailed = { error ->
+                    Log.e("HistoryFragment", "❌ Banner ad failed to load: $error")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("HistoryFragment", "❌ Error initializing banner ad: ${e.message}")
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        // Resume banner ad
+        try {
+            bannerAdManager.resumeBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("HistoryFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Pause banner ad
+        try {
+            bannerAdManager.pauseBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("HistoryFragment", "❌ Error pausing banner ad: ${e.message}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Destroy banner ad
+        try {
+            bannerAdManager.destroyBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("HistoryFragment", "❌ Error destroying banner ad: ${e.message}")
+        }
+        _binding = null
     }
 } 

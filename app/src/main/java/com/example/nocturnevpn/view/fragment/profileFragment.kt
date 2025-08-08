@@ -14,7 +14,6 @@ import com.example.nocturnevpn.R
 import com.example.nocturnevpn.adapter.SimpleHistoryAdapter
 import com.example.nocturnevpn.databinding.FragmentProfileBinding
 import com.example.nocturnevpn.db.HistoryHelper
-
 import com.example.nocturnevpn.view.activitys.AppAuthActivity
 import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.model.Server
@@ -22,6 +21,7 @@ import android.provider.Settings
 import com.example.nocturnevpn.utils.getUserFriendlyDeviceId
 import com.example.nocturnevpn.utils.AuthManager
 import com.example.nocturnevpn.utils.UserDataLoader
+import com.example.nocturnevpn.view.managers.BannerAdManager
 import android.util.Log
 
 
@@ -34,6 +34,7 @@ class ProfileFragment : Fragment() {
     private lateinit var historyHelper: HistoryHelper
     private var sharedPreference: SharedPreference? = null
     private lateinit var authManager: AuthManager
+    private lateinit var bannerAdManager: BannerAdManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +43,7 @@ class ProfileFragment : Fragment() {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         sharedPreference = SharedPreference(requireContext())
         authManager = AuthManager.getInstance(requireContext())
+        bannerAdManager = BannerAdManager.getInstance(requireContext())
         return binding.root
     }
 
@@ -53,7 +55,7 @@ class ProfileFragment : Fragment() {
         loadRecentHistory()
         setupFragmentResultListener()
         setupProfileVisibility()
-        
+        initializeBannerAd()
 
         updateSelectedServerIp()
         updateDeviceUniqueId()
@@ -62,7 +64,25 @@ class ProfileFragment : Fragment() {
         setupGuestProfileClickListeners()
     }
     
-
+    /**
+     * Initialize banner ad
+     */
+    private fun initializeBannerAd() {
+        try {
+            Log.d("ProfileFragment", "🚀 Initializing banner ad...")
+            bannerAdManager.initializeBannerAd(
+                binding.bannerAdView,
+                onAdLoaded = {
+                    Log.d("ProfileFragment", "✅ Banner ad loaded successfully")
+                },
+                onAdFailed = { error ->
+                    Log.e("ProfileFragment", "❌ Banner ad failed to load: $error")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "❌ Error initializing banner ad: ${e.message}")
+        }
+    }
 
     private fun loadUserName() {
         UserDataLoader.loadUserName(requireContext(), binding.userName, authManager, sharedPreference)
@@ -170,6 +190,34 @@ class ProfileFragment : Fragment() {
         setupProfileVisibility()
         loadUserName()
         loadUserEmail()
+        
+        // Resume banner ad
+        try {
+            bannerAdManager.resumeBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Pause banner ad
+        try {
+            bannerAdManager.pauseBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "❌ Error pausing banner ad: ${e.message}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Destroy banner ad
+        try {
+            bannerAdManager.destroyBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("ProfileFragment", "❌ Error destroying banner ad: ${e.message}")
+        }
+        _binding = null
     }
 
     private fun updateSelectedServerIp() {

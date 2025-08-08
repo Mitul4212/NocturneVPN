@@ -54,10 +54,10 @@
 **Goal**: Fix current issues and establish basic ad infrastructure
 
 #### Tasks:
-1. **Fix WebView Conflict**
+<!-- 1. **Fix WebView Conflict**
    - Move banner ad from bottom to top of HomeFragment
    - Implement proper WebView state checking
-   - Add ad loading delays to avoid conflicts
+   - Add ad loading delays to avoid conflicts -->
 
 2. **Create Ad Manager**
    - Implement centralized AdManager class

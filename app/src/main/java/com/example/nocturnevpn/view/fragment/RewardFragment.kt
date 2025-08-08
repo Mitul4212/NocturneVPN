@@ -30,6 +30,8 @@ import androidx.navigation.fragment.findNavController
 import android.os.Vibrator
 import android.os.VibrationEffect
 import com.example.nocturnevpn.utils.AnimatedBorderManager
+import com.example.nocturnevpn.view.managers.BannerAdManager
+import android.util.Log
 
 private val KEY_COIN_BALANCE = "coin_balance"
 private val KEY_COIN_HISTORY = "coin_history"
@@ -61,6 +63,8 @@ class RewardFragment : Fragment() {
     private val CHECKIN_PREFS = "checkin_prefs"
     private val KEY_CHECKED_DATES = "checked_dates"
     private val CHECKIN_REWARD = 5
+    
+    private lateinit var bannerAdManager: BannerAdManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +75,7 @@ class RewardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentRewardBinding.inflate(inflater, container, false)
+        bannerAdManager = BannerAdManager.getInstance(requireContext())
         return binding.root
     }
 
@@ -79,6 +84,55 @@ class RewardFragment : Fragment() {
         android.util.Log.e("DAILY_CHECKIN_DEBUG", "RewardFragment onResume called")
         setupStreakCheckIn()
         setupWatchAdSection()
+        initializeBannerAd()
+        
+        // Resume banner ad
+        try {
+            bannerAdManager.resumeBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("RewardFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
+    }
+
+    /**
+     * Initialize banner ad
+     */
+    private fun initializeBannerAd() {
+        try {
+            Log.d("RewardFragment", "🚀 Initializing banner ad...")
+            bannerAdManager.initializeBannerAd(
+                binding.bannerAdView,
+                onAdLoaded = {
+                    Log.d("RewardFragment", "✅ Banner ad loaded successfully")
+                },
+                onAdFailed = { error ->
+                    Log.e("RewardFragment", "❌ Banner ad failed to load: $error")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("RewardFragment", "❌ Error initializing banner ad: ${e.message}")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Pause banner ad
+        try {
+            bannerAdManager.pauseBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("RewardFragment", "❌ Error pausing banner ad: ${e.message}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Destroy banner ad
+        try {
+            bannerAdManager.destroyBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("RewardFragment", "❌ Error destroying banner ad: ${e.message}")
+        }
+        _binding = null
     }
 
     private fun saveCoinBalance(balance: Int) {

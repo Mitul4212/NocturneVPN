@@ -241,7 +241,12 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         connectionStatusManager.animateButtonClick()
         
         if (vpnManager.isVPNStarted()) {
-            confirmDisconnect()
+            // Show interstitial before disconnect flow
+            val adManager = com.example.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+            adManager.showInterstitialAd(requireActivity()) {
+                // Continue with disconnect confirm after ad closed or if not ready
+                confirmDisconnect()
+            }
             return
         }
 
@@ -303,7 +308,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         // --- PREMIUM CHECK LOGIC END ---
 
         // If we get here, either the server is not premium or the user is premium
-        vpnManager.prepareVPN()
+        // Show interstitial before starting VPN for every 3rd connect attempt only (basic frequency cap)
+        val adManager = com.example.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+        adManager.showInterstitialAd(requireActivity()) {
+            vpnManager.prepareVPN()
+        }
     }
 
     private fun setupProTimer() {
@@ -526,59 +535,36 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
      */
     private fun initializeConsentPopup() {
         Log.d("HomeFragment", "🏠 === INITIALIZING CONSENT POPUP IN HOME FRAGMENT ===")
-        
-        // Add a small delay to ensure fragment is fully loaded
-        Handler(Looper.getMainLooper()).postDelayed({
-            try {
-                // Check if activity is still valid
-                if (!isAdded || activity == null || activity?.isFinishing == true) {
-                    Log.w("HomeFragment", "⚠️ Activity not valid, skipping consent popup")
-                    return@postDelayed
-                }
-                
-                Log.d("HomeFragment", "📱 Activity valid, checking consent requirements...")
-                
-                // Initialize consent manager with HomeFragment activity
-                consentManager.initializeConsent(requireActivity()) { consentStatus ->
-                    Log.d("HomeFragment", "✅ Consent initialization completed with status: $consentStatus")
-                    
-                    // You can add additional logic here based on consent status
-                    when (consentStatus) {
-                        ConsentManager.ConsentStatus.PERSONALIZED -> {
-                            Log.d("HomeFragment", "🎯 User chose personalized ads")
-                            // Initialize banner ad with personalized ads with delay
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                initializeBannerAd()
-                            }, 2000) // 2 second delay to avoid WebView conflicts
-                        }
-                        ConsentManager.ConsentStatus.NON_PERSONALIZED -> {
-                            Log.d("HomeFragment", "🔒 User chose non-personalized ads")
-                            // Initialize banner ad with non-personalized ads with delay
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                initializeBannerAd()
-                            }, 2000) // 2 second delay to avoid WebView conflicts
-                        }
-                        ConsentManager.ConsentStatus.NOT_REQUIRED -> {
-                            Log.d("HomeFragment", "🌍 Consent not required for this region")
-                            // Initialize banner ad normally with delay to avoid WebView conflicts
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                initializeBannerAd()
-                            }, 2000) // 2 second delay to avoid WebView conflicts
-                        }
-                        ConsentManager.ConsentStatus.UNKNOWN -> {
-                            Log.d("HomeFragment", "❓ Consent status unknown")
-                            // Initialize banner ad anyway with delay
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                initializeBannerAd()
-                            }, 2000) // 2 second delay to avoid WebView conflicts
-                        }
+        try {
+            if (!isAdded || activity == null || activity?.isFinishing == true) {
+                Log.w("HomeFragment", "⚠️ Activity not valid, skipping consent popup")
+                return
+            }
+            Log.d("HomeFragment", "📱 Activity valid, checking consent requirements...")
+            consentManager.initializeConsent(requireActivity()) { consentStatus ->
+                Log.d("HomeFragment", "✅ Consent initialization completed with status: $consentStatus")
+                when (consentStatus) {
+                    ConsentManager.ConsentStatus.PERSONALIZED -> {
+                        Log.d("HomeFragment", "🎯 User chose personalized ads")
+                        initializeBannerAd()
+                    }
+                    ConsentManager.ConsentStatus.NON_PERSONALIZED -> {
+                        Log.d("HomeFragment", "🔒 User chose non-personalized ads")
+                        initializeBannerAd()
+                    }
+                    ConsentManager.ConsentStatus.NOT_REQUIRED -> {
+                        Log.d("HomeFragment", "🌍 Consent not required for this region")
+                        initializeBannerAd()
+                    }
+                    ConsentManager.ConsentStatus.UNKNOWN -> {
+                        Log.d("HomeFragment", "❓ Consent status unknown")
+                        initializeBannerAd()
                     }
                 }
-                
-            } catch (e: Exception) {
-                Log.e("HomeFragment", "❌ Error initializing consent popup: ${e.message}")
             }
-        }, 1000) // 1 second delay to ensure fragment is stable
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "❌ Error initializing consent popup: ${e.message}")
+        }
     }
 
     private fun initializeBannerAd() {
@@ -586,24 +572,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             val adView = binding?.bannerAdView
             if (adView != null) {
                 Log.d("HomeFragment", "Initializing banner ad...")
-                
-                // Check if WebView is ready and not busy
-                val globeWebView = binding?.globeWebView
-                if (globeWebView != null) {
-                    // Check if WebView is still loading by checking if it has content and progress
-                    if (globeWebView.url.isNullOrEmpty() || globeWebView.progress < 100) {
-                        Log.d("HomeFragment", "Globe WebView still loading (progress: ${globeWebView.progress}), delaying banner ad...")
-                        // Use a one-time delay instead of recursive call
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            initializeBannerAdOnce()
-                        }, 8000) // Wait 8 seconds and try once more
-                        return
-                    }
-                }
-                
-                // If WebView is ready, proceed with ad initialization
+                // Proceed with ad initialization immediately
                 initializeBannerAdOnce()
-                
             } else {
                 Log.w("HomeFragment", "⚠️ Banner ad view not found in layout")
             }
@@ -617,62 +587,36 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             val adView = binding?.bannerAdView
             if (adView != null) {
                 Log.d("HomeFragment", "Initializing banner ad (final attempt)...")
-                
-                // Configure WebView for ads if needed
                 try {
-                    // Set WebView debugging for ads
                     WebView.setWebContentsDebuggingEnabled(true)
                 } catch (e: Exception) {
                     Log.w("HomeFragment", "WebView debugging already enabled or failed: ${e.message}")
                 }
-                
-                // Add a delay to ensure WebView is not busy
-                Handler(Looper.getMainLooper()).postDelayed({
-                    try {
-                        // Create a new AdRequest
-                        val adRequest = AdRequest.Builder().build()
-                        adView.loadAd(adRequest)
-                        Log.d("HomeFragment", "Banner ad request sent successfully")
-                    } catch (e: Exception) {
-                        Log.e("HomeFragment", "❌ Error loading banner ad: ${e.message}")
-                        adView.visibility = View.GONE
-                    }
-                }, 2000) // 2 seconds delay to avoid WebView conflicts
-                
+                try {
+                    val adRequest = AdRequest.Builder().build()
+                    adView.loadAd(adRequest)
+                    Log.d("HomeFragment", "Banner ad request sent successfully")
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "❌ Error loading banner ad: ${e.message}")
+                    adView.visibility = View.GONE
+                }
                 adView.adListener = object : AdListener() {
                     override fun onAdLoaded() {
                         Log.d("HomeFragment", "✅ Banner ad loaded successfully")
-                        // Show the ad view if it was hidden
                         adView.visibility = View.VISIBLE
                     }
-
                     override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                         Log.e("HomeFragment", "❌ Banner ad failed to load: ${loadAdError.message}")
-                        // Hide the ad view if ad fails to load
                         adView.visibility = View.GONE
-                        
-                        // Check if it's a WebView-related error
                         if (loadAdError.message?.contains("JavascriptEngine") == true) {
                             Log.w("HomeFragment", "WebView conflict detected, will retry later...")
-                            // Try to reload after a much longer delay
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                reloadBannerAd()
-                            }, 180000) // Retry after 3 minutes
+                            Handler(Looper.getMainLooper()).postDelayed({ reloadBannerAd() }, 15000) // 15s short retry
                         } else {
-                            // Retry loading after a delay for other errors
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                reloadBannerAd()
-                            }, 60000) // Retry after 1 minute
+                            Handler(Looper.getMainLooper()).postDelayed({ reloadBannerAd() }, 8000) // 8s retry for other errors
                         }
                     }
-
-                    override fun onAdOpened() {
-                        Log.d("HomeFragment", "🔓 Banner ad opened")
-                    }
-
-                    override fun onAdClosed() {
-                        Log.d("HomeFragment", "🔒 Banner ad closed")
-                    }
+                    override fun onAdOpened() { Log.d("HomeFragment", "🔓 Banner ad opened") }
+                    override fun onAdClosed() { Log.d("HomeFragment", "🔒 Banner ad closed") }
                 }
             }
         } catch (e: Exception) {
@@ -685,19 +629,14 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             val adView = binding?.bannerAdView
             if (adView != null) {
                 Log.d("HomeFragment", "Reloading banner ad...")
-                
-                // Add a delay to avoid conflicts with WebView
-                Handler(Looper.getMainLooper()).postDelayed({
-                    try {
-                        // Create a fresh AdRequest
-                        val adRequest = AdRequest.Builder().build()
-                        adView.loadAd(adRequest)
-                        Log.d("HomeFragment", "Banner ad reload request sent successfully")
-                    } catch (e: Exception) {
-                        Log.e("HomeFragment", "❌ Error reloading banner ad: ${e.message}")
-                        adView.visibility = View.GONE
-                    }
-                }, 3000) // 3 seconds delay to avoid WebView conflicts
+                try {
+                    val adRequest = AdRequest.Builder().build()
+                    adView.loadAd(adRequest)
+                    Log.d("HomeFragment", "Banner ad reload request sent successfully")
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "❌ Error reloading banner ad: ${e.message}")
+                    adView.visibility = View.GONE
+                }
             }
         } catch (e: Exception) {
             Log.e("HomeFragment", "❌ Error reloading banner ad: ${e.message}")

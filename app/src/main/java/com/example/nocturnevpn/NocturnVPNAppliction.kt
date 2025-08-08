@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import com.example.nocturnevpn.utils.AuthManager
 import com.example.nocturnevpn.utils.KeyHashGenerator
 import com.example.nocturnevpn.workers.ServerFetchWorker
+import com.example.nocturnevpn.view.managers.AdManager
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.MobileAds
@@ -53,6 +54,16 @@ class NocturnVPNAppliction : Application() {
             Log.d("NocturnVPNAppliction", "MobileAds initialized successfully")
         } catch (e: Exception) {
             Log.e("NocturnVPNAppliction", "Error initializing MobileAds: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Initialize AdManager
+        try {
+            val adManager = AdManager.getInstance(this)
+            adManager.initialize()
+            Log.d("NocturnVPNAppliction", "AdManager initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing AdManager: ${e.message}")
             e.printStackTrace()
         }
         

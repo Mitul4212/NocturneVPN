@@ -22,6 +22,7 @@ import com.example.nocturnevpn.SharedPreference
 import com.example.nocturnevpn.databinding.FragmentSettingBinding
 import com.example.nocturnevpn.utils.AuthManager
 import com.example.nocturnevpn.utils.UserDataLoader
+import com.example.nocturnevpn.view.managers.BannerAdManager
 import android.util.Log
 import java.util.concurrent.TimeUnit
 
@@ -31,6 +32,7 @@ class settingFragment : Fragment() {
     private val binding get() = _binding!!
     private var sharedPreference: SharedPreference? = null
     private lateinit var authManager: AuthManager
+    private lateinit var bannerAdManager: BannerAdManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)// Non-null assertion operator to safely access binding
@@ -45,6 +47,7 @@ class settingFragment : Fragment() {
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
         sharedPreference = SharedPreference(requireContext())
         authManager = AuthManager.getInstance(requireContext())
+        bannerAdManager = BannerAdManager.getInstance(requireContext())
         return binding.root // Use binding.root, not binding.roots
     }
 
@@ -95,6 +98,9 @@ class settingFragment : Fragment() {
             showRatingDialog(prefs)
         }
 
+        // Initialize banner ad
+        initializeBannerAd()
+
         // Show rating dialog after first VPN connect/disconnect and then once per day if not rated
         val vpnPrompted = prefs.getBoolean("vpn_prompted", false)
         val lastPromptTime = prefs.getLong("last_rating_prompt", 0L)
@@ -118,6 +124,33 @@ class settingFragment : Fragment() {
         updateAccountName()
         // Show rating dialog if needed
         com.example.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
+        // Resume banner ad
+        try {
+            bannerAdManager.resumeBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("SettingsFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Pause banner ad
+        try {
+            bannerAdManager.pauseBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("SettingsFragment", "❌ Error pausing banner ad: ${e.message}")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Destroy banner ad
+        try {
+            bannerAdManager.destroyBannerAd(binding.bannerAdView)
+        } catch (e: Exception) {
+            Log.e("SettingsFragment", "❌ Error destroying banner ad: ${e.message}")
+        }
+        _binding = null
     }
 
     private fun updateAccountName() {
@@ -240,6 +273,25 @@ class settingFragment : Fragment() {
         dialog.show()
     }
 
+    /**
+     * Initialize banner ad
+     */
+    private fun initializeBannerAd() {
+        try {
+            Log.d("SettingsFragment", "🚀 Initializing banner ad...")
+            bannerAdManager.initializeBannerAd(
+                binding.bannerAdView,
+                onAdLoaded = {
+                    Log.d("SettingsFragment", "✅ Banner ad loaded successfully")
+                },
+                onAdFailed = { error ->
+                    Log.e("SettingsFragment", "❌ Banner ad failed to load: $error")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("SettingsFragment", "❌ Error initializing banner ad: ${e.message}")
+        }
+    }
 
 
     companion object {
