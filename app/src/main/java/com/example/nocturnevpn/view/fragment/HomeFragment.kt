@@ -85,6 +85,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             val selectedServer = result.data!!.getParcelableExtra<Server>("serverextra")
             if (selectedServer != null) {
                 serverManager.updateServer(selectedServer)
+                val adManager = com.example.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+                adManager.showInterstitialAd(requireActivity())
             }
         }
     }

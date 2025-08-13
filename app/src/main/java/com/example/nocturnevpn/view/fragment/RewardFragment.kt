@@ -267,59 +267,74 @@ class RewardFragment : Fragment() {
         dayBtns.forEachIndexed { idx, btn ->
             btn.setOnClickListener {
                 if (enableCheckin && idx == currentStreak) {
-                    val reward = if (idx == 6) {
-                        val rand = java.util.Random().nextInt(100)
-                        val value = if (rand < 80) {
-                            10 + java.util.Random().nextInt(21)
-                        } else {
-                            31 + java.util.Random().nextInt(20)
-                        }
-                        val animator = android.animation.ValueAnimator.ofInt(0, value)
-                        animator.duration = 1000
-                        animator.addUpdateListener { valueAnimator ->
-                            binding.checkinReward7.text = valueAnimator.animatedValue.toString()
-                        }
-                        animator.start()
-                        try {
-                            val vibrator = requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                vibrator.vibrate(android.os.VibrationEffect.createOneShot(100, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                    var wasRewarded = false
+                    val adManager = com.example.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+                    btn.isEnabled = false
+                    adManager.showRewardedAd(
+                        requireActivity(),
+                        onRewarded = {
+                            wasRewarded = true
+                            val reward = if (idx == 6) {
+                                val rand = java.util.Random().nextInt(100)
+                                val value = if (rand < 80) {
+                                    10 + java.util.Random().nextInt(21)
+                                } else {
+                                    31 + java.util.Random().nextInt(20)
+                                }
+                                val animator = android.animation.ValueAnimator.ofInt(0, value)
+                                animator.duration = 1000
+                                animator.addUpdateListener { valueAnimator ->
+                                    binding.checkinReward7.text = valueAnimator.animatedValue.toString()
+                                }
+                                animator.start()
+                                try {
+                                    val vibrator = requireContext().getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                        vibrator.vibrate(android.os.VibrationEffect.createOneShot(100, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                                    } else {
+                                        vibrator.vibrate(100)
+                                    }
+                                } catch (e: Exception) { /* ignore */ }
+                                value
                             } else {
-                                vibrator.vibrate(100)
+                                val rewardText = when(idx) {
+                                    0 -> binding.checkinReward1.text.toString()
+                                    1 -> binding.checkinReward2.text.toString()
+                                    2 -> binding.checkinReward3.text.toString()
+                                    3 -> binding.checkinReward4.text.toString()
+                                    4 -> binding.checkinReward5.text.toString()
+                                    5 -> binding.checkinReward6.text.toString()
+                                    else -> "5"
+                                }
+                                rewardText.toIntOrNull() ?: 5
                             }
-                        } catch (e: Exception) { /* ignore */ }
-                        value
-                    } else {
-                        val rewardText = when(idx) {
-                            0 -> binding.checkinReward1.text.toString()
-                            1 -> binding.checkinReward2.text.toString()
-                            2 -> binding.checkinReward3.text.toString()
-                            3 -> binding.checkinReward4.text.toString()
-                            4 -> binding.checkinReward5.text.toString()
-                            5 -> binding.checkinReward6.text.toString()
-                            else -> "5"
+                            val newStreak = currentStreak + 1
+                            val logicalTodayNow = getCheckinLogicalToday()
+                            prefs.edit().putInt(KEY_STREAK, newStreak).putString(KEY_LAST_DATE, logicalTodayNow).apply()
+                            updateStreakUI(newStreak, false)
+                            val coinPrefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                            val oldBalance = coinPrefs.getInt(KEY_COIN_BALANCE, 0)
+                            val newBalance = oldBalance + reward
+                            coinPrefs.edit().putInt(KEY_COIN_BALANCE, newBalance).apply()
+                            animateCoinBalance(oldBalance, newBalance)
+                            val todayDate = getTodayDate()
+                            historyList.add(0, CoinHistory(HistoryType.EARN, reward, todayDate, "Daily Check-in"))
+                            updateDisplayedHistory()
+                            saveCoinHistory()
+                            if (newStreak == 7) {
+                                Toast.makeText(requireContext(), "Week complete! You got $reward coins! Start again tomorrow!", Toast.LENGTH_LONG).show()
+                                prefs.edit().putInt(KEY_STREAK, 0).putString(KEY_LAST_DATE, "").apply()
+                            } else {
+                                Toast.makeText(requireContext(), "Check-in successful! +$reward coins", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onAdClosed = {
+                            if (!wasRewarded) {
+                                Toast.makeText(requireContext(), "Ad not completed. Check-in requires watching an ad.", Toast.LENGTH_SHORT).show()
+                                btn.isEnabled = true
+                            }
                         }
-                        rewardText.toIntOrNull() ?: 5
-                    }
-                    val newStreak = currentStreak + 1
-                    val logicalTodayNow = getCheckinLogicalToday()
-                    prefs.edit().putInt(KEY_STREAK, newStreak).putString(KEY_LAST_DATE, logicalTodayNow).apply()
-                    updateStreakUI(newStreak, false)
-                    val coinPrefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                    val oldBalance = coinPrefs.getInt(KEY_COIN_BALANCE, 0)
-                    val newBalance = oldBalance + reward
-                    coinPrefs.edit().putInt(KEY_COIN_BALANCE, newBalance).apply()
-                    animateCoinBalance(oldBalance, newBalance)
-                    val todayDate = getTodayDate()
-                    historyList.add(0, CoinHistory(HistoryType.EARN, reward, todayDate, "Daily Check-in"))
-                    updateDisplayedHistory()
-                    saveCoinHistory()
-                    if (newStreak == 7) {
-                        Toast.makeText(requireContext(), "Week complete! You got $reward coins! Start again tomorrow!", Toast.LENGTH_LONG).show()
-                        prefs.edit().putInt(KEY_STREAK, 0).putString(KEY_LAST_DATE, "").apply()
-                    } else {
-                        Toast.makeText(requireContext(), "Check-in successful! +$reward coins", Toast.LENGTH_SHORT).show()
-                    }
+                    )
                 }
             }
         }
@@ -468,34 +483,36 @@ class RewardFragment : Fragment() {
                 progressBar?.progress = 0
             }
             if (count >= maxAdsPerDay) return@setOnClickListener
+
             binding.watchAdButton.isEnabled = false
-            Toast.makeText(requireContext(), "Ad running...", Toast.LENGTH_LONG).show()
-            // Animate progress bar over 5 seconds
-            progressBar?.progress = count
-            val animator = ValueAnimator.ofInt(count, count + 1)
-            animator.duration = 5000
-            animator.addUpdateListener { valueAnimator ->
-                progressBar?.progress = valueAnimator.animatedValue as Int
-            }
-            animator.start()
-            handler.postDelayed({
-                // Add coins
-                val previousBalance = loadCoinBalance()
-                val newBalance = previousBalance + adReward
-                animateCoinBalance(previousBalance, newBalance)
-                saveCoinBalance(newBalance)
-                // Add to history
-                val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                historyList.add(0, CoinHistory(HistoryType.EARN, adReward, todayDate, "Watched Ad"))
-                updateDisplayedHistory()
-                saveCoinHistory()
-                // Update ad watch count
-                val newCount = count + 1
-                prefs.edit().putInt(KEY_AD_WATCH_COUNT, newCount).putString(KEY_AD_WATCH_DATE, now).apply()
-                binding.adWatchCount.text = newCount.toString()
-                progressBar?.progress = newCount
-                binding.watchAdButton.isEnabled = newCount < maxAdsPerDay
-            }, 5000)
+
+            val adManager = com.example.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+            adManager.showRewardedAd(
+                requireActivity(),
+                onRewarded = {
+                    val adReward = 250
+                    val previousBalance = loadCoinBalance()
+                    val newBalance = previousBalance + adReward
+                    animateCoinBalance(previousBalance, newBalance)
+                    saveCoinBalance(newBalance)
+
+                    val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    historyList.add(0, CoinHistory(HistoryType.EARN, adReward, todayDate, "Watched Ad"))
+                    updateDisplayedHistory()
+                    saveCoinHistory()
+
+                    val newCount = count + 1
+                    prefs.edit().putInt(KEY_AD_WATCH_COUNT, newCount).putString(KEY_AD_WATCH_DATE, now).apply()
+                    binding.adWatchCount.text = newCount.toString()
+                    progressBar?.progress = newCount
+                    binding.watchAdButton.isEnabled = newCount < maxAdsPerDay
+                },
+                onAdClosed = {
+                    if (!binding.watchAdButton.isEnabled) {
+                        binding.watchAdButton.isEnabled = true
+                    }
+                }
+            )
         }
     }
 

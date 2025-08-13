@@ -25,12 +25,17 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private static final int VIEW_TYPE_SHIMMER = 0;
     private static final int VIEW_TYPE_SERVER = 1;
+	private static final int VIEW_TYPE_AD = 2;
 
     private final List<Server> servers;
     private final ServerClickCallback clickCallback;
     private final String selectedIp;
 
     private boolean isLoading = false;
+
+	// Random inline banner positions and RNG
+	private final java.util.List<Integer> adPositions = new java.util.ArrayList<>();
+	private final java.util.Random random = new java.util.Random();
 
     public interface ServerClickCallback {
         void onServerClick(Server server);
@@ -40,6 +45,7 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.servers = servers;
         this.selectedIp = selectedIp;
         this.clickCallback = callback;
+		recomputeAdPositions();
     }
 
     public void setLoading(boolean loading) {
@@ -52,7 +58,7 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (isLoading) {
             return VIEW_TYPE_SHIMMER;
         } else {
-            return VIEW_TYPE_SERVER;
+			return adPositions.contains(position) ? VIEW_TYPE_AD : VIEW_TYPE_SERVER;
         }
     }
 
@@ -62,7 +68,7 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             // Show up to 3 shimmer placeholders during loading
             return Math.min(servers.size(), 3);
         } else {
-            return servers.size();
+            return servers.size() + adPositions.size();
         }
     }
 
@@ -73,6 +79,10 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_server_skeleton, parent, false);
             return new ShimmerViewHolder(view);
+        } else if (viewType == VIEW_TYPE_AD) {
+			View view = LayoutInflater.from(parent.getContext())
+					.inflate(R.layout.item_ad_banner, parent, false);
+			return new AdViewHolder(view);
         } else {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_server_child, parent, false);
@@ -85,8 +95,20 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (getItemViewType(position) == VIEW_TYPE_SHIMMER) {
             ShimmerViewHolder shimmerHolder = (ShimmerViewHolder) holder;
             shimmerHolder.shimmerLayout.startShimmer();
+        } else if (getItemViewType(position) == VIEW_TYPE_AD) {
+			AdViewHolder adHolder = (AdViewHolder) holder;
+			com.google.android.gms.ads.AdView adView = adHolder.adView;
+			if (!adHolder.initialized) {
+				// Set ad size if not already set (ad unit id is provided via XML layout)
+				if (adView.getAdSize() == null) {
+					adView.setAdSize(com.google.android.gms.ads.AdSize.BANNER);
+				}
+				com.example.nocturnevpn.view.managers.BannerAdManager.Companion.getInstance(adView.getContext()).initializeBannerAd(adView, null, null);
+				adHolder.initialized = true;
+			}
         } else {
-            Server server = servers.get(position);
+            int serverIndex = getServerIndexForAdapterPosition(position);
+            Server server = servers.get(serverIndex);
             // Debug: Log all server pings
             Log.d("ServerPingDebug", "Server: " + server.getHostName() + " | IP: " + server.getIpAddress() + " | Ping: " + server.getPing());
             ServerViewHolder serverHolder = (ServerViewHolder) holder;
@@ -141,6 +163,31 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+	private int getServerIndexForAdapterPosition(int adapterPosition) {
+		int adsBefore = 0;
+		for (int i = 0; i < adPositions.size(); i++) {
+			int adPos = adPositions.get(i);
+			if (adPos < adapterPosition) {
+				adsBefore++;
+			} else {
+				break;
+			}
+		}
+		return adapterPosition - adsBefore;
+	}
+
+	private void recomputeAdPositions() {
+		adPositions.clear();
+		if (servers == null) return;
+		int size = servers.size();
+		if (size < 8) return; // avoid too many ads in small lists
+		int startOffset = 3 + random.nextInt(3); // 3..5
+		int interval = 6 + random.nextInt(3); // 6..8
+		for (int pos = startOffset; pos < size; pos += interval) {
+			adPositions.add(pos + adPositions.size()); // account for previously inserted ads shifting positions
+		}
+	}
+
     private int parsePing(String ping) {
         if (ping == null) return -1;
         try {
@@ -180,6 +227,16 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             shimmerLayout = itemView.findViewById(R.id.shimmer_container);
         }
     }
+
+	static class AdViewHolder extends RecyclerView.ViewHolder {
+		final com.google.android.gms.ads.AdView adView;
+		boolean initialized = false;
+
+		AdViewHolder(@NonNull View itemView) {
+			super(itemView);
+			adView = itemView.findViewById(R.id.inline_ad_view);
+		}
+	}
 }
 
 
