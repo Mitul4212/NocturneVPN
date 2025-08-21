@@ -78,7 +78,6 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="101dp"
                     android:layout_marginEnd="24dp"
-                    android:layout_marginBottom="10dp"
                     android:checked="false"
                     android:gravity="center|left"
                     android:text="@string/dark_mode"
@@ -86,7 +85,6 @@
                     android:textSize="18sp"
                     android:thumbTint="@color/switch_thumb_color"
                     android:trackTint="@color/track_color"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -97,7 +95,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:layout_marginStart="24dp"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="20dp"
                     android:gravity="center"
                     android:text="Privacy &amp; Consent"
                     android:textColor="@color/gray"
@@ -105,19 +103,21 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/darkmode" />
+                    app:layout_constraintTop_toBottomOf="@+id/protocol_group" />
 
                 <LinearLayout
                     android:id="@+id/consent_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:padding="15dp"
+                    android:layout_marginBottom="100dp"
                     android:background="@drawable/ripple"
                     android:clickable="true"
                     android:focusable="true"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/consent_heading">
@@ -133,9 +133,9 @@
                         android:id="@+id/consent_status_text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_gravity="center"
                         android:layout_marginStart="24dp"
+                        android:layout_weight="1"
                         android:text="Manage Consent Settings"
                         android:textColor="@color/black"
                         android:textSize="18sp" />
@@ -155,12 +155,78 @@
                         android:id="@+id/consent_arrow"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_arrow"
-                        android:rotation="180"
                         android:layout_gravity="center"
-                        android:contentDescription="arrow" />
+                        android:contentDescription="arrow"
+                        android:rotation="180"
+                        android:src="@drawable/ic_arrow" />
 
                 </LinearLayout>
+
+                <!-- Protocol selection -->
+                <TextView
+                    android:id="@+id/protocol_heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="24dp"
+                    android:text="Server Protocol"
+                    android:textColor="@color/black"
+                    android:textSize="17sp"
+                    android:gravity="center"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/darkmode" />
+
+                <RadioGroup
+                    android:id="@+id/protocol_group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/protocol_heading">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_protocol_all"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        android:textDirection="ltr"
+                        android:gravity="start"
+                        android:singleLine="false"
+                        android:ellipsize="none"
+                        android:text="All\nAll Protocols: Shows TCP and UDP servers. Best compatibility." />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_protocol_tcp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        android:textDirection="ltr"
+                        android:gravity="start"
+                        android:singleLine="false"
+                        android:ellipsize="none"
+                        android:text="TCP\nMore reliable and stable, may be slightly slower." />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_protocol_udp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layoutDirection="rtl"
+                        android:textDirection="ltr"
+                        android:gravity="start"
+                        android:singleLine="false"
+                        android:ellipsize="none"
+                        android:text="UDP\nOften faster and lower latency, but can be blocked by some networks." />
+
+                </RadioGroup>
+
+                <!-- protocol_info_container removed as requested -->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

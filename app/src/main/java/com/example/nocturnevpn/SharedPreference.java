@@ -30,6 +30,7 @@ public class SharedPreference {
     private static final String SERVER_LIST_JSON = "server_list_json";
     private static final String USER_SIGNED_IN = "user_signed_in";
     private static final String USER_NAME = "user_name";
+    private static final String PROTOCOL_FILTER = "protocol_filter"; // Values: ALL, TCP, UDP
     private static final Gson gson = new Gson();
 
     public SharedPreference(Context context) {
@@ -175,6 +176,31 @@ public class SharedPreference {
         
         mPrefEditor.commit();
         Log.d("SharedPref", "User data cleared");
+    }
+
+    /**
+     * Save protocol filter preference for server list ("ALL", "TCP", "UDP")
+     */
+    public void setProtocolFilter(String filter) {
+        if (filter == null || filter.isEmpty()) filter = "ALL";
+        mPrefEditor.putString(PROTOCOL_FILTER, filter.toUpperCase());
+        mPrefEditor.commit();
+        Log.d("SharedPref", "Protocol filter saved: " + filter.toUpperCase());
+    }
+
+    /**
+     * Get protocol filter preference for server list
+     * @return One of: "ALL" (default), "TCP", "UDP"
+     */
+    public String getProtocolFilter() {
+        String value = mPreference.getString(PROTOCOL_FILTER, "ALL");
+        if (value == null || value.isEmpty()) {
+            Log.d("SharedPref", "Protocol filter read: default=ALL");
+            return "ALL";
+        }
+        String normalized = value.toUpperCase();
+        Log.d("SharedPref", "Protocol filter read: " + normalized);
+        return normalized;
     }
 
 }

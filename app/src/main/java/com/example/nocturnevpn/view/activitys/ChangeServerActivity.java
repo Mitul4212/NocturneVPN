@@ -189,15 +189,25 @@ public class ChangeServerActivity extends AppCompatActivity {
 
     private void filterServers(String query) {
         String lowerQuery = query.toLowerCase().trim();
+        // Read protocol filter from preferences (ALL, TCP, UDP)
+        String protocolFilter = sharedPreference.getProtocolFilter();
+        Log.d("ServerPageDebug", "[Filter] Query='" + lowerQuery + "' ProtocolFilter=" + protocolFilter);
         List<CountryServerGroup> filteredGroups = new ArrayList<>();
 
         for (CountryServerGroup group : fullGroupList) {
             List<Server> filteredServers = new ArrayList<>();
             for (Server server : group.getServers()) {
-                if (server.getCountryLong().toLowerCase().contains(query.toLowerCase()) ||
-                        server.getIpAddress().toLowerCase().contains(query.toLowerCase()) ||
-                        server.getProtocol().toLowerCase().contains(query.toLowerCase()) ||
-                        server.getHostName().toLowerCase().contains(query.toLowerCase())) {
+                boolean protocolMatches =
+                        "ALL".equalsIgnoreCase(protocolFilter) ||
+                        ("TCP".equalsIgnoreCase(protocolFilter) && "tcp".equalsIgnoreCase(server.getProtocol())) ||
+                        ("UDP".equalsIgnoreCase(protocolFilter) && "udp".equalsIgnoreCase(server.getProtocol()));
+
+                boolean textMatches = server.getCountryLong().toLowerCase().contains(lowerQuery) ||
+                        server.getIpAddress().toLowerCase().contains(lowerQuery) ||
+                        server.getProtocol().toLowerCase().contains(lowerQuery) ||
+                        server.getHostName().toLowerCase().contains(lowerQuery);
+
+                if (protocolMatches && textMatches) {
                     filteredServers.add(server);
                 }
             }
@@ -209,6 +219,7 @@ public class ChangeServerActivity extends AppCompatActivity {
         groupedServers.clear();
         groupedServers.addAll(filteredGroups);
         adapter.updateList(filteredGroups);  // Adapter should reflect changes here
+        Log.d("ServerPageDebug", "[Filter] Result groups=" + filteredGroups.size());
 //        adapter.updateList(filteredGroups);
     }
 
@@ -357,7 +368,20 @@ public class ChangeServerActivity extends AppCompatActivity {
 
 
     private void loadServerList(List<Server> serverList) {
-        List<CountryServerGroup> grouped = groupServersByCountry(serverList);
+        // Apply protocol filter before grouping
+        String protocolFilter = sharedPreference.getProtocolFilter();
+        Log.d("ServerPageDebug", "[Load] Applying protocol filter: " + protocolFilter + " to " + serverList.size() + " servers");
+        List<Server> protocolFiltered = new ArrayList<>();
+        for (Server s : serverList) {
+            if ("ALL".equalsIgnoreCase(protocolFilter) ||
+                ("TCP".equalsIgnoreCase(protocolFilter) && "tcp".equalsIgnoreCase(s.getProtocol())) ||
+                ("UDP".equalsIgnoreCase(protocolFilter) && "udp".equalsIgnoreCase(s.getProtocol()))) {
+                protocolFiltered.add(s);
+            }
+        }
+        Log.d("ServerPageDebug", "[Load] After protocol filter -> " + protocolFiltered.size() + " servers");
+
+        List<CountryServerGroup> grouped = groupServersByCountry(protocolFiltered);
 
         // Always keep a fresh copy of full list
         fullGroupList.clear();

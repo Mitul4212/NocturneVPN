@@ -9,6 +9,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.nocturnevpn.databinding.FragmentAdvanceSetttingBinding
 import com.example.nocturnevpn.utils.ConsentManager
+import com.example.nocturnevpn.SharedPreference
+import androidx.core.text.HtmlCompat
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.graphics.Color
 
 class AdvanceSetttingFragment : Fragment() {
 
@@ -36,9 +43,17 @@ class AdvanceSetttingFragment : Fragment() {
 
         // Initialize Consent Manager
         consentManager = ConsentManager.getInstance(requireContext())
+        // Initialize SharedPreference for protocol setting
+        val sharedPref = SharedPreference(requireContext())
         
         // Initialize consent settings
         initializeConsentSettings()
+
+        // Initialize protocol selection UI
+        initializeProtocolSelector(sharedPref)
+
+        // Apply multi-line styled texts for protocol options
+        applyProtocolRichText()
 
         // Handle back button click to navigate back
         binding.backArrow.setOnClickListener {
@@ -180,6 +195,64 @@ class AdvanceSetttingFragment : Fragment() {
         Log.e("AdvanceSettings", "❌ Error: $message")
         // You can implement a toast or snackbar here
         // Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun initializeProtocolSelector(sharedPref: SharedPreference) {
+        val current = sharedPref.protocolFilter
+        Log.d("AdvanceSettings", "🔧 Initializing protocol selector with: $current")
+        when (current) {
+            "TCP" -> binding.radioProtocolTcp.isChecked = true
+            "UDP" -> binding.radioProtocolUdp.isChecked = true
+            else -> binding.radioProtocolAll.isChecked = true
+        }
+
+        val onChecked: (String) -> Unit = { value ->
+            sharedPref.protocolFilter = value
+            Log.d("AdvanceSettings", "✅ Protocol filter changed -> $value")
+        }
+
+        binding.radioProtocolAll.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) onChecked("ALL")
+        }
+        binding.radioProtocolTcp.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) onChecked("TCP")
+        }
+        binding.radioProtocolUdp.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) onChecked("UDP")
+        }
+    }
+
+    private fun applyProtocolRichText() {
+        val grayHex = "#B5AEBE"
+        val grayColor = Color.parseColor(grayHex)
+        val descScale = 0.85f
+
+        fun setRichText(title: String, desc: String, target: android.widget.TextView) {
+            val sb = SpannableStringBuilder()
+            sb.append(title)
+            sb.append("\n")
+            val start = sb.length
+            sb.append(desc)
+            sb.setSpan(ForegroundColorSpan(grayColor), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            sb.setSpan(RelativeSizeSpan(descScale), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            target.text = sb
+        }
+
+        setRichText(
+            title = "All",
+            desc = "All Protocols: Shows TCP and UDP servers. Best compatibility.",
+            target = binding.radioProtocolAll
+        )
+        setRichText(
+            title = "TCP",
+            desc = "More reliable and stable, may be slightly slower.",
+            target = binding.radioProtocolTcp
+        )
+        setRichText(
+            title = "UDP",
+            desc = "Often faster and lower latency, but can be blocked by some networks.",
+            target = binding.radioProtocolUdp
+        )
     }
 
     override fun onDestroyView() {
