@@ -409,6 +409,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }, 4000) // 4 seconds as backup
     }
 
+    /**
+     * Get the GlobeManager instance for theme switching
+     */
+    fun getGlobeManager(): GlobeManager? {
+        return globeManager
+    }
+
     private fun checkVPNStatus() {
         vpnManager.checkServiceStatus()
     }

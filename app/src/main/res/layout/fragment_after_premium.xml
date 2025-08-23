@@ -55,7 +55,7 @@
             android:textSize="20sp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
-            android:textColor="#222222" />
+            android:textColor="@color/text_dark_primary" />
 
         <TextView
             android:id="@+id/tvPremiumThanks"
@@ -67,7 +67,7 @@
             android:textSize="14sp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
-            android:textColor="#888888"
+            android:textColor="@color/text_secondary_gray"
             android:gravity="center"
             android:textAlignment="center"
             android:maxLines="3"
@@ -95,7 +95,7 @@
                     android:text="Subscription Details"
                     android:textStyle="bold"
                     android:textSize="15sp"
-                    android:textColor="#222222" />
+                    android:textColor="@color/text_dark_primary" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -108,14 +108,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Current Plan"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_secondary_gray"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvCurrentPlan"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Yearly Subscription"
-                        android:textColor="#222222"
+                        android:textColor="@color/text_dark_primary"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -130,14 +130,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Renews on"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_secondary_gray"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvRenewsOn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="July 21, 2026"
-                        android:textColor="#222222"
+                        android:textColor="@color/text_dark_primary"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -152,14 +152,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Status"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_secondary_gray"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Active"
-                        android:textColor="#1BC47D"
+                        android:textColor="@color/success_green_premium"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -175,7 +175,7 @@
             android:textSize="15sp"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
-            android:textColor="#222222" />
+            android:textColor="@color/text_dark_primary" />
 
         <!-- Premium Features Grid (copied from fragment_premium.xml) -->
         <androidx.gridlayout.widget.GridLayout

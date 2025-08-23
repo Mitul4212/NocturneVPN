@@ -1,14 +1,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#FFC107" /> <!-- Fully opaque gold -->
+            <solid android:color="@color/gold" /> <!-- Fully opaque gold -->
             <corners android:radius="12dp" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="12dp" />
-            <stroke android:width="2dp" android:color="#FFFFFFFF" /> <!-- White border -->
+            <stroke android:width="2dp" android:color="@color/border_white" /> <!-- White border -->
         </shape>
     </item>
 </layer-list> 

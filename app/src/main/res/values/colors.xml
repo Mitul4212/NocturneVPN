@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFF</color>
     <color name="strong_violet">#6622CC</color>
@@ -9,90 +10,7 @@
     <color name="black_overlay">#000000</color>
     <color name="btn_background">#F7F7F7</color>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <!-- Premium & Feature Colors -->
     <color name="discoint">#FFFFFF</color>
     <color name="tryButton">#FFFFFF</color>
     <color name="custom_white">#F7F7F7</color>
@@ -101,8 +19,7 @@
     <color name="yellow">#FFC801</color>
     <color name="gold">#FFC107</color>
 
-
-
+    <!-- Brand & UI Colors -->
     <color name="pointer_color">#6622CC</color>
     <color name="switch_checked">#6723CC</color>
     <color name="switch_defulte">#C8C9C9</color>
@@ -111,5 +28,50 @@
     <color name="light_strong_violet">#ECE0FF</color>
     <color name="green">#4CAF50</color>
     <color name="red">#F44336</color>
+
+    <!-- Text Colors (from hardcoded) -->
+    <color name="text_dark_primary">#222222</color>
+    <color name="text_secondary_gray">#888888</color>
+    <color name="text_muted">#B2AFB6</color>
+    <color name="text_quick_fix">#727272</color>
+    <color name="text_white_on_colored">#FFFFFF</color>
+
+    <!-- Divider & Border Colors -->
+    <color name="divider_signup">#6D6C69</color>
+    <color name="divider_profile">#E0E0E0</color>
+
+    <!-- Success & Status Colors -->
+    <color name="success_green_premium">#1BC47D</color>
+    <color name="success_green_button">#1ED760</color>
+
+    <!-- Accent & Special Colors -->
+    <color name="accent_pink_purple">#E05EFF</color>
+    <color name="background_dark_blue">#2E3650</color>
+    <color name="button_purple">#9E63FB</color>
+    <color name="coin_icon_gold">#FFBF00</color>
+
+    <!-- Overlay & Transparency Colors -->
+    <color name="overlay_semi_transparent">#80C4C3C3</color>
+    <color name="background_semi_transparent">#33FDFCFD</color>
+    <color name="background_transparent">#00FFFFFF</color>
+
+    <!-- Gradient Colors (with alpha) -->
+    <color name="gradient_start_alpha">#FF6622CC</color>
+    <color name="gradient_end_alpha">#FF22CCC2</color>
+
+    <!-- Border & Stroke Colors -->
+    <color name="border_white">#FFFFFFFF</color>
+    <color name="background_transparent_black">#00000000</color>
+
+
+
+
+    <color name="history_sam_item_bg">#F8F9FA</color>
+    <color name="history_sam_item_strok">#E9ECEF</color>
+
+
+    <!-- boxs colors -->
+    <color name="box_bg">#FFFFFF</color>
+
 
 </resources>

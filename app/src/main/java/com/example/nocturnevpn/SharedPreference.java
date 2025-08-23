@@ -31,6 +31,7 @@ public class SharedPreference {
     private static final String USER_SIGNED_IN = "user_signed_in";
     private static final String USER_NAME = "user_name";
     private static final String PROTOCOL_FILTER = "protocol_filter"; // Values: ALL, TCP, UDP
+    private static final String DARK_MODE_ENABLED = "dark_mode_enabled"; // Dark mode preference
     private static final Gson gson = new Gson();
 
     public SharedPreference(Context context) {
@@ -202,5 +203,29 @@ public class SharedPreference {
         Log.d("SharedPref", "Protocol filter read: " + normalized);
         return normalized;
     }
+
+
+
+    /**
+     * Save dark mode preference
+     * @param enabled true to enable dark mode, false to disable
+     */
+    public void setDarkModeEnabled(boolean enabled) {
+        mPrefEditor.putBoolean(DARK_MODE_ENABLED, enabled);
+        mPrefEditor.commit();
+        Log.d("SharedPref", "Dark mode preference saved: " + enabled);
+    }
+
+    /**
+     * Get dark mode preference
+     * @return true if dark mode is enabled, false otherwise
+     */
+    public boolean isDarkModeEnabled() {
+        boolean enabled = mPreference.getBoolean(DARK_MODE_ENABLED, false);
+        Log.d("SharedPref", "Dark mode preference read: " + enabled);
+        return enabled;
+    }
+
+
 
 }

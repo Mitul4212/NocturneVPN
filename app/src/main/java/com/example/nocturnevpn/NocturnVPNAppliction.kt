@@ -8,6 +8,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.nocturnevpn.utils.AuthManager
 import com.example.nocturnevpn.utils.KeyHashGenerator
+import com.example.nocturnevpn.utils.ThemeManager
 import com.example.nocturnevpn.workers.ServerFetchWorker
 import com.example.nocturnevpn.view.managers.AdManager
 import com.facebook.FacebookSdk
@@ -83,6 +84,15 @@ class NocturnVPNAppliction : Application() {
             KeyHashGenerator.generateKeyHash(this)
             KeyHashGenerator.generateSHA1Hash(this)
             KeyHashGenerator.generateSHA256Hash(this)
+        }
+        
+        // Apply saved theme preference
+        try {
+            ThemeManager.applyTheme(this)
+            Log.d("NocturnVPNAppliction", "Theme applied successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error applying theme: ${e.message}")
+            e.printStackTrace()
         }
     }
 

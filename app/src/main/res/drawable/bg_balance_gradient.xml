@@ -2,8 +2,8 @@
     <gradient
         android:type="linear"
         android:angle="0"
-        android:startColor="#6622CC"
-        android:centerColor="#22CCC2"
-        android:endColor="#4478C7"
+        android:startColor="@color/strong_violet"
+        android:centerColor="@color/up_arrow"
+        android:endColor="@color/try_premium"
         android:useLevel="false" />
 </shape> 

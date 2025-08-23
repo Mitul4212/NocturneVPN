@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#80C4C3C3"/> <!-- Light gray or any highlighted color -->
+    <solid android:color="@color/overlay_semi_transparent"/> <!-- Light gray or any highlighted color -->
     <corners android:radius="18dp"/>
 </shape>

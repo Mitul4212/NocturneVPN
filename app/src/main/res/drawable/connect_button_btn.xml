@@ -4,7 +4,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="100dp" />
-            <solid android:color="#00FFFFFF" />  <!-- Button Color -->
+            <solid android:color="@color/background_transparent" />  <!-- Button Color -->
         </shape>
     </item>
 </ripple>

@@ -5,7 +5,7 @@
     android:viewportHeight="48">
     <!-- Outer circle (coin edge) -->
     <path
-        android:fillColor="#FFBF00"
+        android:fillColor="@color/coin_icon_gold"
         android:pathData="M24,4a20,20 0 1,0 0,40a20,20 0 1,0 0,-40z"/>
     <!-- Inner circle (shine) -->
     <path
@@ -13,8 +13,8 @@
         android:pathData="M24,10a14,14 0 1,0 0,28a14,14 0 1,0 0,-28z"/>
     <!-- Star in the center -->
     <path
-        android:fillColor="#FFBF00"
-        android:strokeColor="#FFC107"
+        android:fillColor="@color/coin_icon_gold"
+        android:strokeColor="@color/gold"
         android:strokeWidth="1.5"
         android:pathData="M24,15 L26.472,21.236 L33.195,21.944 L27.598,26.236 L29.145,32.944 L24,29.236 L18.855,32.944 L20.402,26.236 L14.805,21.944 L21.528,21.236 Z"
         android:strokeLineJoin="round"/>

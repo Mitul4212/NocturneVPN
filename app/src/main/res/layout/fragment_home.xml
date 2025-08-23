@@ -217,7 +217,7 @@
 
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/choose_server"
+            android:id="@+id/chooseServer"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/btn_background"

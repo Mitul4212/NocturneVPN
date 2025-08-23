@@ -9,13 +9,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.nocturnevpn.databinding.FragmentAdvanceSetttingBinding
 import com.example.nocturnevpn.utils.ConsentManager
+import com.example.nocturnevpn.utils.ThemeManager
 import com.example.nocturnevpn.SharedPreference
+import com.example.nocturnevpn.view.managers.GlobeManager
 import androidx.core.text.HtmlCompat
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.graphics.Color
+import android.widget.Toast
 
 class AdvanceSetttingFragment : Fragment() {
 
@@ -28,6 +31,9 @@ class AdvanceSetttingFragment : Fragment() {
     
     // Consent Manager for handling consent settings
     private lateinit var consentManager: ConsentManager
+    
+    // Globe Manager for handling globe theme switching
+    private var globeManager: GlobeManager? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,12 +58,54 @@ class AdvanceSetttingFragment : Fragment() {
         // Initialize protocol selection UI
         initializeProtocolSelector(sharedPref)
 
+        // Initialize dark mode toggle
+        initializeDarkModeToggle(sharedPref)
+
         // Apply multi-line styled texts for protocol options
         applyProtocolRichText()
+
+        // Connect to HomeFragment's GlobeManager for theme switching
+        connectToHomeFragmentGlobeManager()
 
         // Handle back button click to navigate back
         binding.backArrow.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    /**
+     * Set the GlobeManager instance for theme switching
+     */
+    fun setGlobeManager(globeManager: GlobeManager) {
+        this.globeManager = globeManager
+        // Apply current theme to globe when manager is set
+        globeManager.applyCurrentTheme()
+    }
+
+    /**
+     * Connect to HomeFragment's GlobeManager
+     */
+    fun connectToHomeFragmentGlobeManager() {
+        try {
+            // Try to get the HomeFragment from the parent activity
+            val activity = requireActivity()
+            val navHostFragment = activity.supportFragmentManager
+                .findFragmentById(com.example.nocturnevpn.R.id.fragmentContainerView)
+            
+            if (navHostFragment != null) {
+                val homeFragment = navHostFragment.childFragmentManager
+                    .fragments.find { it is HomeFragment } as? HomeFragment
+                
+                homeFragment?.let { home ->
+                    val homeGlobeManager = home.getGlobeManager()
+                    homeGlobeManager?.let { manager ->
+                        setGlobeManager(manager)
+                        Log.d("AdvanceSettings", "Successfully connected to HomeFragment's GlobeManager")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("AdvanceSettings", "Error connecting to HomeFragment's GlobeManager: ${e.message}")
         }
     }
 
@@ -67,16 +115,35 @@ class AdvanceSetttingFragment : Fragment() {
 
 
 
-    // Function to enable or disable Dark Mode
-//    private fun toggleDarkMode(enable: Boolean) {
-//        if (enable) {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//        } else {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//        }
-//        // Save the user's preference in SharedPreferences
-//        sharedPreferences.edit().putBoolean("DarkMode", enable).apply()
-//    }
+    /**
+     * Initialize dark mode toggle switch
+     */
+    private fun initializeDarkModeToggle(sharedPref: SharedPreference) {
+        // Set initial state based on saved preference
+        val isDarkModeEnabled = sharedPref.isDarkModeEnabled()
+        binding.darkmode.isChecked = isDarkModeEnabled
+        
+        // Set up listener for dark mode toggle
+        binding.darkmode.setOnCheckedChangeListener { _, isChecked ->
+            Log.d("AdvanceSettings", "🌙 Dark mode toggle changed to: $isChecked")
+            
+            // Save the preference
+            sharedPref.setDarkModeEnabled(isChecked)
+            
+            // Apply the theme
+            ThemeManager.setDarkMode(requireContext(), isChecked)
+            
+            // Switch globe theme
+            globeManager?.switchGlobeTheme(isChecked)
+            
+            // Show feedback to user
+            val message = if (isChecked) "Dark mode enabled" else "Light mode enabled"
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            
+            // Recreate activity to apply theme changes
+            requireActivity().recreate()
+        }
+    }
 
 
 

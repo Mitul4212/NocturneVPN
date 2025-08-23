@@ -1,6 +1,7 @@
 package com.example.nocturnevpn.view.managers
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -151,8 +152,12 @@ class GlobeManager(
                 isGlobeLoaded = true
                 loadAttempts = 0 // Reset attempts on success
                 
-                // Immediately get user location when globe is ready
+                // Apply current theme when globe is ready
                 Handler(Looper.getMainLooper()).post {
+                    Log.d("GlobeManager", "Globe ready - applying current theme")
+                    applyCurrentTheme()
+                    
+                    // Then get user location
                     Log.d("GlobeManager", "Globe ready - getting user location immediately")
                     getIPLocationAndUpdateGlobe()
                 }
@@ -170,8 +175,24 @@ class GlobeManager(
                     forceRefreshLocation()
                 }
             }
+
+            @JavascriptInterface
+            fun getInitialTheme(): Boolean {
+                val isDarkMode = sharedPreference.isDarkModeEnabled()
+                Log.d("GlobeManager", "JavaScript requested initial theme - Dark mode: $isDarkMode")
+                return isDarkMode
+            }
         }, "AndroidInterface")
 
+        // Set initial WebView background color based on current theme
+        val isDarkMode = sharedPreference.isDarkModeEnabled()
+        val backgroundColor = if (isDarkMode) {
+            Color.parseColor("#121212") // Dark background
+        } else {
+            Color.parseColor("#FFFFFF") // Light background
+        }
+        webView.setBackgroundColor(backgroundColor)
+        
         // Load globe.html from asset path via WebViewAssetLoader
         Log.d("GlobeManager", "Loading globe.html")
         webView.loadUrl("https://appassets.androidplatform.net/assets/globe.html")
@@ -437,6 +458,53 @@ class GlobeManager(
             // Try to load the globe first
             setupGlobe()
         }
+    }
+
+    /**
+     * Switch globe theme based on dark mode preference
+     */
+    fun switchGlobeTheme(isDarkMode: Boolean) {
+        if (!isGlobeLoaded) {
+            Log.w("GlobeManager", "Globe not loaded, cannot switch theme")
+            return
+        }
+
+        Log.d("GlobeManager", "Switching globe theme to dark mode: $isDarkMode")
+        
+        // Set WebView background color from Android side
+        val backgroundColor = if (isDarkMode) {
+            Color.parseColor("#121212") // Dark background
+        } else {
+            Color.parseColor("#FFFFFF") // Light background
+        }
+        
+        binding?.globeWebView?.setBackgroundColor(backgroundColor)
+        
+        // Also switch the map style via JavaScript
+        val js = "javascript:switchMapStyle($isDarkMode)"
+        binding?.globeWebView?.evaluateJavascript(js) { result ->
+            Log.d("GlobeManager", "Theme switch result: $result")
+        }
+    }
+
+    /**
+     * Apply current theme to globe
+     */
+    fun applyCurrentTheme() {
+        val isDarkMode = sharedPreference.isDarkModeEnabled()
+        Log.d("GlobeManager", "Applying current theme - Dark mode: $isDarkMode")
+        
+        // Set initial WebView background color
+        val backgroundColor = if (isDarkMode) {
+            Color.parseColor("#121212") // Dark background
+        } else {
+            Color.parseColor("#FFFFFF") // Light background
+        }
+        
+        binding?.globeWebView?.setBackgroundColor(backgroundColor)
+        
+        // Apply theme to the globe
+        switchGlobeTheme(isDarkMode)
     }
 
     fun loadTestGlobe() {

@@ -419,7 +419,7 @@
                             android:paddingRight="8dp"
                             android:paddingBottom="2dp"
                             android:text="X2"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/text_white_on_colored"
                             android:textSize="10sp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toTopOf="@+id/day3_btn"
@@ -552,7 +552,7 @@
                             android:paddingRight="8dp"
                             android:paddingBottom="2dp"
                             android:text="X2"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/text_white_on_colored"
                             android:textSize="10sp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toTopOf="@+id/day5_btn"
@@ -1013,7 +1013,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
                                 android:text="Claim"
-                                android:textColor="#FFFFFF"
+                                android:textColor="@color/text_white_on_colored"
                                 app:cornerRadius="12dp"
 
                                 android:backgroundTint="@color/strong_violet"
@@ -1075,7 +1075,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="No History"
-                        android:textColor="#B2AFB6"
+                        android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
                 </LinearLayout>
