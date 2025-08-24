@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -79,6 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             app:cardCornerRadius="12dp"
+            android:background="@color/box_bg"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             app:cardElevation="2dp">
@@ -87,6 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:background="@color/box_bg"
+
                 android:padding="16dp">
 
                 <TextView
@@ -383,7 +386,7 @@
             android:layout_marginBottom="16dp"
             android:text="MANAGE SUBSCRIPTION"
             android:textAllCaps="true"
-            android:textColor="@color/white"
+            android:textColor="@color/white_text"
             app:backgroundTint="@color/strong_violet"
             android:drawablePadding="8dp"
             android:padding="14dp"

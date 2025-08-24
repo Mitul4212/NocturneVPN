@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
+    android:background="@color/sub_box_bg"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
@@ -12,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:background="@color/sub_box_bg"
         android:padding="12dp">
 
         <LinearLayout

@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#20FFFFFF"
+            android:background="@color/server_list_skele_bg"
             android:padding="12dp"
             >
 

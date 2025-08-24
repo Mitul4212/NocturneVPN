@@ -359,7 +359,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="12dp"
                     android:text="User Name"
-                    android:textColor="@color/white"
+                    android:textColor="@color/white_text"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -384,7 +384,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Email : "
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="14sp" />
 
                     <TextView
@@ -392,7 +392,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="test@gmail.com"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -692,7 +692,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="14dp"
                     android:text="Go to Premium"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white_text" />
 
             </LinearLayout>
 

@@ -534,24 +534,41 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/Connection_icon"
+
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/connect_button_btn"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_connect" />
+                    android:orientation="vertical"
+                    android:background="@color/box_bg"
+                    >
+                    <ImageView
+                        android:id="@+id/Connection_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/connect_button_btn"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_connect" />
 
-                <TextView
-                    android:id="@+id/Connection_timer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="bottom|center"
-                    android:paddingTop="60dp"
-                    android:text="@string/_00_00_00"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/Connection_timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:paddingTop="60dp"
+                        android:text="@string/_00_00_00"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                </RelativeLayout>
+
+
+
+
 
 
             </androidx.cardview.widget.CardView>

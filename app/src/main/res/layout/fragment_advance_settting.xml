@@ -198,6 +198,7 @@
                         android:layoutDirection="rtl"
                         android:textDirection="ltr"
                         android:gravity="start"
+                        android:layout_marginTop="10dp"
                         android:singleLine="false"
                         android:ellipsize="none"
                         android:text="All\nAll Protocols: Shows TCP and UDP servers. Best compatibility." />
@@ -209,6 +210,8 @@
                         android:layoutDirection="rtl"
                         android:textDirection="ltr"
                         android:gravity="start"
+                        android:layout_marginTop="10dp"
+
                         android:singleLine="false"
                         android:ellipsize="none"
                         android:text="TCP\nMore reliable and stable, may be slightly slower." />
@@ -219,6 +222,8 @@
                         android:layout_height="wrap_content"
                         android:layoutDirection="rtl"
                         android:textDirection="ltr"
+                        android:layout_marginTop="10dp"
+
                         android:gravity="start"
                         android:singleLine="false"
                         android:ellipsize="none"

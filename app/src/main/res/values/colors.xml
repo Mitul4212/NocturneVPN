@@ -8,7 +8,7 @@
     <color name="gray">#B5AEBE</color>
     <color name="track_color">#ADADAD</color>
     <color name="black_overlay">#000000</color>
-    <color name="btn_background">#F7F7F7</color>
+    <color name="Quation_btn_background">#F7F7F7</color>
 
     <!-- Premium & Feature Colors -->
     <color name="discoint">#FFFFFF</color>
@@ -72,6 +72,18 @@
 
     <!-- boxs colors -->
     <color name="box_bg">#FFFFFF</color>
+    <color name="sub_box_bg">#FFFFFF</color>
+    <color name="white_text">#FFFFFF</color>
+
+
+
+    <color name="server_list_skele_bg">#20FFFFFF</color>
+    <color name="server_list_skele_item">#CCCCCC</color>
+
+
+
+
+
 
 
 </resources>

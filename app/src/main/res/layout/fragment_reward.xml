@@ -108,21 +108,21 @@
 
                         <TextView
                             android:text="Your Balance"
-                            android:textColor="@color/white"
+                            android:textColor="@color/white_text"
                             android:textSize="14sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                         <TextView
                             android:id="@+id/coinBalance"
                             android:text="2,150"
-                            android:textColor="@color/white"
+                            android:textColor="@color/white_text"
                             android:textSize="28sp"
                             android:textStyle="bold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                         <TextView
                             android:text="Coins"
-                            android:textColor="@color/white"
+                            android:textColor="@color/white_text"
                             android:textSize="14sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
@@ -144,7 +144,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="How to earn \n      more?"
-                            android:textColor="@color/white"
+                            android:textColor="@color/white_text"
                             android:textSize="12sp"
                             android:layout_gravity="center"
                             />
@@ -185,6 +185,7 @@
                     android:paddingTop="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@color/box_bg"
                     android:descendantFocusability="blocksDescendants"
                     android:focusableInTouchMode="true"
                     android:clickable="false"
@@ -713,6 +714,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@color/box_bg"
                     android:padding="20dp">
 
                     <TextView
@@ -802,6 +804,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@color/box_bg"
+
                     >
 
                     <TextView

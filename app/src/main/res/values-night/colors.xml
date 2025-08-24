@@ -2,13 +2,13 @@
 <resources>
     <!-- Primary Colors -->
     <color name="black">#FFFFFF</color>  <!-- Inverted: white text on dark backgrounds -->
-    <color name="white">#121212</color>  <!-- Dark background instead of white -->
+    <color name="white">#121212</color>  <!-- Dark background instead of white #121212-->
     <color name="strong_violet">#8B5CF6</color>  <!-- Lighter violet for better contrast on dark -->
     <color name="orange">#FF7043</color>  <!-- Lighter orange for dark mode -->
     <color name="gray">#E0E0E0</color>  <!-- Light gray for dark mode -->
     <color name="track_color">#757575</color>  <!-- Medium gray for dark mode -->
     <color name="black_overlay">#000000</color>  <!-- Keep black overlay -->
-    <color name="btn_background">#2D2D2D</color>  <!-- Dark gray button background -->
+    <color name="Quation_btn_background">#2D2D2D</color>  <!-- Dark gray button background -->
 
     <!-- Premium & Feature Colors -->
     <color name="discoint">#121212</color>  <!-- Dark background -->
@@ -64,11 +64,18 @@
     <color name="background_transparent_black">#00000000</color>  <!-- Keep transparent -->
 
 
-    <color name="history_sam_item_bg">#101010</color>
-    <color name="history_sam_item_strok">#101010</color>
+    <color name="history_sam_item_bg">#312C34</color>
+    <color name="history_sam_item_strok">#312C34</color>
 
     <!-- boxs colors -->
 
     <color name="box_bg">#232026</color>
+    <color name="sub_box_bg">#2A272C</color>
+    <color name="white_text">#FFFFFF</color>
+
+    <color name="server_list_skele_bg">#21232026</color>
+    <color name="server_list_skele_item">#B5AEBE</color>
+
+
 
 </resources>

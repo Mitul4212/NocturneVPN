@@ -39,7 +39,7 @@ class HelpCenterAdapter(private val originalQuestions: Array<String>, private va
             cardView.setCardBackgroundColor(
                 ContextCompat.getColor(
                     holder.itemView.context,
-                    if (isExpanded) R.color.btn_background else R.color.light_strong_violet
+                    if (isExpanded) R.color.Quation_btn_background else R.color.light_strong_violet
                 )
             )
             layoutFaqItem.setBackgroundColor(
