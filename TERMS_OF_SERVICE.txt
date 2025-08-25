@@ -1,0 +1,70 @@
+NocturneVPN – Terms of Service
+
+Last Updated: 2025-01-01
+
+1. Overview
+These Terms of Service ("Terms") govern your access to and use of the NocturneVPN mobile application and related services (collectively, the "Service"). By downloading, installing, accessing, or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
+
+2. Eligibility
+You must be at least 13 years of age (or the age of digital consent in your country, if higher) to use the Service. If you are between 13 and 18 (or the age of majority in your jurisdiction), you may only use the Service under the supervision of a parent or legal guardian who agrees to these Terms.
+
+3. Account and Authentication
+3.1 You may be required to sign in (e.g., via Google/Firebase) to access certain features, including synchronization of data (such as coin balance/history) and premium services.
+3.2 You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account.
+
+4. Service Description and VPN Usage
+4.1 NocturneVPN provides VPN connectivity and related features (e.g., selecting regions, premium servers). The Service routes your device’s network traffic through VPN servers.
+4.2 The Service is provided on an "as is" and "as available" basis and may be subject to interruptions, delays, or errors.
+4.3 You are responsible for complying with all applicable laws and regulations in your jurisdiction. You must not use the Service for any illegal or unauthorized purpose.
+
+5. Acceptable Use and Prohibited Activities
+You agree not to:
+(a) use the Service to transmit, distribute, or store content that is illegal, harmful, infringing, or otherwise objectionable;
+(b) engage in activities that violate the rights of others (including intellectual property, privacy, or publicity rights);
+(c) interfere with, disrupt, or attempt to gain unauthorized access to the Service, servers, or networks;
+(d) use the Service for spamming, malware distribution, credential stuffing, DDoS, or other abusive activities;
+(e) reverse engineer, decompile, or attempt to derive the source code of any part of the Service (except where permitted by law);
+(f) circumvent or attempt to defeat any security or authentication measures of the Service;
+(g) resell, rent, lease, or provide the Service to third parties without our prior written consent.
+
+6. Premium Services, Purchases, and Coins
+6.1 Premium. We may offer premium features (e.g., ad-free experience, premium servers, higher speeds, extended timers) via Google Play Billing (subscriptions or one-time purchases). Prices, terms, and availability may vary by region and device. Google Play’s terms and your app store’s rules apply to all payments, renewals, cancellations, and refunds.
+6.2 Auto-Renewing Subscriptions. If you purchase a subscription, it may auto-renew unless canceled prior to the renewal period. Manage or cancel your subscription via your Google Play account: https://play.google.com/store/account/subscriptions
+6.3 Refunds. All billing-related requests (including refunds) are handled by Google Play, subject to their policies and applicable law.
+6.4 Coins and Rewards. The app may include a virtual coin or reward system (e.g., earned via ads or check-ins). Coins have no cash value, are non-transferable, and may not be exchanged for legal tender. We may modify or discontinue the coin system at any time without liability.
+
+7. Ads and Third-Party Services
+The Service may display ads (including personalized or non-personalized). Third-party services (e.g., Google AdMob, Firebase, Play Billing) may be used to deliver functionality. Your use of such services is subject to their terms and privacy policies.
+
+8. Data, Privacy, and Security
+8.1 Our Privacy Policy explains how we collect, use, and share information. By using the Service, you acknowledge the Privacy Policy.
+8.2 We implement reasonable technical and organizational measures to protect your information, but no system is completely secure.
+
+9. Intellectual Property
+The Service and all related content (excluding content you provide) are owned by us or our licensors and are protected by intellectual property laws. You receive a personal, limited, revocable, non-transferable license to use the Service in accordance with these Terms.
+
+10. Modifications to the Service and Terms
+We may update the Service (including features and availability) and these Terms from time to time. Material changes will be communicated by updating the "Last Updated" date or via in-app notice. Your continued use after changes constitutes acceptance of the updated Terms.
+
+11. Disclaimer of Warranties
+THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE." TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.
+
+12. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, OR GOODWILL, ARISING FROM OR RELATED TO YOUR USE OF (OR INABILITY TO USE) THE SERVICE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR TOTAL LIABILITY FOR ALL CLAIMS SHALL NOT EXCEED THE AMOUNT YOU PAID (IF ANY) FOR THE SERVICE IN THE 12 MONTHS PRECEDING THE CLAIM OR USD $50, WHICHEVER IS GREATER.
+
+13. Indemnification
+You agree to defend, indemnify, and hold us harmless from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys’ fees) arising from or related to: (a) your use of the Service; (b) your violation of these Terms; or (c) your violation of any rights of another.
+
+14. Termination
+We may suspend or terminate your access to the Service at any time, with or without notice, if we believe you have violated these Terms or if we discontinue the Service. Upon termination, the rights granted to you cease immediately. Sections intended to survive (e.g., IP rights, disclaimers, limitations of liability) will survive termination.
+
+15. Legal Compliance, Export, and Sanctions
+You must comply with all applicable laws, including export control and sanctions laws. You may not use the Service if you are located in a country embargoed by your jurisdiction’s laws or are on any sanctions list applicable to you or us.
+
+16. Dispute Resolution and Governing Law
+16.1 Governing Law. These Terms are governed by the laws of your country/state of residence (without regard to conflict of laws). If you are a resident of the EU/UK, you may benefit from mandatory provisions of the law of your country of residence.
+16.2 Informal Resolution. Contact us first to attempt to resolve any dispute.
+16.3 Venue. Subject to applicable law, courts in your place of residence or our principal place of business shall have jurisdiction.
+
+17. Contact
+If you have questions about these Terms, contact: paypal4212a@gmail.com (update this email/URL as needed).

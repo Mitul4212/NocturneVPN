@@ -134,7 +134,9 @@ public class ChangeServerActivity extends AppCompatActivity {
             // Load cached servers from database (original API data)
             servers.addAll(dbHelper.getAll());
             if (servers.isEmpty()) {
-                // No data to show, could show empty state or message
+                Log.d("ServerPageDebug", "[onCreate] DB empty → fetching from API now");
+                showSkeletonPlaceholders();
+                populateServerList();
             } else {
                 loadServerList(servers);
             }
@@ -382,6 +384,7 @@ public class ChangeServerActivity extends AppCompatActivity {
         Log.d("ServerPageDebug", "[Load] After protocol filter -> " + protocolFiltered.size() + " servers");
 
         List<CountryServerGroup> grouped = groupServersByCountry(protocolFiltered);
+        Log.d("ServerPageDebug", "[Load] Grouped countries count=" + grouped.size());
 
         // Always keep a fresh copy of full list
         fullGroupList.clear();
@@ -390,6 +393,14 @@ public class ChangeServerActivity extends AppCompatActivity {
         groupedServers.clear();
         groupedServers.addAll(grouped);
         adapter.updateList(grouped);  // Make sure you implement this in ExpandableServerAdapter
+
+        // If after grouping nothing to show, trigger a fresh API fetch
+        if (grouped.isEmpty()) {
+            Log.d("ServerPageDebug", "[Load] Grouped list empty → fetching from API now");
+            showSkeletonPlaceholders();
+            populateServerList();
+            return;
+        }
 
         Server savedServer = sharedPreference.getServer();
         if (savedServer != null) {
@@ -408,6 +419,11 @@ public class ChangeServerActivity extends AppCompatActivity {
         binding.recyclerView.setVisibility(View.INVISIBLE);
         showSkeletonPlaceholders(); // Show skeletons
 
+        if (request == null) {
+            request = new okhttp3.Request.Builder()
+                    .url(BuildConfig.VPN_GATE_API)
+                    .build();
+        }
         mCall = okHttpClient.newCall(request);
         mCall.enqueue(new Callback() {
             @Override

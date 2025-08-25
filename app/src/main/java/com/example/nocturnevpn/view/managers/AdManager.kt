@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.android.gms.ads.*
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
@@ -97,6 +98,18 @@ class AdManager private constructor(private val context: Context) {
         
         Log.d(TAG, "✅ AdManager initialized successfully")
     }
+
+    /**
+     * Call when consent status changes to refresh ad requests accordingly
+     */
+    fun onConsentUpdated() {
+        Log.d(TAG, "🛠️ Consent updated → refreshing ad requests")
+        // Clear cached ads and reload with new targeting
+        cleanup()
+        preloadInterstitialAd()
+        preloadRewardedAd()
+        // Note: Banner ads are managed by BannerAdManager; it should call load with a fresh request
+    }
     
     /**
      * Preload banner ads for faster appearance
@@ -148,14 +161,25 @@ class AdManager private constructor(private val context: Context) {
      */
     fun createAdRequest(): AdRequest {
         val builder = AdRequest.Builder()
-        
-        // Add consent information
-        if (!consentManager.canShowPersonalizedAds()) {
-            // Add non-personalized ads flag
-            // Note: This is handled automatically by AdMob SDK
-            Log.d(TAG, "🔒 Using non-personalized ads due to consent restrictions")
+
+        // Determine consent precisely
+        val consentStatus = consentManager.getConsentStatusForAds()
+        when (consentStatus) {
+            ConsentManager.ConsentStatus.NON_PERSONALIZED -> {
+                val extras = android.os.Bundle().apply { putString("npa", "1") }
+                builder.addNetworkExtrasBundle(AdMobAdapter::class.java, extras)
+                Log.d(TAG, "🔒 Requesting NON-PERSONALIZED ads (npa=1)")
+            }
+            ConsentManager.ConsentStatus.PERSONALIZED,
+            ConsentManager.ConsentStatus.NOT_REQUIRED -> {
+                Log.d(TAG, "✅ Requesting PERSONALIZED ads (status=$consentStatus)")
+            }
+            ConsentManager.ConsentStatus.UNKNOWN -> {
+                // Safe default: personalized unless your policy requires stricter default.
+                Log.d(TAG, "ℹ️ Consent UNKNOWN, defaulting to PERSONALIZED ad request")
+            }
         }
-        
+
         return builder.build()
     }
     
