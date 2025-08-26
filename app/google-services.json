@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "124157274076",
+    "project_id": "nocturnevpn",
+    "storage_bucket": "nocturnevpn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124157274076:android:58ffd52afb5ec0e6a89119",
+        "android_client_info": {
+          "package_name": "com.example.nocturnevpn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124157274076-f0iqru5952rtqqkbsjbp65qs55mpgnp9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nocturnevpn",
+            "certificate_hash": "98aec60a0ae90696d35666d7367190aa45d9c97e"
+          }
+        },
+        {
+          "client_id": "124157274076-efoq830erv6li653ll3jn0vmossdj9co.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSY9LA8CBuiMcvDCQBlY4uU1Wa3E1O9L8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124157274076-efoq830erv6li653ll3jn0vmossdj9co.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

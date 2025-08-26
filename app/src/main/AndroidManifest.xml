@@ -6,9 +6,16 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- Facebook Login Permissions -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    
+    <!-- Attachment Permissions -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 
     <application
+        android:name=".NocturnVPNAppliction"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:extractNativeLibs="true"
@@ -21,9 +28,70 @@
         android:theme="@style/Theme.NocturneVPN"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        
+        <!-- Facebook Configuration -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+        
+        <!-- AdMob Configuration -->
+        <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+        
+        <!-- WebView Configuration for Ads -->
+        <meta-data
+            android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="false" />
+        
+        <!-- Additional WebView Configuration for Ads -->
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+        
+        <!-- FileProvider for attachments -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        
+        <!-- Facebook Login Activity -->
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+        
         <activity
             android:name=".view.activitys.AppAuthActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.activitys.SocialAuthTestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.activitys.ReportIssueActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".view.activitys.ChangeServerActivity"
             android:exported="false"
@@ -43,29 +111,36 @@
 <!--            </intent-filter>-->
         </activity>
 
+        <!-- Splash Activity -->
+        <activity
+            android:name=".view.activitys.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.NocturneVPN"
+            android:screenOrientation="portrait">
+        </activity>
+
         <!-- Default Icon -->
         <activity-alias
-            android:name=".DefaultAlias"
+            android:name="com.example.nocturnevpn.DefaultAlias"
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity">
+            android:targetActivity=".view.activitys.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
 
         <!-- Icon 2 -->
         <activity-alias
-            android:name=".Icon2Alias"
+            android:name="com.example.nocturnevpn.Icon2Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -75,12 +150,12 @@
 
         <!-- Icon 3 -->
         <activity-alias
-            android:name=".Icon3Alias"
+            android:name="com.example.nocturnevpn.Icon3Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark_2"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -90,12 +165,12 @@
 
         <!-- Icon 4 -->
         <activity-alias
-            android:name=".Icon4Alias"
+            android:name="com.example.nocturnevpn.Icon4Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_1"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -105,12 +180,12 @@
 
         <!-- Icon 5 -->
         <activity-alias
-            android:name=".Icon5Alias"
+            android:name="com.example.nocturnevpn.Icon5Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_2"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -120,15 +195,57 @@
 
         <!-- Icon 6 -->
         <activity-alias
-            android:name=".Icon6Alias"
+            android:name="com.example.nocturnevpn.Icon6Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_retro"
             android:label="@string/app_name"
-            android:targetActivity=".view.activitys.HomeActivity" >
+            android:targetActivity=".view.activitys.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Weather Icon (Discreet) -->
+        <activity-alias
+            android:name="com.example.nocturnevpn.WeatherAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_weather"
+            android:label="Weather"
+            android:targetActivity=".view.activitys.SplashActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Notes Icon (Discreet) -->
+        <activity-alias
+            android:name="com.example.nocturnevpn.NotesAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_notes"
+            android:label="Notes"
+            android:targetActivity=".view.activitys.SplashActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Calculator Icon (Discreet) -->
+        <activity-alias
+            android:name="com.example.nocturnevpn.CalculatorAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_calculeter"
+            android:label="Calculator"
+            android:targetActivity=".view.activitys.SplashActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>

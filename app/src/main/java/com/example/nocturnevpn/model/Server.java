@@ -27,6 +27,7 @@ public class Server implements Parcelable {
     public int port;
     public String protocol;
     public boolean isStarred;
+    public boolean isPremium;
 
 
     // Default constructor.
@@ -190,6 +191,12 @@ public class Server implements Parcelable {
         isStarred = starred;
     }
 
+    public boolean isPremium() {
+        return isPremium;
+    }
+    public void setPremium(boolean premium) {
+        isPremium = premium;
+    }
 
 
     @Override
@@ -218,6 +225,7 @@ public class Server implements Parcelable {
         dest.writeInt(this.port);
         dest.writeString(this.protocol);
         dest.writeByte(this.isStarred ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.isPremium ? (byte) 1 : (byte) 0);
 
     }
 
@@ -241,6 +249,7 @@ public class Server implements Parcelable {
         this.port = source.readInt();
         this.protocol = source.readString();
         this.isStarred = source.readByte() != 0;
+        this.isPremium = source.readByte() != 0;
     }
 
     // Constructor to create a Server object from a Parcel (for Parcelable implementation).
@@ -263,6 +272,7 @@ public class Server implements Parcelable {
         this.port = in.readInt();
         this.protocol = in.readString();
         this.isStarred = in.readByte() != 0;
+        this.isPremium = in.readByte() != 0;
     }
 
     // Creator for Parcelable interface, which is responsible for creating instances of Server from a Parcel.

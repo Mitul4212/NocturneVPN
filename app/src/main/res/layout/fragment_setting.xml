@@ -82,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:layout_marginStart="24dp"
-                    android:layout_marginTop="72dp"
+                    android:layout_marginTop="60dp"
                     android:gravity="center"
                     android:text="Account"
                     android:textColor="@color/gray"
@@ -96,15 +96,11 @@
                     android:id="@+id/account"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-
-                    android:clickable="true"
-                    android:focusable="auto"
                     android:orientation="horizontal"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:padding="15dp"
                     android:background="@drawable/ripple"
-
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/Account">
@@ -164,7 +160,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_notifiction" />
+                        android:src="@drawable/ic_notifiction_icon" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -368,14 +364,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="37dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="100dp"
+                    android:background="@drawable/ripple"
                     android:clickable="true"
                     android:focusable="auto"
                     android:orientation="horizontal"
+                    android:padding="15dp"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
-                    android:padding="15dp"
-                    android:background="@drawable/ripple"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -719,6 +715,19 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.94" />
 
+        <!-- Banner Ad -->
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/banner_ad_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            ads:adSize="BANNER"
+            ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

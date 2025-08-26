@@ -15,6 +15,7 @@
       height: 100%;
       background: transparent;
       overflow: hidden;
+      transition: background-color 0.3s ease;
     }
 
     #map {
@@ -23,10 +24,29 @@
       bottom: 0;
       width: 100%;
       background: transparent;
+      transition: background-color 0.3s ease;
     }
 
     canvas {
       background-color: transparent !important;
+    }
+
+    /* Light mode styles */
+    body:not(.dark-mode) {
+      background-color: #FFFFFF !important;
+    }
+
+    body:not(.dark-mode) #map {
+      background-color: #FFFFFF !important;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #121212 !important;
+    }
+
+    body.dark-mode #map {
+      background-color: #121212 !important;
     }
 
     /* Hide default map controls and attribution */
@@ -410,9 +430,49 @@
 
   try {
     showLoadingIndicator();
+    
+    // Function to get the appropriate map style based on theme
+    function getMapStyle() {
+      // Check if we're in dark mode by looking for a dark mode class or attribute
+      const isDarkMode = document.body.classList.contains('dark-mode') || 
+                        document.documentElement.classList.contains('dark-mode') ||
+                        window.isDarkMode === true;
+      
+      if (isDarkMode) {
+        return 'https://appassets.androidplatform.net/assets/darkWorldMap.json';
+      } else {
+        return 'https://appassets.androidplatform.net/assets/worldglobe.json';
+      }
+    }
+    
+    // Function to check initial theme state from Android
+    function checkInitialTheme() {
+      if (window.AndroidInterface && window.AndroidInterface.getInitialTheme) {
+        const isDarkMode = window.AndroidInterface.getInitialTheme();
+        window.isDarkMode = isDarkMode;
+        
+        if (isDarkMode) {
+          document.body.classList.add('dark-mode');
+          document.documentElement.classList.add('dark-mode');
+          // Set initial background color for dark mode
+          const backgroundColor = '#121212';
+          document.body.style.backgroundColor = backgroundColor;
+          document.getElementById('map').style.backgroundColor = backgroundColor;
+        } else {
+          // Set initial background color for light mode
+          const backgroundColor = '#FFFFFF';
+          document.body.style.backgroundColor = backgroundColor;
+          document.getElementById('map').style.backgroundColor = backgroundColor;
+        }
+      }
+    }
+    
+    // Check initial theme before creating map
+    checkInitialTheme();
+    
     map = new maplibregl.Map({
     container: 'map',
-    style: 'https://appassets.androidplatform.net/assets/worldglobe.json',
+    style: getMapStyle(),
     center: [12, 53],
     zoom: 1,
     antialias: true
@@ -610,10 +670,55 @@ document.getElementById("myLocationBtn").addEventListener("click", () => {
     }
   });
 
+  // Function to switch map style based on theme
+  function switchMapStyle(isDarkMode) {
+    if (!map) return;
+    
+    const newStyle = isDarkMode ? 
+      'https://appassets.androidplatform.net/assets/darkWorldMap.json' : 
+      'https://appassets.androidplatform.net/assets/worldglobe.json';
+    
+    // Update the global dark mode state
+    window.isDarkMode = isDarkMode;
+    
+    // Add/remove dark mode class to body and documentElement
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+      document.documentElement.classList.remove('dark-mode');
+    }
+    
+    // Force immediate background color change
+    const backgroundColor = isDarkMode ? '#121212' : '#FFFFFF';
+    document.body.style.backgroundColor = backgroundColor;
+    document.getElementById('map').style.backgroundColor = backgroundColor;
+    
+    // Switch the map style
+    map.setStyle(newStyle);
+    
+    // Re-apply globe projection after style change
+    map.once('style.load', () => {
+      map.setProjection({ type: 'globe' });
+      
+      // Re-add user marker if location is set
+      if (currentSelectionLat !== null && currentSelectionLon !== null) {
+        if (window.userMarker) window.userMarker.remove();
+        window.userMarker = new maplibregl.Marker({ color: "#FF0000" })
+          .setLngLat([currentSelectionLon, currentSelectionLat])
+          .addTo(map);
+      }
+      
+      updateDebugInfo(isDarkMode ? "Switched to dark map and background" : "Switched to light map and background");
+    });
+  }
+
   // Expose functions to Android
   window.setLocation = setLocation;
   window.updateDebugInfo = updateDebugInfo;
   window.toggleDebug = toggleDebug;
+  window.switchMapStyle = switchMapStyle;
 </script>
 </body>
 </html>

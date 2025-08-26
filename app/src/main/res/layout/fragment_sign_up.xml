@@ -19,11 +19,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/signInText"
@@ -38,18 +34,17 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailLayout1"
                 style="@style/LoginTextInputOuterFieldStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/enter_full_name"
                 android:layout_marginTop="29dp"
+                android:hint="@string/enter_full_name"
                 app:boxStrokeColor="@color/strong_violet"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/signInText"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/signInText">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fullNameEditText"
@@ -57,35 +52,30 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-
-                    />
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/passwordLayoutSignIn"
+                android:id="@+id/emailLayoutSignUp"
                 style="@style/LoginTextInputOuterFieldStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:boxStrokeColor="@color/strong_violet"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/emailLayout1"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/emailLayout1">
+                app:layout_constraintEnd_toEndOf="parent">
 
+                <!-- ✅ Updated Email EditText ID -->
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/passwordEditTextSignIn"
+                    android:id="@+id/emailEditText"
                     style="@style/LoginTextInputInnerFieldStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/enter_email"
                     android:inputType="textEmailAddress"
-
-                    />
-
-
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
-
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordLayout"
@@ -95,9 +85,9 @@
                 android:layout_marginTop="20dp"
                 app:boxStrokeColor="@color/strong_violet"
                 app:endIconMode="password_toggle"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/emailLayoutSignUp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/passwordLayoutSignIn">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordEditText"
@@ -107,12 +97,8 @@
                     android:hint="@string/enter_password"
                     android:inputType="textPassword"
                     android:textColorHint="@color/strong_violet"
-
-
-                    />
-
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
-
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/confirmPasswordLayout"
@@ -122,9 +108,9 @@
                 android:layout_marginTop="20dp"
                 app:boxStrokeColor="@color/strong_violet"
                 app:endIconMode="password_toggle"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/passwordLayout"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/passwordLayout">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/confirmPasswordEditText"
@@ -133,29 +119,26 @@
                     android:layout_height="match_parent"
                     android:hint="Enter Confirm Password"
                     android:inputType="textPassword"
-                    android:textColorHint="@color/strong_violet" />
-
+                    android:textColorHint="@color/strong_violet"
+                    android:textCursorDrawable="@drawable/edittext_cursor_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/terms_and_policy_check_button"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/confirmPasswordLayout" />
-
+                android:layout_marginStart="24dp"
+                app:layout_constraintTop_toBottomOf="@id/confirmPasswordLayout"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 app:layout_constraintBottom_toBottomOf="@+id/terms_and_policy_check_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/terms_and_policy_check_button"
-                app:layout_constraintTop_toTopOf="@+id/terms_and_policy_check_button">
+                app:layout_constraintStart_toEndOf="@id/terms_and_policy_check_button"
+                app:layout_constraintTop_toTopOf="@id/terms_and_policy_check_button">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -186,44 +169,42 @@
                     android:text=" Privacy Policy "
                     android:textColor="@color/strong_violet"
                     android:textSize="12sp" />
-
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/signUpButton"
                 android:layout_width="320dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="60dp"
-                android:layout_marginEnd="24dp"
-                android:background="@drawable/btn_signup"
+                android:padding="12dp"
+                android:backgroundTint="@color/strong_violet"
                 android:text="@string/register"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:cornerRadius="30dp"
+                app:layout_constraintTop_toBottomOf="@id/terms_and_policy_check_button"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/terms_and_policy_check_button" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <LinearLayout
                 android:id="@+id/linearLayout6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:layout_marginTop="31dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/signUpButton"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/signUpButton">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <View
                     android:layout_width="103.5dp"
                     android:layout_height="1dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="16dp"
-                    android:background="#6D6C69" />
+                    android:background="@color/divider_signup" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Or sign up with"
-                    android:textColor="#6D6C69"
+                    android:textColor="@color/divider_signup"
                     android:textSize="14sp" />
 
                 <View
@@ -231,8 +212,7 @@
                     android:layout_height="1dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="16dp"
-                    android:background="#6D6C69" />
-
+                    android:background="@color/divider_signup" />
             </LinearLayout>
 
             <LinearLayout
@@ -240,30 +220,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="31dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/linearLayout6"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout6">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <ImageView
+                    android:id="@+id/googleSignUpBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
                     android:src="@drawable/ic_google" />
 
                 <ImageView
+                    android:id="@+id/facebookSignUpBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_facebook" />
-
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="31dp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/linearLayout7"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout7">
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -279,15 +260,7 @@
                     android:text="  Sign In"
                     android:textColor="@color/strong_violet"
                     android:textSize="14sp" />
-
             </LinearLayout>
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </ScrollView>
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

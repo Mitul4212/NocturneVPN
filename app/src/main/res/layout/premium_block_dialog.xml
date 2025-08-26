@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    app:cardElevation="12dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/premium_block_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:padding="28dp">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/premium_block_lottie"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:lottie_rawRes="@raw/info_animation"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/premium_block_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Premium Server"
+            android:textAlignment="center"
+            android:textColor="@color/strong_violet"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/premium_block_lottie"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:id="@+id/premium_block_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This server is for premium users only.\n\nPlease change to a normal server or get a premium subscription."
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            android:paddingTop="8dp"
+            android:textSize="14sp"
+            android:lineSpacingExtra="6dp"
+            app:layout_constraintTop_toBottomOf="@id/premium_block_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/premium_block_change_server_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change Server"
+            android:textColor="@color/white"
+            app:cornerRadius="16dp"
+            app:backgroundTint="@color/strong_violet"
+            app:layout_constraintTop_toBottomOf="@id/premium_block_message"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/premium_block_get_premium_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get Premium"
+            android:textColor="@color/strong_violet"
+            app:cornerRadius="16dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/strong_violet"
+            app:strokeWidth="1dp"
+            app:backgroundTint="@color/Quation_btn_background"
+            app:layout_constraintTop_toBottomOf="@id/premium_block_change_server_btn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView> 

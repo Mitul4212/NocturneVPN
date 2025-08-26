@@ -1,10 +1,12 @@
 package com.example.nocturnevpn.view.activitys
 
 import android.Manifest
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,7 +16,10 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.example.nocturnevpn.R
 import com.example.nocturnevpn.databinding.ActivityHomeBinding
+import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.AuthFlowManager
 import me.ibrahimsn.lib.SmoothBottomBar
+import com.example.nocturnevpn.utils.RatingDialogManager
 
 
 class HomeActivity : AppCompatActivity() {
@@ -48,6 +53,9 @@ class HomeActivity : AppCompatActivity() {
 
         askNotificationPermission()
 
+        // Show rating dialog if needed (after first VPN connect/disconnect and once per day)
+        RatingDialogManager.maybeShowRatingDialog(this)
+
         // Initialize bottom navigation bar
         bottomNavigation = binding.bottomBar
 
@@ -60,6 +68,8 @@ class HomeActivity : AppCompatActivity() {
 
         // Set up navigation logic for bottom navigation bar
         setupNavigation()
+        
+
     }
 
     private fun askNotificationPermission() {
@@ -71,6 +81,36 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+    
+    /**
+     * Sign out the current user and navigate to auth screen
+     */
+    fun signOut() {
+        val authManager = AuthManager.getInstance(this)
+        authManager.signOut()
+        
+        // Navigate back to auth screen
+        val intent = Intent(this, AppAuthActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+    
+    /**
+     * Check if user is signed in and show appropriate UI
+     */
+    fun checkAuthState() {
+        val authManager = AuthManager.getInstance(this)
+        val isSignedIn = authManager.isUserSignedIn()
+        
+
+        Log.d("HomeActivity", "User signed in: $isSignedIn")
+        
+        // You can add UI logic here to show/hide elements based on auth state
+        // For example, show login button in profile fragment if not signed in
+    }
+    
+
 
 
     private fun setupNavigation() {

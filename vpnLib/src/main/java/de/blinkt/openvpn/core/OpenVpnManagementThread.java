@@ -129,12 +129,17 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 mServerSocketLocal.bind(new LocalSocketAddress(socketName,
                         LocalSocketAddress.Namespace.FILESYSTEM));
             } catch (IOException e) {
-                // wait 300 ms before retrying
+                // Replace blocking sleep with non-blocking approach
                 try {
-                    Thread.sleep(300);
+                    // Use a shorter delay and check if we should continue
+                    if (tries > 1) {
+                        // Only sleep if we have more tries left
+                        Thread.sleep(50); // Reduced from 300ms to 50ms
+                    }
                 } catch (InterruptedException ignored) {
+                    // If interrupted, break out of the loop
+                    break;
                 }
-
             }
             tries--;
         }
@@ -423,12 +428,18 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     private void releaseHoldCmd() {
         mResumeHandler.removeCallbacks(mResumeHoldRunnable);
         if ((System.currentTimeMillis() - mLastHoldRelease) < 5000) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ignored) {
-            }
-
+            mResumeHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    executeReleaseCommands();
+                }
+            }, 3000);
+            return;
         }
+        executeReleaseCommands();
+    }
+
+    private void executeReleaseCommands() {
         mWaitingForRelease = false;
         mLastHoldRelease = System.currentTimeMillis();
         managmentCommand("hold release\n");

@@ -6,13 +6,28 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@id/profileFragment"
-        android:name="com.example.nocturnevpn.view.fragment.profileFragment"
+        android:id="@+id/rewardFragment"
+        android:name="com.example.nocturnevpn.view.fragment.RewardFragment"
+        android:label="fragment_reward"
+        tools:layout="@layout/fragment_reward" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.nocturnevpn.view.fragment.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
         <action
             android:id="@+id/action_profileFragment_to_premiumFragment"
             app:destination="@id/premiumFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_editUserInfoFragment"
+            app:destination="@id/editUserInfoFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_rewardFragment"
+            app:destination="@id/rewardFragment" />
     </fragment>
 
     <fragment
@@ -37,6 +52,12 @@
         <action
             android:id="@+id/action_settingFragment3_to_appIconFragment"
             app:destination="@id/appIconFragment" />
+        <action
+            android:id="@+id/action_settingFragment3_to_helpCenterFragment"
+            app:destination="@id/helpCenterFragment" />
+        <action
+            android:id="@+id/action_settingFragment3_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/advanceSetttingFragment"
@@ -44,14 +65,37 @@
         android:label="fragment_advance_settting"
         tools:layout="@layout/fragment_advance_settting" />
     <fragment
+        android:id="@+id/afterPremiumFragment"
+        android:name="com.example.nocturnevpn.view.fragment.AfterPremiumFragment"
+        android:label="After Premium"
+        tools:layout="@layout/fragment_after_premium" />
+    <fragment
         android:id="@+id/premiumFragment"
         android:name="com.example.nocturnevpn.view.fragment.PremiumFragment"
         android:label="fragment_premium"
-        tools:layout="@layout/fragment_premium" />
+        tools:layout="@layout/fragment_premium" >
+        <action
+            android:id="@+id/action_premiumFragment_to_afterPremiumFragment"
+            app:destination="@id/afterPremiumFragment" />
+    </fragment>
     <fragment
         android:id="@+id/appIconFragment"
         android:name="com.example.nocturnevpn.view.fragment.appIconFragment"
         android:label="fragment_app_icon"
         tools:layout="@layout/fragment_app_icon" />
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.nocturnevpn.view.fragment.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/helpCenterFragment"
+        android:name="com.example.nocturnevpn.view.fragment.HelpCenterFragment"
+        android:label="HelpCenterFragment" />
+    <fragment
+        android:id="@+id/editUserInfoFragment"
+        android:name="com.example.nocturnevpn.view.fragment.EditUserInfoFragment"
+        android:label="EditUserInfoFragment"
+        tools:layout="@layout/fragment_edit_user_info" />
 
 </navigation>

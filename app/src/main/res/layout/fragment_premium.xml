@@ -332,7 +332,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="1 MONTH"
-                    android:textColor="@color/white"
+                    android:textColor="@color/white_text"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -367,7 +367,7 @@
                         android:layout_marginBottom="11dp"
                         android:gravity="center"
                         android:text="9.99"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="28sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -381,7 +381,7 @@
                         android:layout_marginBottom="16dp"
                         android:gravity="center"
                         android:text="$/month"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -433,7 +433,7 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="1 YEAR"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -444,7 +444,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="8dp"
-                        android:backgroundTint="@color/discoint"
+                        android:backgroundTint="@color/sub_box_bg"
                         app:cardCornerRadius="20dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -486,7 +486,7 @@
                         android:layout_marginBottom="11dp"
                         android:gravity="center"
                         android:text="4.99"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="28sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -500,7 +500,7 @@
                         android:layout_marginBottom="16dp"
                         android:gravity="center"
                         android:text="$/month"
-                        android:textColor="@color/white"
+                        android:textColor="@color/white_text"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -536,17 +536,27 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="TRY PREMIUM FREE"
-                    android:textColor="@color/try_premium"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:background="@color/box_bg">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:gravity="center"
+                        android:text="TRY PREMIUM FREE"
+                        android:textColor="@color/try_premium"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+
 
 
             </androidx.cardview.widget.CardView>

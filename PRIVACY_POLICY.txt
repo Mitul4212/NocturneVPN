@@ -1,0 +1,62 @@
+NocturneVPN – Privacy Policy
+
+Last Updated: 2025-01-01
+
+This Privacy Policy explains how NocturneVPN ("we", "us", "our") collects, uses, and shares information when you use our mobile application and related services (the "Service"). By using the Service, you agree to the collection and use of information in accordance with this Policy.
+
+1. Information We Collect
+1.1 Account Information
+- If you sign in (e.g., with Google/Firebase), we may collect your user ID, display name, and email address to create and manage your account, synchronize app data (e.g., coin balance/history), and enable premium features.
+
+1.2 Usage Data and Device Information
+- We may collect app usage data, device identifiers (e.g., Android Advertising ID where permitted), IP address, app version, and crash logs for analytics, performance, and security.
+
+1.3 VPN Data
+- We do not inspect or store the contents of your VPN traffic. To provide VPN connectivity and maintain service quality, our systems may process connection metadata (e.g., session timestamps, server selection, connection status) for the duration of the session. We do not sell your VPN browsing content.
+
+1.4 Ads and Monetization
+- The Service may show ads (e.g., Google AdMob). Ads may be personalized or non-personalized depending on your consent and device settings. Ad networks may collect or receive device and usage data to serve and measure ads, subject to their policies.
+
+1.5 Purchases and Subscriptions
+- If you purchase premium features via Google Play Billing, Google processes your payment details. We receive purchase tokens and product information to enable and verify your entitlement. We do not receive or store your full payment information (e.g., credit card numbers).
+
+1.6 Coins and Rewards
+- The app may implement coins/rewards. We may store your coin balance and history in local storage and/or in cloud storage (e.g., Firebase/Firestore) linked to your account to persist across devices.
+
+2. How We Use Information
+We use information to:
+- Provide and maintain the Service (including VPN connectivity and premium access)
+- Authenticate users and sync user data across devices
+- Display and measure ads; manage consent choices
+- Process purchases and manage entitlements
+- Monitor performance, detect abuse, and improve reliability
+- Communicate important updates and respond to support requests
+
+3. Sharing of Information
+We may share information with:
+- Service Providers (e.g., Firebase, Google AdMob, Play Billing) to operate essential features
+- Analytics and crash reporting tools to improve app quality
+- Law enforcement or authorities if required by applicable law
+We do not sell your VPN browsing content.
+
+4. Data Retention
+We retain account and entitlement records as long as your account is active or as needed for legitimate business or legal purposes. Coin history and related records may be retained to support feature continuity. We retain only as long as necessary and in accordance with applicable law.
+
+5. Your Choices and Rights
+- Ads and Consent: Where required, we request consent for personalized ads. You can change your ad preferences in the app (when available) or device settings.
+- Access/Deletion: You may request access to or deletion of your account data by contacting us (see Contact). Deleting your account may remove cloud-synced data (e.g., coin history). Some billing records may be retained to comply with legal obligations.
+
+6. Security
+We implement reasonable technical and organizational measures to protect your information. However, no system is completely secure, and we cannot guarantee absolute security.
+
+7. Children’s Privacy
+The Service is not directed to children under 13. If you are under 13 (or the age of digital consent in your region), you may use the Service only with parental/guardian consent and supervision.
+
+8. International Data Transfers
+Your information may be processed and stored on servers located outside your country of residence. We take steps to ensure appropriate safeguards for international transfers where required by law.
+
+9. Changes to this Policy
+We may update this Privacy Policy from time to time. Material changes will be indicated by updating the “Last Updated” date or via in-app notice. Your continued use of the Service after changes means you accept the updated Policy.
+
+10. Contact Us
+If you have questions or requests about this Privacy Policy, contact: privacy@nocturnevpn.app (update this email/URL as needed).

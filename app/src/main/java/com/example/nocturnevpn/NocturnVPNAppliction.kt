@@ -4,23 +4,102 @@ import android.app.Application
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.nocturnevpn.utils.AuthManager
+import com.example.nocturnevpn.utils.KeyHashGenerator
+import com.example.nocturnevpn.utils.ThemeManager
 import com.example.nocturnevpn.workers.ServerFetchWorker
+import com.example.nocturnevpn.view.managers.AdManager
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
+import com.google.android.gms.ads.MobileAds
 import java.util.concurrent.TimeUnit
 
 class NocturnVPNAppliction : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Initialize Facebook SDK
+        try {
+            FacebookSdk.sdkInitialize(applicationContext)
+            AppEventsLogger.activateApp(this)
+            Log.d("NocturnVPNAppliction", "Facebook SDK initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing Facebook SDK: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Initialize Firebase Auth state
+        try {
+            val authManager = AuthManager.getInstance(this)
+            val firebaseAuth = authManager.getFirebaseAuth()
+            
+            // Firebase Auth persistence is enabled by default
+            // We'll handle session restoration in AuthManager with better logic
+            
+            Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${firebaseAuth.currentUser != null}")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing Firebase Auth: ${e.message}")
+            e.printStackTrace()
+        }
+        
         setupPeriodicServerFetch()
+        
+        // Initialize Google MobileAds
+        try {
+            MobileAds.initialize(this) { initializationStatus ->
+                Log.d("NocturnVPNAppliction", "MobileAds initialization completed: ${initializationStatus.adapterStatusMap}")
+            }
+            Log.d("NocturnVPNAppliction", "MobileAds initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing MobileAds: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Initialize AdManager
+        try {
+            val adManager = AdManager.getInstance(this)
+            adManager.initialize()
+            Log.d("NocturnVPNAppliction", "AdManager initialized successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error initializing AdManager: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Configure WebView for ads compatibility
+        try {
+            // Enable WebView debugging for ads
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+            
+            Log.d("NocturnVPNAppliction", "WebView configured for ads compatibility")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error configuring WebView for ads: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Generate key hashes for Facebook authentication (debug only)
+        if (BuildConfig.DEBUG) {
+            KeyHashGenerator.generateKeyHash(this)
+            KeyHashGenerator.generateSHA1Hash(this)
+            KeyHashGenerator.generateSHA256Hash(this)
+        }
+        
+        // Apply saved theme preference
+        try {
+            ThemeManager.applyTheme(this)
+            Log.d("NocturnVPNAppliction", "Theme applied successfully")
+        } catch (e: Exception) {
+            Log.e("NocturnVPNAppliction", "Error applying theme: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     private fun setupPeriodicServerFetch() {
         try {
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
+                // No network type constraint, allow any network
                 .build()
 
             // Set to 30 minutes for both debug and release

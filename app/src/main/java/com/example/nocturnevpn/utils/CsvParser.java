@@ -59,6 +59,9 @@ public class CsvParser {
         server.port = getPort(lines);
         server.protocol = getProtocol(lines);
 
+        // Log all fields for debugging premium logic
+        android.util.Log.d("ServerParse", "hostName=" + server.hostName + ", ipAddress=" + server.ipAddress + ", score=" + server.score + ", ping=" + server.ping + ", speed=" + server.speed + ", countryLong=" + server.countryLong + ", countryShort=" + server.countryShort + ", vpnSessions=" + server.vpnSessions + ", uptime=" + server.uptime + ", totalUsers=" + server.totalUsers + ", totalTraffic=" + server.totalTraffic + ", logType=" + server.logType + ", operator=" + server.operator + ", message=" + server.message + ", port=" + server.port + ", protocol=" + server.protocol);
+
         return server;
     }
 

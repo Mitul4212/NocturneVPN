@@ -1,12 +1,20 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.NocturneVPN" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.NocturneVPN" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-<!--        &lt;!&ndash; Override the background for night mode &ndash;&gt;-->
-<!--        <item name="colorBackground">@color/black</item>-->
-<!--        <item name="android:windowBackground">?android:colorBackground</item>-->
-<!--        <item name="colorSurface">@color/black</item> &lt;!&ndash; Optional &ndash;&gt;-->
+        <item name="colorPrimary">@color/strong_violet</item>
+        <item name="colorPrimaryVariant">@color/strong_violet</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/up_arrow</item>
+        <item name="colorSecondaryVariant">@color/up_arrow</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorBackground">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorOnBackground">@color/black</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:navigationBarColor">@color/white</item>
 
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
@@ -14,5 +22,27 @@
 
     </style>
 
+    <style name="Theme.NocturneVPN" parent="Base.Theme.NocturneVPN" />
+
+    <style name="LoginTextInputOuterFieldStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginStart">24dp</item>
+        <item name="android:layout_marginEnd">24dp</item>
+    </style>
+
+    <style name="LoginTextInputInnerFieldStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textColorHint">@color/strong_violet</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_gravity">center</item>
+
+
+    </style>
 
 </resources>

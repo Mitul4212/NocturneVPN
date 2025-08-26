@@ -1,5 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary Colors -->
+    <color name="black">#FFFFFF</color>  <!-- Inverted: white text on dark backgrounds -->
+    <color name="white">#121212</color>  <!-- Dark background instead of white #121212-->
+    <color name="strong_violet">#8B5CF6</color>  <!-- Lighter violet for better contrast on dark -->
+    <color name="orange">#FF7043</color>  <!-- Lighter orange for dark mode -->
+    <color name="gray">#E0E0E0</color>  <!-- Light gray for dark mode -->
+    <color name="track_color">#757575</color>  <!-- Medium gray for dark mode -->
+    <color name="black_overlay">#000000</color>  <!-- Keep black overlay -->
+    <color name="Quation_btn_background">#2D2D2D</color>  <!-- Dark gray button background -->
+
+    <!-- Premium & Feature Colors -->
+    <color name="discoint">#121212</color>  <!-- Dark background -->
+    <color name="tryButton">#2D2D2D</color>  <!-- Dark button background -->
+    <color name="custom_white">#2D2D2D</color>  <!-- Dark gray instead of light -->
+    <color name="up_arrow">#4DD0E1</color>  <!-- Lighter teal for dark mode -->
+    <color name="highlighted_card_color">#4D424242</color>  <!-- Dark overlay -->
+    <color name="yellow">#FFD54F</color>  <!-- Lighter yellow for dark mode -->
+    <color name="gold">#FFD54F</color>  <!-- Lighter gold for dark mode -->
+
+    <!-- Brand & UI Colors -->
+    <color name="pointer_color">#8B5CF6</color>  <!-- Lighter violet for dark mode -->
+    <color name="switch_checked">#8B5CF6</color>  <!-- Lighter violet for dark mode -->
+    <color name="switch_defulte">#757575</color>  <!-- Medium gray for dark mode -->
+    <color name="discount_text">#64B5F6</color>  <!-- Lighter blue for dark mode -->
+    <color name="try_premium">#64B5F6</color>  <!-- Lighter blue for dark mode -->
+    <color name="light_strong_violet">#4C1D95</color>  <!-- Darker violet for dark mode -->
+    <color name="green">#66BB6A</color>  <!-- Lighter green for dark mode -->
+    <color name="red">#EF5350</color>  <!-- Lighter red for dark mode -->
+
+    <!-- Text Colors -->
+    <color name="text_dark_primary">#FFFFFF</color>  <!-- White text for dark mode -->
+    <color name="text_secondary_gray">#BDBDBD</color>  <!-- Light gray text for dark mode -->
+    <color name="text_muted">#9E9E9E</color>  <!-- Medium gray for dark mode -->
+    <color name="text_quick_fix">#BDBDBD</color>  <!-- Light gray for dark mode -->
+    <color name="text_white_on_colored">#FFFFFF</color>  <!-- Keep white text -->
+
+    <!-- Divider & Border Colors -->
+    <color name="divider_signup">#424242</color>  <!-- Dark gray divider for dark mode -->
+    <color name="divider_profile">#424242</color>  <!-- Dark gray divider for dark mode -->
+
+    <!-- Success & Status Colors -->
+    <color name="success_green_premium">#4CAF50</color>  <!-- Lighter green for dark mode -->
+    <color name="success_green_button">#4CAF50</color>  <!-- Lighter green for dark mode -->
+
+    <!-- Accent & Special Colors -->
+    <color name="accent_pink_purple">#E91E63</color>  <!-- Lighter pink for dark mode -->
+    <color name="background_dark_blue">#546E7A</color>  <!-- Lighter blue for dark mode -->
+    <color name="button_purple">#BA68C8</color>  <!-- Lighter purple for dark mode -->
+    <color name="coin_icon_gold">#FFD54F</color>  <!-- Lighter gold for dark mode -->
+
+    <!-- Overlay & Transparency Colors -->
+    <color name="overlay_semi_transparent">#80000000</color>  <!-- Dark overlay for dark mode -->
+    <color name="background_semi_transparent">#33000000</color>  <!-- Dark semi-transparent -->
+    <color name="background_transparent">#00FFFFFF</color>  <!-- Keep transparent -->
+
+    <!-- Gradient Colors (with alpha) -->
+    <color name="gradient_start_alpha">#FF8B5CF6</color>  <!-- Lighter violet gradient start -->
+    <color name="gradient_end_alpha">#FF4DD0E1</color>  <!-- Lighter teal gradient end -->
+
+    <!-- Border & Stroke Colors -->
+    <color name="border_white">#FF424242</color>  <!-- Dark border for dark mode -->
+    <color name="background_transparent_black">#00000000</color>  <!-- Keep transparent -->
+
+
+    <color name="history_sam_item_bg">#312C34</color>
+    <color name="history_sam_item_strok">#312C34</color>
+
+    <!-- boxs colors -->
+
+    <color name="box_bg">#232026</color>
+    <color name="sub_box_bg">#2A272C</color>
+    <color name="white_text">#FFFFFF</color>
+
+    <color name="server_list_skele_bg">#21232026</color>
+    <color name="server_list_skele_item">#B5AEBE</color>
+
 
 
 </resources>
