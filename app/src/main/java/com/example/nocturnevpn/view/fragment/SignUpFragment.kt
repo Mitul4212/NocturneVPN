@@ -1,6 +1,7 @@
 package com.example.nocturnevpn.view.fragment
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -92,6 +93,17 @@ class SignUpFragment : Fragment() {
 
         binding.facebookSignUpBtn.setOnClickListener {
             signInWithFacebook()
+        }
+
+        // Legal links
+        binding.termsOfServiceTextLink.setOnClickListener {
+            val uri = Uri.parse("https://mitul4212.github.io/nocturnevpn-legal/terms-of-service.html")
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }
+
+        binding.privacyPolicyTextLink.setOnClickListener {
+            val uri = Uri.parse("https://mitul4212.github.io/nocturnevpn-legal/privacy-policy.html")
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
         }
     }
 

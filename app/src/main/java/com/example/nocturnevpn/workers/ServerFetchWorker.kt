@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.content.Intent
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 class ServerFetchWorker (
     private val context: Context,
@@ -50,7 +51,7 @@ class ServerFetchWorker (
 
                 // --- Notify UI that server list is fetched ---
                 val intent = Intent("com.example.nocturnevpn.SERVER_LIST_FETCHED")
-                applicationContext.sendBroadcast(intent)
+                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
                 Log.d("ServerFetchWorker", "📢 [$triggerType] Broadcast sent: SERVER_LIST_FETCHED")
 
                 // --- Run premium calculation and ping logic ---

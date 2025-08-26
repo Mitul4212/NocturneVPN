@@ -21,6 +21,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.badoo.mobile.util.WeakHandler;
 import com.example.nocturnevpn.BuildConfig;
@@ -180,13 +181,14 @@ public class ChangeServerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(serverListFetchedReceiver, new IntentFilter("com.example.nocturnevpn.SERVER_LIST_FETCHED"));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(serverListFetchedReceiver, new IntentFilter("com.example.nocturnevpn.SERVER_LIST_FETCHED"));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(serverListFetchedReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(serverListFetchedReceiver);
     }
 
     private void filterServers(String query) {
