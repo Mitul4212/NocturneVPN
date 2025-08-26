@@ -15,8 +15,16 @@
         <item name="android:windowBackground">@color/white</item>
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:navigationBarColor">@color/white</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowFullscreen">false</item>
         <item name="android:windowNoTitle">true</item>
+
+
+
+        <item name="android:windowLightStatusBar">true</item>
+
+
+
+
 
 
     </style>

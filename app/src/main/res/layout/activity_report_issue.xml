@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow"
         app:title="Report an Issue"
-        app:titleTextColor="@android:color/black" />
+        app:titleTextColor="@color/black" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_bar"
