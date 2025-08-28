@@ -37,9 +37,9 @@ class AdManager private constructor(private val context: Context) {
         private const val TEST_NATIVE_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
         
         // Production Ad Unit IDs (to be replaced)
-        private const val PROD_BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
-        private const val PROD_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
-        private const val PROD_REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
+        private const val PROD_BANNER_AD_UNIT_ID = "ca-app-pub-6998123470344633/7185705851"
+        private const val PROD_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6998123470344633/2367691113"
+        private const val PROD_REWARDED_AD_UNIT_ID = "ca-app-pub-6998123470344633/8307215835"
         private const val PROD_NATIVE_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
         
         // Ad loading delays and retry settings
@@ -153,7 +153,7 @@ class AdManager private constructor(private val context: Context) {
     private fun isTestMode(): Boolean {
         // TODO: Implement proper test mode detection
         // For now, always use test ads
-        return true
+        return false
     }
     
     /**
