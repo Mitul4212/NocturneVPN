@@ -129,4 +129,12 @@ class AuthFlowManager private constructor(context: Context) {
         Log.d("AuthFlowManager", "hasSeenLogin: ${hasSeenLogin()}")
         Log.d("AuthFlowManager", "=======================")
     }
+    
+    /**
+     * Clear all auth flow preferences (for testing)
+     */
+    fun clearAllPreferences() {
+        prefs.edit().clear().apply()
+        Log.d("AuthFlowManager", "All auth flow preferences cleared")
+    }
 } 
