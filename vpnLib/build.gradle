@@ -1,19 +1,22 @@
 apply plugin: 'com.android.library'
 android {
     namespace 'de.blinkt.openvpn'
-    compileSdkVersion 30
+    compileSdkVersion 35
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 35
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
         }
     }
     compileOptions {

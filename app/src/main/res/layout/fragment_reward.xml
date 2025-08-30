@@ -1109,7 +1109,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/historyRecyclerView" />
+                    app:layout_constraintTop_toBottomOf="@+id/coinHistoryRecyclerView" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

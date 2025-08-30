@@ -7,15 +7,15 @@ apply(plugin = "androidx.navigation.safeargs.kotlin")
 
 
 android {
-    namespace = "com.example.nocturnevpn"
+    namespace = "com.nocturnevpn"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.nocturnevpn"
+        applicationId = "com.nocturnevpn"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -26,11 +26,16 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
     compileOptions {
@@ -62,7 +67,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("org.chromium.net:cronet-embedded:119.6045.31")
+//    implementation("org.chromium.net:cronet-embedded:119.6045.31")
+    implementation("com.google.android.gms:play-services-cronet:18.0.1")
     implementation("androidx.webkit:webkit:1.13.0")
     implementation ("androidx.work:work-runtime-ktx:2.9.0")
 

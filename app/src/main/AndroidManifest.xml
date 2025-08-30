@@ -121,7 +121,7 @@
 
         <!-- Default Icon -->
         <activity-alias
-            android:name="com.example.nocturnevpn.DefaultAlias"
+            android:name="com.nocturnevpn.DefaultAlias"
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
@@ -135,7 +135,7 @@
 
         <!-- Icon 2 -->
         <activity-alias
-            android:name="com.example.nocturnevpn.Icon2Alias"
+            android:name="com.nocturnevpn.Icon2Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark"
@@ -150,7 +150,7 @@
 
         <!-- Icon 3 -->
         <activity-alias
-            android:name="com.example.nocturnevpn.Icon3Alias"
+            android:name="com.nocturnevpn.Icon3Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_dark_2"
@@ -165,7 +165,7 @@
 
         <!-- Icon 4 -->
         <activity-alias
-            android:name="com.example.nocturnevpn.Icon4Alias"
+            android:name="com.nocturnevpn.Icon4Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_1"
@@ -180,7 +180,7 @@
 
         <!-- Icon 5 -->
         <activity-alias
-            android:name="com.example.nocturnevpn.Icon5Alias"
+            android:name="com.nocturnevpn.Icon5Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_2"
@@ -195,7 +195,7 @@
 
         <!-- Icon 6 -->
         <activity-alias
-            android:name="com.example.nocturnevpn.Icon6Alias"
+            android:name="com.nocturnevpn.Icon6Alias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_3d_retro"
@@ -210,7 +210,7 @@
 
         <!-- Weather Icon (Discreet) -->
         <activity-alias
-            android:name="com.example.nocturnevpn.WeatherAlias"
+            android:name="com.nocturnevpn.WeatherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_weather"
@@ -224,7 +224,7 @@
 
         <!-- Notes Icon (Discreet) -->
         <activity-alias
-            android:name="com.example.nocturnevpn.NotesAlias"
+            android:name="com.nocturnevpn.NotesAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_notes"
@@ -238,7 +238,7 @@
 
         <!-- Calculator Icon (Discreet) -->
         <activity-alias
-            android:name="com.example.nocturnevpn.CalculatorAlias"
+            android:name="com.nocturnevpn.CalculatorAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_calculeter"
