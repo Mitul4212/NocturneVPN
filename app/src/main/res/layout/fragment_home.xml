@@ -165,7 +165,7 @@
             <!-- Custom Button -->
 
 
-            <com.example.nocturnevpn.widget.AnimatedGradientBorderView
+            <com.nocturnevpn.widget.AnimatedGradientBorderView
                 android:id="@+id/go_pro_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -210,7 +210,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            </com.example.nocturnevpn.widget.AnimatedGradientBorderView>
+            </com.nocturnevpn.widget.AnimatedGradientBorderView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
