@@ -1,4 +1,4 @@
-package com.example.nocturnevpn.view.activitys
+package com.nocturnevpn.view.activitys
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.example.nocturnevpn.R
-import com.example.nocturnevpn.utils.AuthManager
-import com.example.nocturnevpn.utils.AuthFlowManager
+import com.nocturnevpn.R
+import com.nocturnevpn.utils.AuthManager
+import com.nocturnevpn.utils.AuthFlowManager
 import com.google.firebase.auth.FirebaseAuth
 
 class SplashActivity : AppCompatActivity() {
