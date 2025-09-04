@@ -157,6 +157,12 @@
 -keep class de.blinkt.openvpn.api.IOpenVPNAPIService { *; }
 -keep class de.blinkt.openvpn.api.APIVpnProfile { *; }
 
+# Harden AIDL and internal interfaces (Play minify)
+-keep class de.blinkt.openvpn.core.IOpenVPNServiceInternal { *; }
+-keep class de.blinkt.openvpn.core.IOpenVPNServiceInternal$Stub { *; }
+-keep class de.blinkt.openvpn.api.IOpenVPNAPIService { *; }
+-keepattributes *Annotation*,InnerClasses,EnclosingMethod,Signature
+
 # Keep OpenVpnApi class - Critical for VPN functionality
 -keep class de.blinkt.openvpn.OpenVpnApi { *; }
 -keepclassmembers class de.blinkt.openvpn.OpenVpnApi { public *; }

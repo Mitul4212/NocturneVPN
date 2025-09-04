@@ -43,6 +43,11 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.AdListener
 import de.blinkt.openvpn.core.VpnStatus
 import android.webkit.WebView
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.core.app.NotificationManagerCompat
 
 class HomeFragment : Fragment(), VpnStatus.StateListener {
 
@@ -238,6 +243,35 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
 
     }
 
+    private val notifPermissionLauncher = registerForActivityResult(RequestPermission()) { granted ->
+        if (granted) {
+            proceedConnectFlow()
+        } else {
+            // Open app notification settings if user denied; Samsung may suppress notifications
+            openAppNotificationSettings()
+            mContext.toast("Please enable notifications to start VPN")
+        }
+    }
+
+    private fun notificationsAllowed(): Boolean {
+        return NotificationManagerCompat.from(requireContext()).areNotificationsEnabled()
+    }
+
+    private fun openAppNotificationSettings() {
+        try {
+            val intent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, requireContext().packageName)
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        } catch (_: Exception) { }
+    }
+
+    private fun proceedConnectFlow() {
+        val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+        adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+    }
+
     private fun handleConnectButtonClick() {
         // Add button click animation for immediate feedback
         connectionStatusManager.animateButtonClick()
@@ -309,12 +343,22 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }
         // --- PREMIUM CHECK LOGIC END ---
 
-        // If we get here, either the server is not premium or the user is premium
-        // Show interstitial before starting VPN for every 3rd connect attempt only (basic frequency cap)
-        val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-        adManager.showInterstitialAd(requireActivity()) {
-            vpnManager.prepareVPN()
+        // On Android 13+, ensure POST_NOTIFICATIONS is granted; Samsung may suppress FGS otherwise
+        if (Build.VERSION.SDK_INT >= 33) {
+            val granted = requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            if (!granted || !notificationsAllowed()) {
+                notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        } else if (!notificationsAllowed()) {
+            openAppNotificationSettings()
+            mContext.toast("Please enable notifications to start VPN")
+            return
         }
+
+        // If we get here, either the server is not premium or the user is premium
+        val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+        adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
     }
 
     private fun setupProTimer() {

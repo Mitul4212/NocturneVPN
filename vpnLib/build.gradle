@@ -9,11 +9,15 @@ android {
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
+        // Ship keep rules with the AAR so the app applies them when shrinking
+        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Do not minify the library itself; let the app’s R8 do it using consumer rules
+            minifyEnabled false
         }
         debug {
             minifyEnabled false

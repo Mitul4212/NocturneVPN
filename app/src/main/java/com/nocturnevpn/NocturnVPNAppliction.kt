@@ -21,63 +21,62 @@ class NocturnVPNAppliction : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // Initialize Facebook SDK
-        try {
-            FacebookSdk.sdkInitialize(applicationContext)
-            AppEventsLogger.activateApp(this)
-            Log.d("NocturnVPNAppliction", "Facebook SDK initialized successfully")
-        } catch (e: Exception) {
-            Log.e("NocturnVPNAppliction", "Error initializing Facebook SDK: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        // Initialize Firebase Auth state
-        try {
-            val authManager = AuthManager.getInstance(this)
-            val firebaseAuth = authManager.getFirebaseAuth()
+        // Initialize third-party SDKs only if enabled
+        if (!BuildConfig.DISABLE_THIRD_PARTY_SDKS) {
+            // Initialize Facebook SDK
+            try {
+                FacebookSdk.sdkInitialize(applicationContext)
+                AppEventsLogger.activateApp(this)
+                Log.d("NocturnVPNAppliction", "Facebook SDK initialized successfully")
+            } catch (e: Exception) {
+                Log.e("NocturnVPNAppliction", "Error initializing Facebook SDK: ${e.message}")
+                e.printStackTrace()
+            }
             
-            // Firebase Auth persistence is enabled by default
-            // We'll handle session restoration in AuthManager with better logic
+            // Initialize Firebase Auth state
+            try {
+                val authManager = AuthManager.getInstance(this)
+                val firebaseAuth = authManager.getFirebaseAuth()
+                Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${firebaseAuth.currentUser != null}")
+            } catch (e: Exception) {
+                Log.e("NocturnVPNAppliction", "Error initializing Firebase Auth: ${e.message}")
+                e.printStackTrace()
+            }
             
-            Log.d("NocturnVPNAppliction", "Firebase Auth initialized, current user: ${firebaseAuth.currentUser != null}")
-        } catch (e: Exception) {
-            Log.e("NocturnVPNAppliction", "Error initializing Firebase Auth: ${e.message}")
-            e.printStackTrace()
+            // Initialize Google MobileAds
+            try {
+                MobileAds.initialize(this) { initializationStatus ->
+                    Log.d("NocturnVPNAppliction", "MobileAds initialization completed: ${initializationStatus.adapterStatusMap}")
+                }
+                Log.d("NocturnVPNAppliction", "MobileAds initialized successfully")
+            } catch (e: Exception) {
+                Log.e("NocturnVPNAppliction", "Error initializing MobileAds: ${e.message}")
+                e.printStackTrace()
+            }
+            
+            // Initialize AdManager
+            try {
+                val adManager = AdManager.getInstance(this)
+                adManager.initialize()
+                Log.d("NocturnVPNAppliction", "AdManager initialized successfully")
+            } catch (e: Exception) {
+                Log.e("NocturnVPNAppliction", "Error initializing AdManager: ${e.message}")
+                e.printStackTrace()
+            }
+            
+            // Configure WebView for ads compatibility
+            try {
+                android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+                Log.d("NocturnVPNAppliction", "WebView configured for ads compatibility")
+            } catch (e: Exception) {
+                Log.e("NocturnVPNAppliction", "Error configuring WebView for ads: ${e.message}")
+                e.printStackTrace()
+            }
+        } else {
+            Log.w("NocturnVPNAppliction", "Third-party SDK initialization disabled by BuildConfig flag")
         }
         
         setupPeriodicServerFetch()
-        
-        // Initialize Google MobileAds
-        try {
-            MobileAds.initialize(this) { initializationStatus ->
-                Log.d("NocturnVPNAppliction", "MobileAds initialization completed: ${initializationStatus.adapterStatusMap}")
-            }
-            Log.d("NocturnVPNAppliction", "MobileAds initialized successfully")
-        } catch (e: Exception) {
-            Log.e("NocturnVPNAppliction", "Error initializing MobileAds: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        // Initialize AdManager
-        try {
-            val adManager = AdManager.getInstance(this)
-            adManager.initialize()
-            Log.d("NocturnVPNAppliction", "AdManager initialized successfully")
-        } catch (e: Exception) {
-            Log.e("NocturnVPNAppliction", "Error initializing AdManager: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        // Configure WebView for ads compatibility
-        try {
-            // Enable WebView debugging for ads
-            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
-            
-            Log.d("NocturnVPNAppliction", "WebView configured for ads compatibility")
-        } catch (e: Exception) {
-            Log.e("NocturnVPNAppliction", "Error configuring WebView for ads: ${e.message}")
-            e.printStackTrace()
-        }
         
         // Generate key hashes for Facebook authentication (debug only)
         if (BuildConfig.DEBUG) {
@@ -99,10 +98,8 @@ class NocturnVPNAppliction : Application() {
     private fun setupPeriodicServerFetch() {
         try {
             val constraints = Constraints.Builder()
-                // No network type constraint, allow any network
                 .build()
 
-            // Set to 30 minutes for both debug and release
             val repeatInterval = 15L
             val flexInterval = 5L
 
@@ -113,10 +110,8 @@ class NocturnVPNAppliction : Application() {
                 .setConstraints(constraints)
                 .build()
 
-            // Cancel any existing work first
             WorkManager.getInstance(this).cancelUniqueWork("vpn_server_fetch")
 
-            // Schedule new work
             WorkManager.getInstance(this).enqueueUniquePeriodicWork(
                 "vpn_server_fetch",
                 ExistingPeriodicWorkPolicy.REPLACE,

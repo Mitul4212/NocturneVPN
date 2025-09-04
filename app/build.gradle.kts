@@ -14,13 +14,15 @@ android {
         applicationId = "com.nocturnevpn"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.1"
+        versionCode = 4
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled = true
         buildConfigField("String", "VPN_GATE_API", "\"http://www.vpngate.net/api/iphone/\"")
+        // Toggle to disable third-party SDK initializations during troubleshooting
+        buildConfigField("boolean", "DISABLE_THIRD_PARTY_SDKS", "true")
 
     }
 
@@ -51,6 +53,20 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    // Deliver a single base APK (disable language/density/ABI splits)
+    bundle {
+        language { enableSplit = false }
+        density { enableSplit = false }
+        abi { enableSplit = false }
+    }
+
+    // Ensure native libs are extracted to app lib/ directory so OpenVPN can exec from nativeLibraryDir
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
