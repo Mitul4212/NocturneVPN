@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.nocturnevpn.databinding.ActivitySocialAuthTestBinding
 import com.nocturnevpn.utils.SocialAuthHelper
 import com.google.firebase.auth.FirebaseAuth
+import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 
 class SocialAuthTestActivity : AppCompatActivity() {
     
@@ -16,8 +20,15 @@ class SocialAuthTestActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Edge-to-edge; handle insets
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivitySocialAuthTestBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(top = bars.top, bottom = bars.bottom)
+            insets
+        }
         
         socialAuthHelper = SocialAuthHelper(this)
         auth = FirebaseAuth.getInstance()

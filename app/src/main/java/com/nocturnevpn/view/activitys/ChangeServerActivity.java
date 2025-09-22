@@ -22,6 +22,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
 import com.badoo.mobile.util.WeakHandler;
 import com.nocturnevpn.BuildConfig;
@@ -111,6 +115,22 @@ public class ChangeServerActivity extends AppCompatActivity {
         sharedPreference = new SharedPreference(ChangeServerActivity.this);
         binding = ActivityChangeServerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Edge-to-edge with transparent bars; handle insets to avoid overlap
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Apply only top inset on root to avoid double bottom padding
+            v.setPadding(v.getPaddingLeft(), bars.top, v.getPaddingRight(), v.getPaddingBottom());
+            // Ensure list content is above nav bar
+            binding.swipeRefresh.setPadding(
+                    binding.swipeRefresh.getPaddingLeft(),
+                    binding.swipeRefresh.getPaddingTop(),
+                    binding.swipeRefresh.getPaddingRight(),
+                    bars.bottom
+            );
+            return insets;
+        });
 
         // Do NOT trigger Worker or server fetch on page open for best UX
         // Only periodic Worker and manual refresh will update data

@@ -1,7 +1,10 @@
 package com.nocturnevpn.view.fragment
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,27 +13,23 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.nocturnevpn.R
-import com.nocturnevpn.databinding.FragmentSignInBinding
-import com.nocturnevpn.utils.SocialAuthHelper
-import com.nocturnevpn.utils.FirebaseUtils
-import com.nocturnevpn.view.activitys.HomeActivity
-import com.nocturnevpn.SharedPreference
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.firestore.FirebaseFirestore
+import com.nocturnevpn.R
+import com.nocturnevpn.SharedPreference
+import com.nocturnevpn.databinding.FragmentSignInBinding
+import com.nocturnevpn.utils.FirebaseUtils
+import com.nocturnevpn.utils.SocialAuthHelper
 import com.nocturnevpn.utils.getUserFriendlyDeviceId
-import android.provider.Settings
-import android.os.Build
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import android.content.Context
+import com.nocturnevpn.view.activitys.HomeActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SignInFragment : Fragment() {
 
@@ -96,9 +95,9 @@ class SignInFragment : Fragment() {
             signInWithGoogle()
         }
 
-        binding.facebookSignInBtn.setOnClickListener {
-            signInWithFacebook()
-        }
+//        binding.facebookSignInBtn.setOnClickListener {
+//            signInWithFacebook()
+//        }
         
         // Add retry functionality when there are network errors
         binding.emailLayout1.setEndIconOnClickListener {

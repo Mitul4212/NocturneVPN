@@ -2,7 +2,9 @@ package com.nocturnevpn.view.fragment
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,17 +13,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.nocturnevpn.R
-import com.nocturnevpn.databinding.FragmentSignUpBinding
-import com.nocturnevpn.utils.SocialAuthHelper
-import com.nocturnevpn.utils.AuthManager
-import com.nocturnevpn.view.activitys.HomeActivity
-import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.nocturnevpn.R
+import com.nocturnevpn.databinding.FragmentSignUpBinding
+import com.nocturnevpn.utils.AuthManager
+import com.nocturnevpn.utils.SocialAuthHelper
 import com.nocturnevpn.utils.getUserFriendlyDeviceId
-import android.provider.Settings
-import android.os.Build
+import com.nocturnevpn.view.activitys.HomeActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -91,9 +90,9 @@ class SignUpFragment : Fragment() {
             signInWithGoogle()
         }
 
-        binding.facebookSignUpBtn.setOnClickListener {
-            signInWithFacebook()
-        }
+//        binding.facebookSignUpBtn.setOnClickListener {
+//            signInWithFacebook()
+//        }
 
         // Legal links
         binding.termsOfServiceTextLink.setOnClickListener {

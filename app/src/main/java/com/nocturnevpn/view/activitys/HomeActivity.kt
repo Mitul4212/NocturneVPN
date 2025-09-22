@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.nocturnevpn.R
@@ -20,6 +21,11 @@ import com.nocturnevpn.utils.AuthManager
 import com.nocturnevpn.utils.AuthFlowManager
 import me.ibrahimsn.lib.SmoothBottomBar
 import com.nocturnevpn.utils.RatingDialogManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import androidx.core.view.updateLayoutParams
+import androidx.constraintlayout.widget.ConstraintLayout
 
 
 class HomeActivity : AppCompatActivity() {
@@ -47,9 +53,23 @@ class HomeActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // Draw edge-to-edge; we'll handle insets in layouts
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         // Inflate the layout using View Binding
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Apply insets to avoid overlapping content while keeping transparent bars
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(top = systemBars.top)
+            // Lift bottom bar above navigation bar by adding a bottom margin
+            binding.bottomBar.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                bottomMargin = systemBars.bottom
+            }
+            insets
+        }
 
         askNotificationPermission()
 

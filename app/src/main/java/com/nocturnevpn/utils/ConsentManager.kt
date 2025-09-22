@@ -336,6 +336,9 @@ class ConsentManager private constructor(private val context: Context) {
         Log.d(TAG, "📊 Status to save: $status")
         Log.d(TAG, "⏰ Timestamp: ${System.currentTimeMillis()}")
         
+        // Read previous status to avoid redundant analytics rows
+        val previousStatus = prefs.getString(KEY_CONSENT_STATUS, null)
+
         // Save to SharedPreferences
         prefs.edit().apply {
             putString(KEY_CONSENT_STATUS, status.name)
@@ -344,9 +347,16 @@ class ConsentManager private constructor(private val context: Context) {
         }.apply()
         
         Log.d(TAG, "✅ Consent status saved to SharedPreferences")
-        
-        // Also sync to Firebase for tracking
-        syncConsentToFirebase(status)
+
+        // Also sync to Firebase for tracking ONLY if changed
+        if (previousStatus != status.name) {
+            Log.d(TAG, "🔁 Status changed from $previousStatus to ${status.name}, syncing to Firebase")
+            syncConsentToFirebase(status)
+        } else {
+            Log.d(TAG, "ℹ️ Status unchanged ($previousStatus), skipping analytics write")
+            // Ensure analytics doc exists even if status didn't change (e.g., after DB cleanup)
+            ensureAnalyticsDocExists(status)
+        }
     }
 
     /**
@@ -425,8 +435,10 @@ class ConsentManager private constructor(private val context: Context) {
             .addOnSuccessListener {
                 Log.d(TAG, "✅ Consent status synced to Firebase successfully")
                 
-                // Also save to analytics collection for easy tracking
+                // Also save/update single analytics row per user
                 saveToAnalyticsCollection(userId, consentStatus, currentTime, readableTimestamp)
+                // Cleanup any legacy/random-id analytics docs for this user
+                cleanupDuplicateAnalyticsDocs(userId)
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "❌ Error syncing consent to Firebase: ${e.message}")
@@ -437,27 +449,123 @@ class ConsentManager private constructor(private val context: Context) {
      * Save consent data to analytics collection for easy tracking
      */
     private fun saveToAnalyticsCollection(userId: String, consentStatus: ConsentStatus, timestamp: Long, readableTimestamp: String) {
-        val analyticsData = hashMapOf(
-            "userId" to userId,
-            "consentStatus" to consentStatus.name,
-            "timestamp" to timestamp,
-            "readableTimestamp" to readableTimestamp,
-            "countryCode" to getCountryCode(),
-            "ipLocation" to getUserIPLocation(),
-            "isGdprRegion" to gdprRegions.contains(getCountryCode()),
-            "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
-            "appVersion" to getAppVersion(),
-            "deviceInfo" to getDeviceInfo()
-        )
-        
-        db.collection("consent_analytics")
-            .add(analyticsData)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "📊 Consent analytics saved with ID: ${documentReference.id}")
+        val docRef = db.collection("consent_analytics").document(userId)
+
+        docRef.get()
+            .addOnSuccessListener { snapshot ->
+                val createdTs = (snapshot?.getLong("createdTimestamp")) ?: timestamp
+                val createdReadable = (snapshot?.getString("createdReadableTimestamp")) ?: readableTimestamp
+
+                val analyticsData = hashMapOf(
+                    "userId" to userId,
+                    "consentStatus" to consentStatus.name,
+                    // Last update fields
+                    "lastUpdatedTimestamp" to timestamp,
+                    "lastUpdatedReadable" to readableTimestamp,
+                    // Created (first consent) fields preserved
+                    "createdTimestamp" to createdTs,
+                    "createdReadableTimestamp" to createdReadable,
+                    // Context
+                    "countryCode" to getCountryCode(),
+                    "ipLocation" to getUserIPLocation(),
+                    "isGdprRegion" to gdprRegions.contains(getCountryCode()),
+                    "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
+                    "appVersion" to getAppVersion(),
+                    "deviceInfo" to getDeviceInfo()
+                )
+
+                docRef.set(analyticsData)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "📊 Consent analytics upserted for user: $userId")
+                        cleanupDuplicateAnalyticsDocs(userId)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "❌ Error saving consent analytics: ${e.message}")
+                    }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "❌ Error saving consent analytics: ${e.message}")
+                Log.e(TAG, "❌ Error reading existing analytics doc: ${e.message}")
+                // Fallback: write without created preservation
+                val analyticsData = hashMapOf(
+                    "userId" to userId,
+                    "consentStatus" to consentStatus.name,
+                    "lastUpdatedTimestamp" to timestamp,
+                    "lastUpdatedReadable" to readableTimestamp,
+                    "createdTimestamp" to timestamp,
+                    "createdReadableTimestamp" to readableTimestamp,
+                    "countryCode" to getCountryCode(),
+                    "ipLocation" to getUserIPLocation(),
+                    "isGdprRegion" to gdprRegions.contains(getCountryCode()),
+                    "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
+                    "appVersion" to getAppVersion(),
+                    "deviceInfo" to getDeviceInfo()
+                )
+                docRef.set(analyticsData)
+                cleanupDuplicateAnalyticsDocs(userId)
             }
+    }
+
+    /**
+     * Ensure consent_analytics/{userId} exists. If missing, create it with current status.
+     */
+    private fun ensureAnalyticsDocExists(consentStatus: ConsentStatus) {
+        val userId = getCurrentUserId() ?: return
+        val docRef = db.collection("consent_analytics").document(userId)
+        docRef.get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot == null || !snapshot.exists()) {
+                    val now = System.currentTimeMillis()
+                    val readable = getReadableTimestamp(now)
+                    val analyticsData = hashMapOf(
+                        "userId" to userId,
+                        "consentStatus" to consentStatus.name,
+                        "lastUpdatedTimestamp" to now,
+                        "lastUpdatedReadable" to readable,
+                        "createdTimestamp" to now,
+                        "createdReadableTimestamp" to readable,
+                        "countryCode" to getCountryCode(),
+                        "ipLocation" to getUserIPLocation(),
+                        "isGdprRegion" to gdprRegions.contains(getCountryCode()),
+                        "isCcpaRegion" to ccpaRegions.contains(getCountryCode()),
+                        "appVersion" to getAppVersion(),
+                        "deviceInfo" to getDeviceInfo()
+                    )
+                    docRef.set(analyticsData)
+                        .addOnSuccessListener { Log.d(TAG, "📊 Created missing analytics doc for user: $userId") }
+                        .addOnFailureListener { e -> Log.e(TAG, "❌ Error creating analytics doc: ${e.message}") }
+                } else {
+                    // If exists, optionally clean up duplicates
+                    cleanupDuplicateAnalyticsDocs(userId)
+                }
+            }
+            .addOnFailureListener { e -> Log.e(TAG, "❌ Error checking analytics doc existence: ${e.message}") }
+    }
+
+    /**
+     * Remove legacy random-ID docs in consent_analytics for the same user to avoid duplicates.
+     */
+    private fun cleanupDuplicateAnalyticsDocs(userId: String) {
+        try {
+            db.collection("consent_analytics")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener { query ->
+                    val batch = db.batch()
+                    for (doc in query.documents) {
+                        if (doc.id != userId) {
+                            batch.delete(doc.reference)
+                        }
+                    }
+                    batch.commit().addOnSuccessListener {
+                        Log.d(TAG, "🧹 Cleaned up duplicate analytics docs for user: $userId")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "❌ Duplicate cleanup failed: ${e.message}")
+                }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Duplicate cleanup exception: ${e.message}")
+        }
     }
     
     /**

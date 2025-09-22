@@ -10,6 +10,10 @@ import androidx.fragment.app.Fragment
 import com.nocturnevpn.view.fragment.IssueCategoryFragment
 import com.nocturnevpn.view.fragment.QuickFixFragment
 import com.nocturnevpn.view.fragment.ReportFormFragment
+import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 
 class ReportIssueActivity : AppCompatActivity(),
     IssueCategoryFragment.OnIssueCategorySelectedListener,
@@ -23,7 +27,16 @@ class ReportIssueActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Edge-to-edge; handle insets
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_report_issue)
+
+        val root = findViewById<android.view.View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(top = bars.top, bottom = bars.bottom)
+            insets
+        }
 
         toolbar = findViewById(R.id.toolbar)
         progressBar = findViewById(R.id.progress_bar)
