@@ -10,6 +10,7 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.LoadAdError
 import com.nocturnevpn.utils.ConsentManager
+import com.nocturnevpn.utils.SubscriptionSyncManager
 
 /**
  * BannerAdManager - Handles banner ad operations across fragments
@@ -62,6 +63,12 @@ class BannerAdManager private constructor(private val context: Context) {
         onAdLoaded: (() -> Unit)? = null,
         onAdFailed: ((String) -> Unit)? = null
     ) {
+        // Suppress banners for premium users
+        if (isUserPremium()) {
+            Log.d(TAG, "🚫 Banner suppressed for premium user")
+            adView.visibility = View.GONE
+            return
+        }
         Log.d(TAG, "🚀 Initializing banner ad...")
         
         // Set ad listener
@@ -102,6 +109,11 @@ class BannerAdManager private constructor(private val context: Context) {
      * Load banner ad with retry mechanism
      */
     private fun loadBannerAd(adView: AdView, retryCount: Int = 0) {
+        if (isUserPremium()) {
+            Log.d(TAG, "🚫 Banner load skipped for premium user")
+            adView.visibility = View.GONE
+            return
+        }
         if (retryCount >= MAX_RETRY_ATTEMPTS) {
             Log.w(TAG, "⚠️ Max retry attempts reached for banner ad")
             return
@@ -160,8 +172,13 @@ class BannerAdManager private constructor(private val context: Context) {
      * Refresh banner ad
      */
     fun refreshBannerAd(adView: AdView) {
-        Log.d(TAG, "🔄 Refreshing banner ad...")
-        loadBannerAd(adView)
+        if (isUserPremium()) {
+            Log.d(TAG, "🚫 Banner refresh skipped for premium user")
+            adView.visibility = View.GONE
+        } else {
+            Log.d(TAG, "🔄 Refreshing banner ad...")
+            loadBannerAd(adView)
+        }
     }
     
     /**
@@ -219,16 +236,25 @@ class BannerAdManager private constructor(private val context: Context) {
      * Show banner ad
      */
     fun showBannerAd(adView: AdView) {
-        adView.visibility = View.VISIBLE
-        Log.d(TAG, "👁️ Banner ad shown")
+        if (isUserPremium()) {
+            adView.visibility = View.GONE
+            Log.d(TAG, "🚫 Banner show blocked for premium user")
+        } else {
+            adView.visibility = View.VISIBLE
+            Log.d(TAG, "👁️ Banner ad shown")
+        }
     }
     
     /**
      * Start ad refresh cycle
      */
     fun startAdRefreshCycle() {
-        mainHandler.postDelayed(adRefreshRunnable, AD_REFRESH_INTERVAL)
-        Log.d(TAG, "🔄 Started ad refresh cycle")
+        if (!isUserPremium()) {
+            mainHandler.postDelayed(adRefreshRunnable, AD_REFRESH_INTERVAL)
+            Log.d(TAG, "🔄 Started ad refresh cycle")
+        } else {
+            Log.d(TAG, "🚫 Ad refresh cycle suppressed for premium user")
+        }
     }
     
     /**
@@ -245,5 +271,11 @@ class BannerAdManager private constructor(private val context: Context) {
     fun cleanup() {
         stopAdRefreshCycle()
         Log.d(TAG, "🧹 BannerAdManager cleaned up")
+    }
+
+    private fun isUserPremium(): Boolean {
+        val manager = SubscriptionSyncManager.getInstance(context)
+        manager.enforceLocalExpiryAndSync(syncFirebase = false)
+        return manager.hasActiveSubscription()
     }
 }

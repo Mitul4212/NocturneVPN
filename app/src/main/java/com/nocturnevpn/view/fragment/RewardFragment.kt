@@ -327,9 +327,12 @@ class RewardFragment : Fragment() {
                     var wasRewarded = false
                     val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
                     btn.isEnabled = false
-                    adManager.showRewardedAd(
-                        requireActivity(),
-                        onRewarded = {
+                    // Premium users skip ad for check-in; free users must watch ad
+                    val prefsPremium = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    val endTime = prefsPremium.getLong(KEY_PRO_TIMER_END, 0L)
+                    val type = prefsPremium.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+                    val isLocalPremium = endTime > System.currentTimeMillis() && (type == "subscription")
+                    val proceedReward: () -> Unit = {
                             wasRewarded = true
                             val reward = if (idx == 6) {
                                 val rand = java.util.Random().nextInt(100)
@@ -389,14 +392,24 @@ class RewardFragment : Fragment() {
                             } else {
                                 Toast.makeText(requireContext(), "Check-in successful! +$reward coins", Toast.LENGTH_SHORT).show()
                             }
-                        },
-                        onAdClosed = {
-                            if (!wasRewarded) {
-                                Toast.makeText(requireContext(), "Ad not completed. Check-in requires watching an ad.", Toast.LENGTH_SHORT).show()
-                                btn.isEnabled = true
-                            }
-                        }
-                    )
+                    }
+
+                    if (isLocalPremium) {
+                        // Skip ad, grant reward directly for premium users
+                        proceedReward()
+                    } else {
+                        adManager.showRewardedAd(
+                            requireActivity(),
+                            onRewarded = { proceedReward() },
+                            onAdClosed = {
+                                if (!wasRewarded) {
+                                    Toast.makeText(requireContext(), "Ad not completed. Check-in requires watching an ad.", Toast.LENGTH_SHORT).show()
+                                    btn.isEnabled = true
+                                }
+                            },
+                            allowPremium = false
+                        )
+                    }
                 }
             }
         }
@@ -636,7 +649,8 @@ class RewardFragment : Fragment() {
                     if (!binding.watchAdButton.isEnabled) {
                         binding.watchAdButton.isEnabled = true
                     }
-                }
+                },
+                allowPremium = true // ALWAYS allow rewarded ad on watchAdButton even for premium users
             )
         }
     }
@@ -909,8 +923,10 @@ class RewardFragment : Fragment() {
                 "createdAt" to now,
                 "createdAtStr" to formatReadableDateTime(now)
             )
+            // Use .document(date).set(payload, SetOptions.merge()) to update or create a single document per day
             firestore.collection("users").document(userId)
-                .collection("checkins").add(payload)
+                .collection("checkins").document(date) // Use the date as the document ID
+                .set(payload, SetOptions.merge())
         } catch (_: Exception) { }
     }
 

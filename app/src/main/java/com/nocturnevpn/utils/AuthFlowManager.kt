@@ -103,7 +103,7 @@ class AuthFlowManager private constructor(context: Context) {
         
         return when {
             isSignedIn -> {
-                // User is signed in, always go to home
+                // User is signed in, go to home normally
                 Log.d("AuthFlowManager", "User signed in, going to HomeActivity")
                 Class.forName("com.nocturnevpn.view.activitys.HomeActivity")
             }

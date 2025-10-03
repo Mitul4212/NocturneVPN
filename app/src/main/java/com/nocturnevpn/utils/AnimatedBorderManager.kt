@@ -28,6 +28,7 @@ class AnimatedBorderManager private constructor(context: Context) {
         private const val KEY_IS_ANIMATING = "is_animating"
         private const val KEY_ANIMATION_END_TIME = "animation_end_time"
         private const val KEY_SHOULD_SHOW_AFTER_NAVIGATION = "should_show_after_navigation"
+        const val ANIMATION_INFINITE: Long = Long.MAX_VALUE // Define ANIMATION_INFINITE
         
         @Volatile
         private var INSTANCE: AnimatedBorderManager? = null
@@ -60,21 +61,25 @@ class AnimatedBorderManager private constructor(context: Context) {
         // Update current border view
         currentBorderView = borderView
         
-        // Save state to preferences
-        val endTime = System.currentTimeMillis() + durationMillis
+        // Save state to preferences and start the animation
+        val infinite = durationMillis == ANIMATION_INFINITE
+        val endTime = if (infinite) Long.MAX_VALUE else (System.currentTimeMillis() + durationMillis)
         prefs.edit()
             .putBoolean(KEY_IS_ANIMATING, true)
             .putLong(KEY_ANIMATION_END_TIME, endTime)
             .apply()
-        
-        // Start the animation
+
         borderView.startBorderAnimation()
-        
-        // Schedule the stop animation with a small delay to prevent immediate stopping
-        currentAnimationRunnable = Runnable {
-            stopAnimatedBorder()
+
+        // Schedule stop only for finite durations
+        if (!infinite) {
+            currentAnimationRunnable = Runnable {
+                stopAnimatedBorder()
+            }
+            handler.postDelayed(currentAnimationRunnable!!, durationMillis)
+        } else {
+            currentAnimationRunnable = null
         }
-        handler.postDelayed(currentAnimationRunnable!!, durationMillis)
         
         // Add a small delay to ensure animation starts properly
         handler.postDelayed({
@@ -156,18 +161,22 @@ class AnimatedBorderManager private constructor(context: Context) {
             return
         }
         
-        if (isAnimating && endTime > System.currentTimeMillis()) {
+        if (isAnimating && (endTime == Long.MAX_VALUE || endTime > System.currentTimeMillis())) {
             // Animation should still be running
-            val remainingTime = endTime - System.currentTimeMillis()
-            Log.d("AnimatedBorderManager", "Restoring animation with ${remainingTime}ms remaining")
+            val remainingTime = if (endTime == Long.MAX_VALUE) Long.MAX_VALUE else (endTime - System.currentTimeMillis())
+            Log.d("AnimatedBorderManager", "Restoring animation with ${if (endTime == Long.MAX_VALUE) "infinite" else "$remainingTime"}ms remaining")
             
             currentBorderView = borderView
             borderView.startBorderAnimation()
             
-            currentAnimationRunnable = Runnable {
-                stopAnimatedBorder()
+            if (endTime != Long.MAX_VALUE) {
+                currentAnimationRunnable = Runnable {
+                    stopAnimatedBorder()
+                }
+                handler.postDelayed(currentAnimationRunnable!!, remainingTime)
+            } else {
+                currentAnimationRunnable = null
             }
-            handler.postDelayed(currentAnimationRunnable!!, remainingTime)
             
         } else if (shouldShowAfterNav) {
             // Should show animation after navigation

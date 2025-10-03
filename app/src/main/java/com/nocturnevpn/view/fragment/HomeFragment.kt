@@ -1,13 +1,16 @@
 package com.nocturnevpn.view.fragment
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,39 +18,38 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.webkit.WebView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.billingclient.api.BillingClient
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
 import com.nocturnevpn.CheckInternetConnection
 import com.nocturnevpn.R
 import com.nocturnevpn.SharedPreference
+import com.nocturnevpn.data.repository.SubscriptionRepository
 import com.nocturnevpn.databinding.FragmentHomeBinding
 import com.nocturnevpn.model.Server
-import com.nocturnevpn.utils.Utils
-import com.nocturnevpn.utils.toast
 import com.nocturnevpn.utils.AnimatedBorderManager
 import com.nocturnevpn.utils.ConsentManager
+import com.nocturnevpn.utils.SubscriptionSyncManager
+import com.nocturnevpn.utils.Utils
+import com.nocturnevpn.utils.toast
 import com.nocturnevpn.view.activitys.ChangeServerActivity
 import com.nocturnevpn.view.managers.ConnectionStatusManager
 import com.nocturnevpn.view.managers.GlobeManager
 import com.nocturnevpn.view.managers.NotificationManager
 import com.nocturnevpn.view.managers.ServerManager
 import com.nocturnevpn.view.managers.VPNManager
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.AdListener
 import de.blinkt.openvpn.core.VpnStatus
-import android.webkit.WebView
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), VpnStatus.StateListener {
 
@@ -69,6 +71,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private var connection: CheckInternetConnection? = null
     private var sharedPreference: SharedPreference? = null
     var wasConnectedOnce = false
+    private var isUserPremium: Boolean = false
 
 
     private val PREFS = "reward_prefs"
@@ -82,6 +85,10 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     
     // Consent manager
     private lateinit var consentManager: ConsentManager
+
+    // Subscription repository
+    private lateinit var subscriptionRepository: SubscriptionRepository
+    private lateinit var subscriptionSyncManager: SubscriptionSyncManager // Add this line
 
 
     @SuppressLint("SuspiciousIndentation")
@@ -114,11 +121,17 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         connection = CheckInternetConnection()
+        val billingClient = BillingClient.newBuilder(requireContext().applicationContext)
+            .enablePendingPurchases()
+            .setListener { billingResult, purchases -> /* Handled by VPNManager or AfterPremiumFragment */ }
+            .build()
+        vpnManager = VPNManager(requireContext(), sharedPreference!!, billingClient)
         initializeManagers()
+        subscriptionRepository = SubscriptionRepository(SubscriptionRepository.subscriptionService)
+        subscriptionSyncManager = SubscriptionSyncManager.getInstance(requireContext()) // Initialize SubscriptionSyncManager
     }
 
     private fun initializeManagers() {
-        vpnManager = VPNManager(requireContext(), sharedPreference!!)
         notificationManager = NotificationManager(requireContext())
         animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
         consentManager = ConsentManager.getInstance(requireContext())
@@ -159,11 +172,12 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         val goProButton = view.findViewById<com.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
 
         // On click: navigate to PremiumFragment, then after returning, show animated border for 1 minute
-        goProButton.setOnClickListener {
-            android.util.Log.d("AnimatedBorderTest", "Button clicked, navigating to PremiumFragment")
-            animatedBorderManager.setShouldShowAfterNavigation(true)
-            findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
-        }
+        // Removed: This is now handled by updateGoProButtonState for conditional navigation and animated border.
+        // goProButton.setOnClickListener {
+        //     android.util.Log.d("AnimatedBorderTest", "Button clicked, navigating to PremiumFragment")
+        //     animatedBorderManager.setShouldShowAfterNavigation(true)
+        //     findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        // }
         
         // Initialize consent popup after everything else is set up
         initializeConsentPopup()
@@ -205,7 +219,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private fun setupUI() {
         setupProButtonGradient()
         serverManager.loadSavedServer()
-        setupProTimer()
+        // setupProTimer() // This will now be handled by updateGoProButtonState
+        updateGoProButtonState()
     }
 
     private fun setupProButtonGradient() {
@@ -223,9 +238,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
 
     private fun setupClickListeners() {
         binding?.goProButton?.setOnClickListener {
-            // Set flag to show animation after navigation
-            animatedBorderManager.setShouldShowAfterNavigation(true)
-            findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+            // The navigation logic will be handled by updateGoProButtonState
         }
 
         binding?.chooseServer?.setOnClickListener {
@@ -268,8 +281,12 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     }
 
     private fun proceedConnectFlow() {
-        val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-        adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+        if (isUserPremium) {
+            vpnManager.prepareVPN()
+        } else {
+            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+        }
     }
 
     private fun handleConnectButtonClick() {
@@ -277,11 +294,15 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         connectionStatusManager.animateButtonClick()
         
         if (vpnManager.isVPNStarted()) {
-            // Show interstitial before disconnect flow
-            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-            adManager.showInterstitialAd(requireActivity()) {
-                // Continue with disconnect confirm after ad closed or if not ready
+            // For premium users, do not show interstitial on disconnect
+            if (isUserPremium) {
                 confirmDisconnect()
+            } else {
+                val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+                adManager.showInterstitialAd(requireActivity()) {
+                    // Continue with disconnect confirm after ad closed or if not ready
+                    confirmDisconnect()
+                }
             }
             return
         }
@@ -308,41 +329,70 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Selected server: IP=${selectedServer.ipAddress}, Country=${selectedServer.countryLong}, isPremium=$isPremiumServer (matched in list: ${matchedServer != null})")
         // --- DEBUG LOGS END ---
 
-        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val proTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
-        val isUserPremium = proTimerEnd > System.currentTimeMillis()
-        Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "isPremiumServer=$isPremiumServer, isUserPremium=$isUserPremium, proTimerEnd=$proTimerEnd, now=${System.currentTimeMillis()}")
+        // Check backend-verified subscription status from Firebase
+        CoroutineScope(Dispatchers.IO).launch {
+            subscriptionSyncManager.restoreSubscriptionFromFirebase(
+                onSuccess = { subscriptionStatus ->
+                    val isUserPremiumFromFirebase = subscriptionStatus?.status == "active" &&
+                                                  (subscriptionStatus.expiryTimeMillis > System.currentTimeMillis())
+                    isUserPremium = isUserPremiumFromFirebase
+                    Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "isPremiumServer=$isPremiumServer, isUserPremiumFromFirebase=$isUserPremiumFromFirebase, BackendStatus=$subscriptionStatus")
 
-        if (isPremiumServer && !isUserPremium) {
-            // Show custom dialog: Not allowed to connect premium server
-            Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Blocked: User tried to connect to premium server without premium access!")
-            val dialogView = LayoutInflater.from(mContext).inflate(R.layout.premium_block_dialog, null)
-            val titleView = dialogView.findViewById<TextView>(R.id.premium_block_title)
-            val messageView = dialogView.findViewById<TextView>(R.id.premium_block_message)
-            val lottie = dialogView.findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.premium_block_lottie)
-            val changeServerBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_change_server_btn)
-            val getPremiumBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_get_premium_btn)
-            // Set dialog content (optional, already set in XML)
-            titleView.text = "Premium Server"
-            messageView.text = "This server is for premium users only.\n\nPlease change to a normal server or get a premium subscription."
-            lottie.setAnimation(R.raw.info_animation)
-            val dialog = android.app.Dialog(mContext)
-            dialog.setContentView(dialogView)
-            dialog.setCancelable(true)
-            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-            changeServerBtn.setOnClickListener {
-                dialog.dismiss()
-                getServerResult.launch(Intent(mContext, ChangeServerActivity::class.java))
-            }
-            getPremiumBtn.setOnClickListener {
-                dialog.dismiss()
-                findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
-            }
-            dialog.show()
-            return
+                    if (isPremiumServer && !isUserPremiumFromFirebase) {
+                        // Show custom dialog: Not allowed to connect premium server
+                        Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Blocked: User tried to connect to premium server without premium access based on Firebase!")
+                        requireActivity().runOnUiThread {
+                            showPremiumBlockDialog()
+                        }
+                    } else {
+                        // Proceed with VPN connection flow
+                        requireActivity().runOnUiThread {
+                            proceedConnectionFlowAfterPremiumCheck(isUserPremiumFromFirebase)
+                        }
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("NOCTURNE_VPN_PREMIUM_CHECK", "Failed to restore subscription from Firebase: $error")
+                    // If Firebase check fails, default to blocking premium server access for safety
+                    requireActivity().runOnUiThread {
+                        if (isPremiumServer) {
+                            showPremiumBlockDialog()
+                        } else {
+                            proceedConnectionFlowAfterPremiumCheck(false)
+                        }
+                    }
+                }
+            )
         }
-        // --- PREMIUM CHECK LOGIC END ---
+    }
 
+    private fun showPremiumBlockDialog() {
+        val dialogView = LayoutInflater.from(mContext).inflate(R.layout.premium_block_dialog, null)
+        val titleView = dialogView.findViewById<TextView>(R.id.premium_block_title)
+        val messageView = dialogView.findViewById<TextView>(R.id.premium_block_message)
+        val lottie = dialogView.findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.premium_block_lottie)
+        val changeServerBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_change_server_btn)
+        val getPremiumBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.premium_block_get_premium_btn)
+        // Set dialog content (optional, already set in XML)
+        titleView.text = "Premium Server"
+        messageView.text = "This server is for premium users only.\n\nPlease change to a normal server or get a premium subscription."
+        lottie.setAnimation(R.raw.info_animation)
+        val dialog = android.app.Dialog(mContext)
+        dialog.setContentView(dialogView)
+        dialog.setCancelable(true)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        changeServerBtn.setOnClickListener {
+            dialog.dismiss()
+            getServerResult.launch(Intent(mContext, ChangeServerActivity::class.java))
+        }
+        getPremiumBtn.setOnClickListener {
+            dialog.dismiss()
+            findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        }
+        dialog.show()
+    }
+
+    private fun proceedConnectionFlowAfterPremiumCheck(isPremium: Boolean) {
         // On Android 13+, ensure POST_NOTIFICATIONS is granted; Samsung may suppress FGS otherwise
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
@@ -357,28 +407,27 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }
 
         // If we get here, either the server is not premium or the user is premium
-        val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-        adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+        if (isPremium) {
+            vpnManager.prepareVPN()
+        } else {
+            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+        }
     }
 
     private fun setupProTimer() {
         val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val endTime = prefs.getLong(KEY_PRO_TIMER_END, 0L)
         val timerType = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
-        if (endTime > System.currentTimeMillis()) {
+
+        // This logic now specifically for reward-based pro timer
+        if (endTime > System.currentTimeMillis() && timerType != "subscription") {
             binding?.proTimer?.visibility = View.VISIBLE
             binding?.goProButton?.visibility = View.GONE
             startProTimerCountdown(endTime, timerType)
-            
-            // Show animated border for premium users
-            val goProButton = view?.findViewById<com.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
-            if (goProButton != null && !animatedBorderManager.isCurrentlyAnimating()) {
-                animatedBorderManager.startAnimatedBorder(goProButton, 60000) // 1 minute duration
-            }
         } else {
             binding?.proTimer?.visibility = View.GONE
-            binding?.goProButton?.visibility = View.VISIBLE
-            
+            // The visibility of goProButton will be managed by updateGoProButtonState for subscription status
             // Only stop animated border if it's not running for navigation purposes
             val goProButton = view?.findViewById<com.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
             if (goProButton != null && !animatedBorderManager.isAnimationRunningForNavigation()) {
@@ -386,6 +435,108 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
             }
         }
         applyProTimerGradient()
+    }
+
+    private fun updateGoProButtonState() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val goProButton = binding?.goProButton
+            val proTimer = binding?.proTimer
+
+            if (goProButton == null || proTimer == null) return@launch
+
+            // First, check for reward-based pro timer (independent of subscription)
+            val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            val rewardProTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
+            val rewardTimerType = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+
+            if (rewardProTimerEnd > System.currentTimeMillis() && rewardTimerType != "subscription") {
+                proTimer.visibility = View.VISIBLE
+                goProButton.visibility = View.GONE
+                startProTimerCountdown(rewardProTimerEnd, rewardTimerType)
+                animatedBorderManager.stopAnimatedBorder() // Ensure no animated border for reward timer
+                goProButton.setOnClickListener { /* No action, timer is active */ }
+                return@launch
+            }
+
+            // If no reward timer, then check for active subscription
+            val purchasesResult = vpnManager.queryActiveSubscriptionPurchases()
+
+            if (purchasesResult.isSuccess) {
+                val purchases = purchasesResult.getOrNull() ?: emptyList()
+                val packageName = requireContext().packageName
+                var hasActiveSubscriptionFromBackend = false
+
+                for (purchase in purchases) {
+                    if (purchase.products.isNotEmpty()) {
+                        val productId = purchase.products.first()
+                        val purchaseToken = purchase.purchaseToken
+
+                        // Get current user account information for subscription binding
+                        val authManager = com.nocturnevpn.utils.AuthManager.getInstance(requireContext())
+                        val userEmail = authManager.getCurrentUserEmail()
+                        val userId = authManager.getCurrentUserId()
+                        
+                        Log.d("HomeFragment", "🔍 Checking subscription for user: email=$userEmail, userId=$userId")
+                        val backendResult = subscriptionRepository.checkSubscription(packageName, productId, purchaseToken, userEmail, userId)
+                        backendResult.onSuccess { subscriptionStatus ->
+                            // Persist backend verdict snapshot so future restores use fresh data
+                            val sync = com.nocturnevpn.utils.SubscriptionSyncManager.getInstance(requireContext())
+                            sync.saveBackendVerifiedSubscription(subscriptionStatus, productId, purchaseToken, verifySource = "home-verify")
+
+                            if (subscriptionStatus.status == "active" && subscriptionStatus.expiryTimeMillis > System.currentTimeMillis()) {
+                                hasActiveSubscriptionFromBackend = true
+                                Log.d("HomeFragment", "Active subscription verified by backend: $subscriptionStatus")
+                            }
+                        }.onFailure { e ->
+                            Log.e("HomeFragment", "Backend verification failed for $productId: ${e.message}")
+                        }
+                    }
+                }
+
+                if (hasActiveSubscriptionFromBackend) {
+                    goProButton.visibility = View.VISIBLE
+                    proTimer.visibility = View.GONE
+                    // Always-on animated border with guard against re-starting
+                    if (!animatedBorderManager.isCurrentlyAnimating()) {
+                        animatedBorderManager.startAnimatedBorder(goProButton, AnimatedBorderManager.ANIMATION_INFINITE)
+                    }
+                    goProButton.setOnClickListener {
+                        findNavController().navigate(R.id.action_homeFragment_to_afterPremiumFragment2)
+                    }
+                } else {
+                    // Free user or expired subscription
+                    goProButton.visibility = View.VISIBLE
+                    proTimer.visibility = View.GONE
+                    animatedBorderManager.stopAnimatedBorder()
+                    goProButton.setOnClickListener {
+                        findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+                    }
+                }
+            } else {
+                // Error querying Google Play purchases (e.g., billing not ready)
+                Log.e("HomeFragment", "Error querying Google Play purchases: ${purchasesResult.exceptionOrNull()?.message}")
+                // Default to free user experience (but check local cache for quick UX)
+                val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                val endTime = prefs.getLong(KEY_PRO_TIMER_END, 0L)
+                val type = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+                val isLocalPremium = endTime > System.currentTimeMillis() && type == "subscription"
+                goProButton.visibility = View.VISIBLE
+                proTimer.visibility = View.GONE
+                if (isLocalPremium) {
+                    if (!animatedBorderManager.isCurrentlyAnimating()) {
+                        animatedBorderManager.startAnimatedBorder(goProButton, AnimatedBorderManager.ANIMATION_INFINITE)
+                    }
+                    goProButton.setOnClickListener {
+                        findNavController().navigate(R.id.action_homeFragment_to_afterPremiumFragment2)
+                    }
+                } else {
+                    animatedBorderManager.stopAnimatedBorder()
+                    goProButton.setOnClickListener {
+                        findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+                    }
+                }
+            }
+        }
     }
 
     private fun startProTimerCountdown(endTime: Long, timerType: String) {
@@ -500,6 +651,21 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         serverManager.loadSavedServer()
         com.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
         setupProTimer()
+
+        // Re-evaluate Go Pro button state on resume
+        updateGoProButtonState()
+
+        // Ensure subscription state restored here (source of truth for Home)
+        if (com.nocturnevpn.utils.AuthManager.getInstance(requireContext()).isUserSignedIn()) {
+            subscriptionSyncManager.restoreSubscriptionFromFirebase(
+                onSuccess = { status ->
+                    Log.d("HomeFragment", "Subscription restored onResume: $status")
+                },
+                onFailure = { e ->
+                    Log.w("HomeFragment", "Failed to restore subscription onResume: $e")
+                }
+            )
+        }
 
         // Resume banner ad
         binding?.bannerAdView?.resume()

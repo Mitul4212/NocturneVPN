@@ -26,6 +26,7 @@ class AuthManager private constructor(context: Context) {
         }
     }
     
+    private val appContext: Context = context.applicationContext
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -117,6 +118,13 @@ class AuthManager private constructor(context: Context) {
             Log.e("AuthManager", "❌ Error saving auth state: ${e.message}")
             e.printStackTrace()
         }
+
+        // After auth state is saved, flush any pending subscription snapshot to Firestore
+        try {
+            SubscriptionSyncManager.getInstance(appContext).flushPendingSubscriptionSnapshot()
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Failed to flush pending subscription snapshot: ${e.message}")
+        }
     }
     
     /**
@@ -124,6 +132,16 @@ class AuthManager private constructor(context: Context) {
      */
     fun clearAuthState() {
         Log.d("AuthManager", "Clearing auth state")
+        
+        // Clear subscription data to prevent cross-account access
+        try {
+            val subscriptionSyncManager = SubscriptionSyncManager.getInstance(appContext)
+            subscriptionSyncManager.clearLocalSubscription()
+            Log.d("AuthManager", "Local subscription data cleared during auth state clear")
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Error clearing subscription data during auth state clear: ${e.message}")
+        }
+        
         sharedPreferences.edit().apply {
             putBoolean(KEY_IS_USER_SIGNED_IN, false)
             remove(KEY_USER_ID)
@@ -289,6 +307,19 @@ class AuthManager private constructor(context: Context) {
      */
     fun signOut() {
         Log.d("AuthManager", "Signing out user")
+        
+        // Clear subscription data when user signs out to prevent cross-account subscription access
+        try {
+            val subscriptionSyncManager = SubscriptionSyncManager.getInstance(appContext)
+            subscriptionSyncManager.clearLocalSubscription()
+            subscriptionSyncManager.clearSubscriptionFromFirebase(
+                onSuccess = { Log.d("AuthManager", "Subscription data cleared on sign out") },
+                onFailure = { error -> Log.w("AuthManager", "Failed to clear subscription data on sign out: $error") }
+            )
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Error clearing subscription data on sign out: ${e.message}")
+        }
+        
         auth.signOut()
         clearAuthState()
     }

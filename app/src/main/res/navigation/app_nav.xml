@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_reward" />
 
     <fragment
+        android:id="@+id/splashAfterLoginFragment"
+        android:name="com.nocturnevpn.view.fragment.SplashAfterLoginFragment"
+        android:label="Splash After Login"
+        tools:layout="@layout/fragment_splash_after_login" />
+
+    <fragment
         android:id="@+id/profileFragment"
         android:name="com.nocturnevpn.view.fragment.ProfileFragment"
         android:label="fragment_profile"
@@ -38,6 +44,12 @@
         <action
             android:id="@+id/action_homeFragment_to_premiumFragment"
             app:destination="@id/premiumFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_afterPremiumFragment2"
+            app:destination="@id/afterPremiumFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingFragment3"
+            app:destination="@id/settingFragment3" />
     </fragment>
 
     <fragment

@@ -83,6 +83,17 @@ class HomeActivity : AppCompatActivity() {
         navController = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
 
+        // If launched after login and we want to run post-login splash, navigate to splash fragment once
+        val showPostLoginSplash = intent.getBooleanExtra("SHOW_POST_LOGIN_SPLASH", false)
+        Log.d("HomeActivity", "SHOW_POST_LOGIN_SPLASH flag: $showPostLoginSplash")
+        
+        if (showPostLoginSplash) {
+            Log.d("HomeActivity", "User just signed in - navigating to SplashAfterLoginFragment for subscription verification")
+            navController.navigate(R.id.splashAfterLoginFragment)
+        } else {
+            Log.d("HomeActivity", "Normal app start - going directly to home")
+        }
+
         // Ensure Home is selected as the default tab
         bottomNavigation.itemActiveIndex = 1
 

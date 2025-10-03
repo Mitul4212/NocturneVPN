@@ -13,6 +13,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.nocturnevpn.utils.ConsentManager
+import com.nocturnevpn.utils.SubscriptionSyncManager
 
 /**
  * AdManager - Centralized ad management for NocturneVPN
@@ -373,6 +374,12 @@ class AdManager private constructor(private val context: Context) {
      * Show interstitial ad if ready
      */
     fun showInterstitialAd(activity: android.app.Activity, onAdClosed: (() -> Unit)? = null) {
+		// Suppress ads for premium users
+		if (isUserPremium()) {
+			Log.d(TAG, "🚫 Interstitial suppressed for premium user")
+			onAdClosed?.invoke()
+			return
+		}
         val ad = getInterstitialAd()
         if (ad != null) {
             Log.d(TAG, "🔓 Showing interstitial ad")
@@ -391,8 +398,15 @@ class AdManager private constructor(private val context: Context) {
     fun showRewardedAd(
         activity: android.app.Activity,
         onRewarded: (() -> Unit)? = null,
-        onAdClosed: (() -> Unit)? = null
+        onAdClosed: (() -> Unit)? = null,
+        allowPremium: Boolean = false
     ) {
+        // Suppress ads for premium users unless explicitly allowed
+        if (!allowPremium && isUserPremium()) {
+            Log.d(TAG, "🚫 Rewarded suppressed for premium user (allowPremium=false)")
+            onAdClosed?.invoke()
+            return
+        }
         val ad = getRewardedAd()
         if (ad != null) {
             Log.d(TAG, "🔓 Showing rewarded ad")
@@ -421,4 +435,10 @@ class AdManager private constructor(private val context: Context) {
         rewardedRetryCount = 0
         nativeRetryCount = 0
     }
+
+	private fun isUserPremium(): Boolean {
+		val manager = SubscriptionSyncManager.getInstance(context)
+		// Only consider paid subscription for suppressing ads
+		return manager.isLocalPaidSubscriptionActive()
+	}
 }

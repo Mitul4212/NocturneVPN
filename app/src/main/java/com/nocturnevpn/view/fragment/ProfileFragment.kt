@@ -35,6 +35,7 @@ class ProfileFragment : Fragment() {
     private var sharedPreference: SharedPreference? = null
     private lateinit var authManager: AuthManager
     private lateinit var bannerAdManager: BannerAdManager
+    
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +63,9 @@ class ProfileFragment : Fragment() {
         loadUserName()
         loadUserEmail()
         setupGuestProfileClickListeners()
+
+        // Update premium status initially (Profile no longer triggers restore; Home/Premium own it)
+        updatePremiumStatus()
     }
     
     /**
@@ -107,7 +111,19 @@ class ProfileFragment : Fragment() {
         }
 
         binding.goToPremiumButton.setOnClickListener {
-            this.findNavController().navigate(R.id.action_profileFragment_to_premiumFragment)
+            // Quick local check for immediate UX
+            val prefs = requireContext().getSharedPreferences("reward_prefs", android.content.Context.MODE_PRIVATE)
+            val endTime = prefs.getLong("pro_timer_end", 0L)
+            val type = prefs.getString("pro_timer_type", "") ?: ""
+            val isLocalPremium = endTime > System.currentTimeMillis() && (type == "subscription" || type.isNotEmpty())
+            if (isLocalPremium) {
+                this.findNavController().navigate(R.id.afterPremiumFragment)
+                return@setOnClickListener
+            }
+
+            // Navigate directly to premium page
+            Log.d("ProfileFragment", "🎯 Premium button clicked - navigating to premium page")
+            this.findNavController().navigate(R.id.premiumFragment)
         }
 
         // Add click listener for info update button
@@ -190,12 +206,18 @@ class ProfileFragment : Fragment() {
         setupProfileVisibility()
         loadUserName()
         loadUserEmail()
+        updatePremiumStatus()
         
         // Resume banner ad
         try {
             bannerAdManager.resumeBannerAd(binding.bannerAdView)
         } catch (e: Exception) {
             Log.e("ProfileFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
+        
+        // Update premium status from local cache only
+        if (authManager.isUserSignedIn()) {
+            updatePremiumStatus()
         }
     }
 
@@ -251,6 +273,55 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun updatePremiumStatus() {
+        if (!authManager.isUserSignedIn()) {
+            // If user is not signed in, they are not premium
+            binding.premiumStatus.text = "Free"
+            binding.premiumStatus.setTextColor(requireContext().getColor(R.color.strong_violet))
+            return
+        }
+
+        // Check premium status from account-aware Firebase data first, then fallback to local cache
+        val subscriptionSyncManager = com.nocturnevpn.utils.SubscriptionSyncManager.getInstance(requireContext())
+        subscriptionSyncManager.restoreSubscriptionFromFirebase(
+            onSuccess = { subscriptionStatus ->
+                val isPremiumFromFirebase = subscriptionStatus?.status == "active" && 
+                                          subscriptionStatus.expiryTimeMillis > System.currentTimeMillis()
+                
+                val statusText = if (isPremiumFromFirebase) "Premium" else "Free"
+                val color = if (isPremiumFromFirebase) R.color.success_green_premium else R.color.strong_violet
+                
+                try {
+                    if (isAdded && context != null) {
+                        binding.premiumStatus.text = statusText
+                        binding.premiumStatus.setTextColor(requireContext().getColor(color))
+                    }
+                } catch (_: Exception) {}
+                
+                Log.d("ProfileFragment", "Premium status updated from Firebase: isPremium=$isPremiumFromFirebase, status=${subscriptionStatus?.status}")
+            },
+            onFailure = { 
+                // Fallback to local cache if Firebase fails
+                val prefs = requireContext().getSharedPreferences("reward_prefs", android.content.Context.MODE_PRIVATE)
+                val proTimerEnd = prefs.getLong("pro_timer_end", 0L)
+                val proTimerType = prefs.getString("pro_timer_type", "") ?: ""
+                
+                val isPremium = proTimerType == "subscription" && proTimerEnd > System.currentTimeMillis()
+                val statusText = if (isPremium) "Premium" else "Free"
+                val color = if (isPremium) R.color.success_green_premium else R.color.strong_violet
+                
+                try {
+                    if (isAdded && context != null) {
+                        binding.premiumStatus.text = statusText
+                        binding.premiumStatus.setTextColor(requireContext().getColor(color))
+                    }
+                } catch (_: Exception) {}
+                
+                Log.d("ProfileFragment", "Premium status updated from local cache (Firebase failed): isPremium=$isPremium")
+            }
+        )
+    }
+
     private fun setupGuestProfileClickListeners() {
         // Setup click listeners for guest profile buttons directly in the main layout
         
@@ -304,5 +375,14 @@ class ProfileFragment : Fragment() {
         
         // Show toast message
         Toast.makeText(context, "IP Address copied to clipboard", Toast.LENGTH_SHORT).show()
+    }
+
+    
+    
+    
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 } 

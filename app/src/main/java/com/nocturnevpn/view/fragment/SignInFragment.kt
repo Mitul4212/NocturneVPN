@@ -191,6 +191,7 @@ class SignInFragment : Fragment() {
                 
                 Toast.makeText(context, "Sign in successful!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(requireContext(), HomeActivity::class.java)
+                intent.putExtra("SHOW_POST_LOGIN_SPLASH", true)
                 startActivity(intent)
                 requireActivity().finish()
             } else {
@@ -376,7 +377,10 @@ class SignInFragment : Fragment() {
                 authFlowManager.markSuccessfulLogin()
                 
                 Toast.makeText(context, "Google sign-in successful!", Toast.LENGTH_SHORT).show()
-                navigateToHome()
+                val intent = Intent(requireContext(), HomeActivity::class.java)
+                intent.putExtra("SHOW_POST_LOGIN_SPLASH", true)
+                startActivity(intent)
+                requireActivity().finish()
             }
 
             override fun onFailure(errorMessage: String) {
@@ -394,7 +398,10 @@ class SignInFragment : Fragment() {
                 authFlowManager.markSuccessfulLogin()
                 
                 Toast.makeText(context, "Facebook sign-in successful!", Toast.LENGTH_SHORT).show()
-                navigateToHome()
+                val intent = Intent(requireContext(), HomeActivity::class.java)
+                intent.putExtra("SHOW_POST_LOGIN_SPLASH", true)
+                startActivity(intent)
+                requireActivity().finish()
             }
 
             override fun onFailure(errorMessage: String) {

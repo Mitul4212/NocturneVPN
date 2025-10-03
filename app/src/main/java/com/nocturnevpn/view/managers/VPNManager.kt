@@ -19,10 +19,24 @@ import de.blinkt.openvpn.OpenVpnApi
 import de.blinkt.openvpn.core.OpenVPNService
 import de.blinkt.openvpn.core.OpenVPNThread
 import java.io.IOException
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.QueryPurchasesParams
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingResult
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 class VPNManager(
     private val context: Context,
-    private val sharedPreference: SharedPreference
+    private val sharedPreference: SharedPreference,
+    private val billingClient: BillingClient // Add BillingClient to constructor
 ) {
     private var vpnStart = false
     private lateinit var vpnThread: OpenVPNThread
@@ -35,6 +49,7 @@ class VPNManager(
     private var notificationUpdateHandler: Handler? = null
     private var notificationUpdateRunnable: Runnable? = null
     private var historyManager: HistoryManager? = null
+    private val billingClientState = MutableStateFlow(false) // State flow for billing client readiness
 
     init {
         vpnThread = OpenVPNThread()
@@ -42,6 +57,24 @@ class VPNManager(
         connection = CheckInternetConnection()
         notificationUpdateHandler = Handler(Looper.getMainLooper())
         historyManager = HistoryManager.getInstance(context)
+
+        // Initialize billing client connection
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    billingClientState.value = true
+                    Log.d("VPNManager", "Billing client setup finished, ready.")
+                } else {
+                    billingClientState.value = false
+                    Log.w("VPNManager", "Billing client setup failed: ${billingResult.debugMessage}")
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {
+                billingClientState.value = false
+                Log.w("VPNManager", "Billing service disconnected.")
+            }
+        })
     }
 
     fun setVPNResultLauncher(launcher: ActivityResultLauncher<Intent>) {
@@ -319,4 +352,27 @@ class VPNManager(
             Log.d("VPN_Debug", "Stopped periodic notification updates")
         }
     }
+
+    // Add a method to query active subscriptions from Google Play
+    suspend fun queryActiveSubscriptionPurchases(): Result<List<Purchase>> = withContext(Dispatchers.IO) {
+        if (!billingClientState.first { it }) {
+            Log.w("VPNManager", "BillingClient not ready for querying purchases.")
+            return@withContext Result.failure(IllegalStateException("BillingClient not ready"))
+        }
+        
+        val purchasesResult = CompletableDeferred<Result<List<Purchase>>>()
+
+        billingClient.queryPurchasesAsync(
+            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
+        ) { billingResult, purchases ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                purchasesResult.complete(Result.success(purchases))
+            } else {
+                Log.e("VPNManager", "Query purchases failed: ${billingResult.debugMessage}")
+                purchasesResult.complete(Result.failure(Exception(billingResult.debugMessage)))
+            }
+        }
+        purchasesResult.await()
+    }
+
 } 
