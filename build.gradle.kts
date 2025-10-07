@@ -29,6 +29,13 @@ allprojects {
         mavenCentral()
     }
 
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.10")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10")
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {
