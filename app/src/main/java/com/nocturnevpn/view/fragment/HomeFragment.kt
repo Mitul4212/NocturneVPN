@@ -41,6 +41,7 @@ import com.nocturnevpn.utils.SubscriptionSyncManager
 import com.nocturnevpn.utils.Utils
 import com.nocturnevpn.utils.toast
 import com.nocturnevpn.view.activitys.ChangeServerActivity
+import com.nocturnevpn.view.managers.BannerAdManager
 import com.nocturnevpn.view.managers.ConnectionStatusManager
 import com.nocturnevpn.view.managers.GlobeManager
 import com.nocturnevpn.view.managers.NotificationManager
@@ -67,6 +68,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     private var globeManager: GlobeManager? = null
     private lateinit var notificationManager: NotificationManager
     private lateinit var connectionStatusManager: ConnectionStatusManager
+    private lateinit var bannerAdManager: BannerAdManager
     
     private var connection: CheckInternetConnection? = null
     private var sharedPreference: SharedPreference? = null
@@ -135,6 +137,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         notificationManager = NotificationManager(requireContext())
         animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
         consentManager = ConsentManager.getInstance(requireContext())
+        bannerAdManager = BannerAdManager.getInstance(requireContext())
         
         // Set up VPN result launcher
         vpnManager.setVPNResultLauncher(vpnResult)
@@ -668,7 +671,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }
 
         // Resume banner ad
-        binding?.bannerAdView?.resume()
+        try {
+            binding?.bannerAdView?.let { bannerAdManager.resumeBannerAd(it) }
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "❌ Error resuming banner ad: ${e.message}")
+        }
 
         // Restore animated border state when fragment resumes
         val goProButton = view?.findViewById<com.nocturnevpn.widget.AnimatedGradientBorderView>(R.id.go_pro_button)
@@ -686,7 +693,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         proTimerRunnable?.let { proTimerHandler?.removeCallbacks(it) }
         
         // Pause banner ad
-        binding?.bannerAdView?.pause()
+        try {
+            binding?.bannerAdView?.let { bannerAdManager.pauseBannerAd(it) }
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "❌ Error pausing banner ad: ${e.message}")
+        }
         
         // Preserve animated border state when fragment is paused
         animatedBorderManager.onFragmentPause()
@@ -702,7 +713,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         notificationManager.removeVPNNotification()
         
         // Destroy banner ad
-        binding?.bannerAdView?.destroy()
+        try {
+            binding?.bannerAdView?.let { bannerAdManager.destroyBannerAd(it) }
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "❌ Error destroying banner ad: ${e.message}")
+        }
         
         _binding = null  // 💡 Add this to avoid memory leaks
     }
@@ -790,9 +805,16 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         try {
             val adView = binding?.bannerAdView
             if (adView != null) {
-                Log.d("HomeFragment", "Initializing banner ad...")
-                // Proceed with ad initialization immediately
-                initializeBannerAdOnce()
+                Log.d("HomeFragment", "🚀 Initializing banner ad...")
+                bannerAdManager.initializeBannerAd(
+                    adView,
+                    onAdLoaded = {
+                        Log.d("HomeFragment", "✅ Banner ad loaded successfully")
+                    },
+                    onAdFailed = { error ->
+                        Log.e("HomeFragment", "❌ Banner ad failed to load: $error")
+                    }
+                )
             } else {
                 Log.w("HomeFragment", "⚠️ Banner ad view not found in layout")
             }
@@ -801,64 +823,4 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         }
     }
 
-    private fun initializeBannerAdOnce() {
-        try {
-            val adView = binding?.bannerAdView
-            if (adView != null) {
-                Log.d("HomeFragment", "Initializing banner ad (final attempt)...")
-                try {
-                    WebView.setWebContentsDebuggingEnabled(true)
-                } catch (e: Exception) {
-                    Log.w("HomeFragment", "WebView debugging already enabled or failed: ${e.message}")
-                }
-                try {
-                    val adRequest = AdRequest.Builder().build()
-                    adView.loadAd(adRequest)
-                    Log.d("HomeFragment", "Banner ad request sent successfully")
-                } catch (e: Exception) {
-                    Log.e("HomeFragment", "❌ Error loading banner ad: ${e.message}")
-                    adView.visibility = View.GONE
-                }
-                adView.adListener = object : AdListener() {
-                    override fun onAdLoaded() {
-                        Log.d("HomeFragment", "✅ Banner ad loaded successfully")
-                        adView.visibility = View.VISIBLE
-                    }
-                    override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                        Log.e("HomeFragment", "❌ Banner ad failed to load: ${loadAdError.message}")
-                        adView.visibility = View.GONE
-                        if (loadAdError.message?.contains("JavascriptEngine") == true) {
-                            Log.w("HomeFragment", "WebView conflict detected, will retry later...")
-                            Handler(Looper.getMainLooper()).postDelayed({ reloadBannerAd() }, 15000) // 15s short retry
-                        } else {
-                            Handler(Looper.getMainLooper()).postDelayed({ reloadBannerAd() }, 8000) // 8s retry for other errors
-                        }
-                    }
-                    override fun onAdOpened() { Log.d("HomeFragment", "🔓 Banner ad opened") }
-                    override fun onAdClosed() { Log.d("HomeFragment", "🔒 Banner ad closed") }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("HomeFragment", "❌ Error in initializeBannerAdOnce: ${e.message}")
-        }
-    }
-
-    private fun reloadBannerAd() {
-        try {
-            val adView = binding?.bannerAdView
-            if (adView != null) {
-                Log.d("HomeFragment", "Reloading banner ad...")
-                try {
-                    val adRequest = AdRequest.Builder().build()
-                    adView.loadAd(adRequest)
-                    Log.d("HomeFragment", "Banner ad reload request sent successfully")
-                } catch (e: Exception) {
-                    Log.e("HomeFragment", "❌ Error reloading banner ad: ${e.message}")
-                    adView.visibility = View.GONE
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("HomeFragment", "❌ Error reloading banner ad: ${e.message}")
-        }
-    }
 }

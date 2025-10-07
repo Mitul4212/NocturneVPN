@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "124157274076-25am63ljgq7d3eo7j839flh94ubj0js0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nocturnevpn",
+            "certificate_hash": "fed6fcca415788b921d5c974f10305050f51a38e"
+          }
+        },
+        {
           "client_id": "124157274076-f0iqru5952rtqqkbsjbp65qs55mpgnp9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -64,6 +72,14 @@
           "android_info": {
             "package_name": "com.nocturnevpn",
             "certificate_hash": "33dd61b1afeb0d5a3223d017aa7f62f986cef6a0"
+          }
+        },
+        {
+          "client_id": "124157274076-i00ie181hjc3aeo7aukr0fhps78a58lk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nocturnevpn",
+            "certificate_hash": "fed6fcca415788b921d5c974f10305050f51a38e"
           }
         },
         {

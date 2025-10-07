@@ -275,7 +275,7 @@ class BannerAdManager private constructor(private val context: Context) {
 
     private fun isUserPremium(): Boolean {
         val manager = SubscriptionSyncManager.getInstance(context)
-        manager.enforceLocalExpiryAndSync(syncFirebase = false)
-        return manager.hasActiveSubscription()
+        // Only consider paid subscription for suppressing ads
+        return manager.isLocalPaidSubscriptionActive()
     }
 }
