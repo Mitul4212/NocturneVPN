@@ -1,127 +1,210 @@
 # NocturneVPN
 
-Modern Android VPN client built with Kotlin and Jetpack. It offers fast, reliable connections, intuitive server selection, and a polished UI with dark/light themes.
+**NocturneVPN** is a modern Android VPN client built with Kotlin and Jetpack.  
+It offers fast, reliable connections, intuitive server selection, and a polished UI with dark/light themes.
 
-This app uses a dedicated VPN module built on Android `VpnService` and ships with sensible defaults for modern devices while remaining compatible with older Android versions via the `vpnLib` library.
+This app uses a dedicated VPN module built on **Android VpnService** and integrates the **ICS OpenVPN** (`de.blinkt.openvpn`) library for core VPN functionality.
 
-## Features
+---
 
-- Fast and stable VPN connection using open standards
+## ✨ Features
+
+- Fast and stable VPN connection using open standards (OpenVPN protocol)
 - Server selection by country and latency
 - 3D globe visualization (CesiumJS) of the connected IP location
 - Clean, responsive UI with Material 3 and dynamic theming
 - Session status, bandwidth, and connection duration indicators
-- Basic analytics and crash reporting (optional)
+- Optional analytics and crash reporting
 
-## Architecture & Tech Stack
+---
 
-- Language: Kotlin
-- UI: Jetpack (Fragments/Views), Material 3, Navigation
-- Background: WorkManager
-- Networking/VPN: Android `VpnService` (via `vpnLib` module)
-- HTTP: Retrofit2, OkHttp (with logging)
-- Images/Animations: Glide, Lottie
-- Data/Async: Kotlin Coroutines/Flow, LiveData (where applicable)
-- Build: Gradle Kotlin DSL (AGP 8.5.x), Kotlin 2.0.x
-- Services: Firebase (Auth, Analytics, Firestore), Google Sign‑In, Facebook Login
-- Monetization/Compliance: Google Play Billing, Google Mobile Ads (AdMob), UMP (Consent)
+## 🏗️ Architecture & Tech Stack
 
-### Modules
+| Layer | Tech |
+|-------|------|
+| **Language** | Kotlin |
+| **UI** | Jetpack (Fragments/Views), Material 3, Navigation |
+| **Background** | WorkManager |
+| **VPN Core** | Android VpnService (via `vpnLib`, ICS OpenVPN native integration) |
+| **Networking** | Retrofit2, OkHttp (with logging) |
+| **Images/Animations** | Glide, Lottie |
+| **Async/Data** | Kotlin Coroutines, Flow, LiveData |
+| **Build** | Gradle Kotlin DSL (AGP 8.5.x), Kotlin 2.0.x |
+| **Services** | Firebase (Auth, Analytics, Firestore), Google Sign-In, Facebook Login |
+| **Monetization** | AdMob, Google Play Billing, UMP (Consent) |
 
-- `app`: Android application module (UI, navigation, app wiring)
-- `vpnLib`: Core VPN implementation and utilities (AIDL enabled, consumer ProGuard, ndkVersion pinned)
+---
 
-## Project Structure
+## 🧩 Modules
+
+- `app`: Main Android app (UI, navigation, user interaction)
+- `vpnLib`: Core VPN module (JNI + OpenVPN integration via NDK)
+
+---
+
+## 📁 Project Structure
 
 ```
 NocturneVPN/
   app/
-    src/main/...            # UI, fragments, view models, resources
+    src/main/...  # UI, fragments, view models, resources
   vpnLib/
-    src/main/...            # VPN service, networking, helpers
+    src/main/...  # VPN service, networking, helpers
 ```
 
-## Requirements
+---
 
-- Android Studio (Giraffe/Iguana or newer)
-- JDK 17
-- Android SDK Platform 35 (compileSdk/targetSdk 35)
-- Min SDK: 24 for `app` (library supports down to 16)
-- Gradle (use included wrapper)
-- NDK installed (library uses `ndkVersion 29.0.13113456`)
+## ⚙️ Requirements
 
-## Getting Started
+- Android Studio **Iguana or newer**
+- **JDK 17**
+- **Android SDK Platform 35**
+- **Min SDK 24** (VPN library supports down to 16)
+- **NDK** (ndkVersion = 29.0.13113456)
 
-1) Clone the repository
-```
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+```bash
 git clone https://github.com/Mitul4212/NocturneVPN.git
 cd NocturneVPN
 ```
 
-2) Open in Android Studio
-- Open the root project directory.
-- Let Gradle sync complete.
+### 2. Open in Android Studio
 
-3) Configure optional services
-- Firebase: ensure `app/google-services.json` exists if you plan to use Auth/Analytics/Firestore. Otherwise remove the Google Services plugin and Firebase deps.
-- Social Auth: configure Firebase Auth providers (Google/Facebook) or remove dependencies.
-- Ads & Consent: if using AdMob, integrate UMP (Consent) and set up ad units in the console.
+Open the root project and let Gradle sync complete.
 
-4) Build & run
-```
+### 3. Configure Optional Services
+
+- Firebase: Add `google-services.json` if using Auth/Analytics/Firestore
+- Social Auth: Configure Google/Facebook sign-in
+- Ads: Set up AdMob + Consent SDK (UMP)
+
+### 4. Build & Run
+```bash
 ./gradlew assembleDebug
 ./gradlew installDebug
 ```
-- Or use the Android Studio Run button to launch on a device/emulator.
 
-On Windows PowerShell, use:
-```
+On Windows PowerShell:
+```bash
 ./gradlew.bat assembleDebug
 ```
 
-## App Signing (Release)
+---
 
-1) Create or use an existing keystore
-2) Configure signing in `gradle.properties` or Android Studio Build Variants
-3) Build
-```
+## 🔑 App Signing (Release)
+
+- Create or use an existing keystore
+- Configure signing in `gradle.properties` or Android Studio
+- Build:
+```bash
 ./gradlew assembleRelease
 ```
-Artifacts are available under `app/release/` and `app/build/outputs/`.
 
-## Configuration
+Artifacts: `app/build/outputs/apk/release/`
 
-- Environment/Secrets: keep API keys and service configs out of VCS. Use local `gradle.properties` or CI secrets.
-- Permissions: required permissions are declared in `AndroidManifest.xml` (e.g., `BIND_VPN_SERVICE`, `INTERNET`, `ACCESS_NETWORK_STATE`, `FOREGROUND_SERVICE`). Review and adjust as needed.
-- Application ID & namespace: `com.nocturnevpn` (see `app/build.gradle.kts`).
-- BuildConfig fields (in `app`):
-  - `BuildConfig.VPN_GATE_API` → defaults to `http://www.vpngate.net/api/iphone/`
-  - `BuildConfig.DISABLE_THIRD_PARTY_SDKS` → set to `true` to skip initializing third‑party SDKs during troubleshooting
-- Bundling: language/density/ABI splits are disabled for a single base APK.
-- Packaging: `jniLibs.useLegacyPackaging = true` to ensure native libs are extractable for OpenVPN executables.
-- View/Data Binding: both enabled.
-- MultiDex: enabled.
+---
 
-## Notable Dependencies
+## ⚙️ Configuration
 
-- Core: `androidx.core:core-ktx`, `appcompat`, `material`, `constraintlayout`
-- Navigation: `androidx.navigation:navigation-fragment-ktx`, `navigation-ui-ktx`
+- Permissions: Declared in `AndroidManifest.xml`
+- App ID: `com.nocturnevpn`
+- BuildConfig Fields:
+  - `VPN_GATE_API` → `http://www.vpngate.net/api/iphone/`
+  - `DISABLE_THIRD_PARTY_SDKS` → `true` for debugging
+- Packaging: `jniLibs.useLegacyPackaging = true`
+- View/Data Binding: Enabled
+- MultiDex: Enabled
+
+---
+
+## 🧰 Notable Dependencies
+
+- Core: `androidx.core-ktx`, `appcompat`, `material`, `constraintlayout`
+- Navigation: `androidx.navigation:navigation-fragment-ktx`
 - Background: `work-runtime-ktx`
-- Networking: `retrofit2`, `converter-gson`, `okhttp`, `logging-interceptor`
-- Images/Animations: `glide`, `lottie`
-- Firebase (via BoM): `firebase-auth`, `firebase-analytics`, `firebase-firestore-ktx`
-- Auth Providers: `play-services-auth` (Google), `facebook-login`
-- Monetization/Consent: `billing-ktx`, `play-services-ads`, `user-messaging-platform`
-- UI helpers: `SmoothBottomBar`, `flagkit-android`, `facebook shimmer`
-- Web: `webkit`, Cronet via `play-services-cronet`
+- Networking: `retrofit2`, `okhttp`, `gson`
+- Firebase: `firebase-auth`, `firebase-analytics`, `firebase-firestore-ktx`
+- Auth Providers: `play-services-auth`, `facebook-login`
+- Monetization: `billing-ktx`, `play-services-ads`, `user-messaging-platform`
+- UI Helpers: `SmoothBottomBar`, `flagkit-android`, `facebook shimmer`
+- Web: `webkit`, `play-services-cronet`
 
-## Screenshots / Demo
+---
 
-> Add screenshots or GIFs here to showcase onboarding, server list, connection screen, and the 3D globe view.
+## 🧠 Troubleshooting
 
-## Badges (optional)
+- Gradle Sync Issues: Use included Gradle wrapper and correct AGP version
+- VPN Fails to Connect: Verify device supports `VpnService`
+- Firebase Errors: Check `google-services.json` setup
+- Native Library (NDK) Build Issues: Ensure correct NDK version and ABI filters
 
-> Add CI/build, code quality, or release badges here.
+---
+
+## 📸 Screenshots / Demo
+
+Add screenshots or GIFs here showing the server list, connection UI, and globe visualization.
+
+---
+
+## 👥 Contributing
+
+Contributions are welcome!
+
+- Fork the repo
+- Create a feature branch
+- Follow Kotlin & Android best practices
+- Submit a pull request with details and screenshots
+
+---
+
+## 🔒 Privacy & Terms
+
+See `PRIVACY_POLICY.txt` and `TERMS_OF_SERVICE.txt` for details.
+
+---
+
+## 🧾 License
+
+This project includes and modifies code from the
+ICS OpenVPN project
+by Arne Schwabe, licensed under the GNU General Public License v2 (GPLv2).
+
+Therefore, NocturneVPN is distributed under the same license:
+
+NocturneVPN - Android VPN Client
+Copyright (C) 2025 Mitul Chovatiya
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2,
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.
+If not, see <https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt>.
+
+Full license text available in the `LICENSE` file.
+
+---
+
+## 🧑‍💻 Author
+
+Mitul Chovatiya  
+Email: your-email@example.com  
+GitHub: https://github.com/Mitul4212
+
+---
+
+✅ **Next Step:**  
+You must also add a `LICENSE` file at your project root — this project should use **GPL-2.0** (the same as ICS-OpenVPN). I will add it now.
 
 ## Troubleshooting
 
