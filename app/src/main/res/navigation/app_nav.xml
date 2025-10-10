@@ -7,13 +7,19 @@
 
     <fragment
         android:id="@+id/rewardFragment"
-        android:name="com.example.nocturnevpn.view.fragment.RewardFragment"
+        android:name="com.nocturnevpn.view.fragment.RewardFragment"
         android:label="fragment_reward"
         tools:layout="@layout/fragment_reward" />
 
     <fragment
+        android:id="@+id/splashAfterLoginFragment"
+        android:name="com.nocturnevpn.view.fragment.SplashAfterLoginFragment"
+        android:label="Splash After Login"
+        tools:layout="@layout/fragment_splash_after_login" />
+
+    <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.nocturnevpn.view.fragment.ProfileFragment"
+        android:name="com.nocturnevpn.view.fragment.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
         <action
@@ -32,17 +38,23 @@
 
     <fragment
         android:id="@id/homeFragment"
-        android:name="com.example.nocturnevpn.view.fragment.HomeFragment"
+        android:name="com.nocturnevpn.view.fragment.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_homeFragment_to_premiumFragment"
             app:destination="@id/premiumFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_afterPremiumFragment2"
+            app:destination="@id/afterPremiumFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingFragment3"
+            app:destination="@id/settingFragment3" />
     </fragment>
 
     <fragment
         android:id="@id/settingFragment3"
-        android:name="com.example.nocturnevpn.view.fragment.settingFragment"
+        android:name="com.nocturnevpn.view.fragment.settingFragment"
         android:label="fragment_setting"
         tools:layout="@layout/fragment_setting" >
 
@@ -61,17 +73,17 @@
     </fragment>
     <fragment
         android:id="@+id/advanceSetttingFragment"
-        android:name="com.example.nocturnevpn.view.fragment.AdvanceSetttingFragment"
+        android:name="com.nocturnevpn.view.fragment.AdvanceSetttingFragment"
         android:label="fragment_advance_settting"
         tools:layout="@layout/fragment_advance_settting" />
     <fragment
         android:id="@+id/afterPremiumFragment"
-        android:name="com.example.nocturnevpn.view.fragment.AfterPremiumFragment"
+        android:name="com.nocturnevpn.view.fragment.AfterPremiumFragment"
         android:label="After Premium"
         tools:layout="@layout/fragment_after_premium" />
     <fragment
         android:id="@+id/premiumFragment"
-        android:name="com.example.nocturnevpn.view.fragment.PremiumFragment"
+        android:name="com.nocturnevpn.view.fragment.PremiumFragment"
         android:label="fragment_premium"
         tools:layout="@layout/fragment_premium" >
         <action
@@ -80,21 +92,21 @@
     </fragment>
     <fragment
         android:id="@+id/appIconFragment"
-        android:name="com.example.nocturnevpn.view.fragment.appIconFragment"
+        android:name="com.nocturnevpn.view.fragment.appIconFragment"
         android:label="fragment_app_icon"
         tools:layout="@layout/fragment_app_icon" />
     <fragment
         android:id="@+id/historyFragment"
-        android:name="com.example.nocturnevpn.view.fragment.HistoryFragment"
+        android:name="com.nocturnevpn.view.fragment.HistoryFragment"
         android:label="fragment_history"
         tools:layout="@layout/fragment_history" />
     <fragment
         android:id="@+id/helpCenterFragment"
-        android:name="com.example.nocturnevpn.view.fragment.HelpCenterFragment"
+        android:name="com.nocturnevpn.view.fragment.HelpCenterFragment"
         android:label="HelpCenterFragment" />
     <fragment
         android:id="@+id/editUserInfoFragment"
-        android:name="com.example.nocturnevpn.view.fragment.EditUserInfoFragment"
+        android:name="com.nocturnevpn.view.fragment.EditUserInfoFragment"
         android:label="EditUserInfoFragment"
         tools:layout="@layout/fragment_edit_user_info" />
 

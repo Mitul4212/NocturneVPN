@@ -87,7 +87,7 @@
         app:boxCornerRadiusTopEnd="18dp"
         app:boxCornerRadiusBottomStart="18dp"
         app:boxCornerRadiusBottomEnd="18dp"
-        app:boxStrokeColor="@color/strong_violet"
+        app:boxStrokeColor="@color/textinput_stroke"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

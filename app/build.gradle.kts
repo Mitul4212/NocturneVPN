@@ -7,30 +7,37 @@ apply(plugin = "androidx.navigation.safeargs.kotlin")
 
 
 android {
-    namespace = "com.example.nocturnevpn"
+    namespace = "com.nocturnevpn"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.nocturnevpn"
+        applicationId = "com.nocturnevpn"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 16
+        versionName = "1.0.14"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled = true
         buildConfigField("String", "VPN_GATE_API", "\"http://www.vpngate.net/api/iphone/\"")
+        // Toggle to disable third-party SDK initializations during troubleshooting
+        buildConfigField("boolean", "DISABLE_THIRD_PARTY_SDKS", "true")
 
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
     compileOptions {
@@ -47,6 +54,20 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    // Deliver a single base APK (disable language/density/ABI splits)
+    bundle {
+        language { enableSplit = false }
+        density { enableSplit = false }
+        abi { enableSplit = false }
+    }
+
+    // Ensure native libs are extracted to app lib/ directory so OpenVPN can exec from nativeLibraryDir
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -62,7 +83,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("org.chromium.net:cronet-embedded:119.6045.31")
+//    implementation("org.chromium.net:cronet-embedded:119.6045.31")
+    implementation("com.google.android.gms:play-services-cronet:18.0.1")
     implementation("androidx.webkit:webkit:1.13.0")
     implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
@@ -84,10 +106,12 @@ dependencies {
     implementation ("androidx.cardview:cardview:1.0.0")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.badoo.mobile:android-weak-handler:1.1")
 //    implementation("com.android.support:multidex:1.0.3")
 
@@ -119,4 +143,9 @@ dependencies {
     // Google Ads SDK for banner ads
     implementation("com.google.android.gms:play-services-ads:22.6.0")
 
+    implementation("com.android.billingclient:billing-ktx:7.0.0")
+
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }

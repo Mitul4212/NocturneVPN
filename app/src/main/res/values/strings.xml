@@ -70,6 +70,13 @@
     <string name="reward_hub">Reward Hub</string>
     <string name="test_ad_unit_id_banner">ca-app-pub-3940256099942544/6300978111</string>
 
+
+<!--    ad mob ads id-->
+    <string name="ad_app_unit_id">ca-app-pub-6998123470344633~8474752707</string>
+    <string name="ad_unit_id_banner">ca-app-pub-6998123470344633/7185705851</string>
+    <string name="ad_unit_id_interstitial">ca-app-pub-6998123470344633/2367691113</string>
+    <string name="ad_unit_id_rewarded">ca-app-pub-6998123470344633/8307215835</string>
+
     <string-array name="faq_questions">
         <item>Why do I need a VPN?</item>
         <item>Is it safe?</item>

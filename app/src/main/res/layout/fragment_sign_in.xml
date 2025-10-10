@@ -28,7 +28,7 @@
         style="@style/LoginTextInputOuterFieldStyle"
         android:hint="@string/enter_email"
         android:layout_marginTop="0dp"
-        app:boxStrokeColor="@color/strong_violet"
+        app:strokeColor="@color/textinput_stroke"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline4">
@@ -49,7 +49,7 @@
         style="@style/LoginTextInputOuterFieldStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="@color/strong_violet"
+        app:strokeColor="@color/textinput_stroke"
         app:endIconMode="password_toggle"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -113,11 +113,11 @@
             android:layout_marginEnd="16dp"
             android:src="@drawable/ic_google" />
 
-        <ImageView
-            android:id="@+id/facebookSignInBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_facebook" />
+<!--        <ImageView-->
+<!--            android:id="@+id/facebookSignInBtn"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/ic_facebook" />-->
     </LinearLayout>
 
 

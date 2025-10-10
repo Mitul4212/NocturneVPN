@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused state -->
+    <item android:color="@color/strong_violet" android:state_focused="true" />
+    <!-- Default light mode -->
+    <item android:color="@color/black" />
+
+</selector>

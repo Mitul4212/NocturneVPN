@@ -5,13 +5,13 @@
     android:height="22dp">
     <path
         android:pathData="M3.5 14H3.5A1.5 1.5 0 0 1 5 15.5V18.5A1.5 1.5 0 0 1 3.5 20H3.5A1.5 1.5 0 0 1 2 18.5V15.5A1.5 1.5 0 0 1 3.5 14Z"
-        android:fillColor="#6622CC" />
+        android:fillColor="@color/strong_violet" />
     <path
         android:pathData="M8.5 10H8.5A1.5 1.5 0 0 1 10 11.5V18.5A1.5 1.5 0 0 1 8.5 20H8.5A1.5 1.5 0 0 1 7 18.5V11.5A1.5 1.5 0 0 1 8.5 10Z"
-        android:fillColor="#6622CC" />
+        android:fillColor="@color/strong_violet" />
     <path
         android:pathData="M13.5 6H13.5A1.5 1.5 0 0 1 15 7.5V18.5A1.5 1.5 0 0 1 13.5 20H13.5A1.5 1.5 0 0 1 12 18.5V7.5A1.5 1.5 0 0 1 13.5 6Z"
-        android:fillColor="#6622CC" />
+        android:fillColor="@color/strong_violet" />
     <path
         android:pathData="M18.5 2H18.5A1.5 1.5 0 0 1 20 3.5V18.5A1.5 1.5 0 0 1 18.5 20H18.5A1.5 1.5 0 0 1 17 18.5V3.5A1.5 1.5 0 0 1 18.5 2Z"
         android:fillColor="#C7B4E3" />

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.example.nocturnevpn.view.fragment.SignUpFragment"
+        android:name="com.nocturnevpn.view.fragment.SignUpFragment"
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/signInFragment"
-        android:name="com.example.nocturnevpn.view.fragment.SignInFragment"
+        android:name="com.nocturnevpn.view.fragment.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in" >
         <action
@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
-        android:name="com.example.nocturnevpn.view.fragment.ForgotPasswordFragment"
+        android:name="com.nocturnevpn.view.fragment.ForgotPasswordFragment"
         android:label="fragment_forgot_password"
         tools:layout="@layout/fragment_forgot_password" >
         <action
@@ -43,7 +43,7 @@
     </fragment>
     <fragment
         android:id="@+id/verificationFragment"
-        android:name="com.example.nocturnevpn.view.fragment.VerificationFragment"
+        android:name="com.nocturnevpn.view.fragment.VerificationFragment"
         android:label="fragment_verification"
         tools:layout="@layout/fragment_verification" >
         <action
@@ -52,7 +52,7 @@
     </fragment>
     <fragment
         android:id="@+id/passwordResetConfirmationFragment"
-        android:name="com.example.nocturnevpn.view.fragment.PasswordResetConfirmationFragment"
+        android:name="com.nocturnevpn.view.fragment.PasswordResetConfirmationFragment"
         android:label="fragment_password_reset_confirmation"
         tools:layout="@layout/fragment_password_reset_confirmation" >
         <argument
