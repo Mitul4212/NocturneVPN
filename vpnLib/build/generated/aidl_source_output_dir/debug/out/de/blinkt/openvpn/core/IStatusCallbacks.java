@@ -2,6 +2,10 @@
  * This file is auto-generated.  DO NOT MODIFY.
  */
 package de.blinkt.openvpn.core;
+/**
+ * Used to notify the UI process from the :openvpn service process of changes/event happening in
+ * the backend
+ */
 public interface IStatusCallbacks extends android.os.IInterface
 {
   /** Default implementation for IStatusCallbacks. */
@@ -18,6 +22,9 @@ public interface IStatusCallbacks extends android.os.IInterface
     {
     }
     @Override public void connectedVPN(java.lang.String uuid) throws android.os.RemoteException
+    {
+    }
+    @Override public void notifyProfileVersionChanged(java.lang.String uuid, int profileVersion) throws android.os.RemoteException
     {
     }
     @Override
@@ -106,6 +113,15 @@ public interface IStatusCallbacks extends android.os.IInterface
           this.connectedVPN(_arg0);
           break;
         }
+        case TRANSACTION_notifyProfileVersionChanged:
+        {
+          java.lang.String _arg0;
+          _arg0 = data.readString();
+          int _arg1;
+          _arg1 = data.readInt();
+          this.notifyProfileVersionChanged(_arg0, _arg1);
+          break;
+        }
         default:
         {
           return super.onTransact(code, data, reply, flags);
@@ -182,11 +198,25 @@ public interface IStatusCallbacks extends android.os.IInterface
           _data.recycle();
         }
       }
+      @Override public void notifyProfileVersionChanged(java.lang.String uuid, int profileVersion) throws android.os.RemoteException
+      {
+        android.os.Parcel _data = android.os.Parcel.obtain();
+        try {
+          _data.writeInterfaceToken(DESCRIPTOR);
+          _data.writeString(uuid);
+          _data.writeInt(profileVersion);
+          boolean _status = mRemote.transact(Stub.TRANSACTION_notifyProfileVersionChanged, _data, null, android.os.IBinder.FLAG_ONEWAY);
+        }
+        finally {
+          _data.recycle();
+        }
+      }
     }
     static final int TRANSACTION_newLogItem = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
     static final int TRANSACTION_updateStateString = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
     static final int TRANSACTION_updateByteCount = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
     static final int TRANSACTION_connectedVPN = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
+    static final int TRANSACTION_notifyProfileVersionChanged = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
   }
   public static final java.lang.String DESCRIPTOR = "de.blinkt.openvpn.core.IStatusCallbacks";
   /** Called when the service has a new status for you. */
@@ -194,6 +224,7 @@ public interface IStatusCallbacks extends android.os.IInterface
   public void updateStateString(java.lang.String state, java.lang.String msg, int resid, de.blinkt.openvpn.core.ConnectionStatus level, android.content.Intent intent) throws android.os.RemoteException;
   public void updateByteCount(long inBytes, long outBytes) throws android.os.RemoteException;
   public void connectedVPN(java.lang.String uuid) throws android.os.RemoteException;
+  public void notifyProfileVersionChanged(java.lang.String uuid, int profileVersion) throws android.os.RemoteException;
   /** @hide */
   static class _Parcel {
     static private <T> T readTypedObject(

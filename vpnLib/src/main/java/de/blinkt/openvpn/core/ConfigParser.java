@@ -503,8 +503,10 @@ public class ConfigParser {
                     np.mSearchDomain = dhcpoption.get(2);
                 } else if (type.equals("DNS")) {
                     np.mOverrideDNS = true;
-                    if (np.mDNS1.equals(VpnProfile.DEFAULT_DNS1))
+                    if (np.mDNS1.equals(VpnProfile.DEFAULT_DNS1)) {
                         np.mDNS1 = arg;
+                        np.mDNS2 = "";
+                    }
                     else
                         np.mDNS2 = arg;
                 }
@@ -531,9 +533,65 @@ public class ConfigParser {
         if (getOption("comp-lzo", 0, 1) != null)
             np.mUseLzo = true;
 
+        Vector<String> ncp_ciphers = getOption("ncp-ciphers", 1, 1);
+        Vector<String> data_ciphers = getOption("data-ciphers", 1, 1);
         Vector<String> cipher = getOption("cipher", 1, 1);
+
         if (cipher != null)
             np.mCipher = cipher.get(1);
+
+        if (data_ciphers != null)
+        {
+            np.mDataCiphers = data_ciphers.get(1);
+        }
+        else if (ncp_ciphers != null)
+        {
+            np.mDataCiphers = ncp_ciphers.get(1);
+        }
+        Vector<String> tls_cert_profile = getOption("tls-cert-profile", 1, 1);
+        if (tls_cert_profile != null)
+        {
+            String profile = tls_cert_profile.get(1);
+            for (String choice : new String[]{"insecure", "preferred", "legacy", "suiteb"}) {
+                if (choice.equals(profile)) {
+                    np.mTlSCertProfile = profile;
+                    break;
+                }
+            }
+            if (!profile.equals(np.mTlSCertProfile))
+            {
+                throw new ConfigParseError("Invalid tls-cert-profile '" + profile + "'");
+            }
+        }
+
+        Vector<String> provider = getOption("provider", 1, 9);
+        if (provider != null)
+        {
+            String providers = provider.get(1).toLowerCase(Locale.ROOT);
+            if (providers.equals("legacy:default") || providers.equals("default:legacy"))
+                np.mUseLegacyProvider = true;
+
+            for (String prov:provider)
+            {
+                if ("legacy".equals(prov.toLowerCase(Locale.ROOT)))
+                {
+                    np.mUseLegacyProvider = true;
+                }
+            }
+        }
+
+
+        Vector<String> compatmode = getOption("compat-mode", 1, 1);
+        if (compatmode != null)
+        {
+            Scanner versionScanner = new Scanner(compatmode.get(1));
+            versionScanner.useDelimiter("\\.");
+            int major = versionScanner.nextInt();
+            int minor = versionScanner.nextInt();
+            int patch = versionScanner.nextInt();
+
+            np.mCompatMode = major * 10000 + minor * 100 + patch;
+        }
 
         Vector<String> auth = getOption("auth", 1, 1);
         if (auth != null)
@@ -544,6 +602,20 @@ public class ConfigParser {
         if (ca != null) {
             np.mCaFilename = ca.get(1);
         }
+
+        Vector<Vector<String>> peerfp = getAllOption("peer-fingerprint", 1, 1);
+        if (peerfp != null)
+        {
+            np.mCheckPeerFingerprint = true;
+            for (Vector<String> fp: peerfp)
+            {
+                if (fp.get(1).startsWith(VpnProfile.INLINE_TAG))
+                    np.mPeerFingerPrints+=fp.get(1).substring(VpnProfile.INLINE_TAG.length()) + "\n";
+                else
+                    np.mPeerFingerPrints+=fp.get(1) + "\n";
+            }
+        }
+
 
         Vector<String> cert = getOption("cert", 1, 1);
         if (cert != null) {

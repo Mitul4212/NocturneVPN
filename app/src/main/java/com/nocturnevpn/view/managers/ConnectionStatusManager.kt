@@ -87,6 +87,30 @@ class ConnectionStatusManager(
         }
     }
 
+    // New: Directly update duration and speeds from raw bytes per second
+    fun updateConnectionSpeeds(duration: String, downBytesPerSecond: Long, upBytesPerSecond: Long) {
+        try {
+            binding?.vpnConnectionTime?.text = duration
+
+            val downText = formatBps(downBytesPerSecond)
+            val upText = formatBps(upBytesPerSecond)
+
+            binding?.downloadSpeed?.text = downText
+            binding?.uploadSpeed?.text = upText
+        } catch (e: Exception) {
+            Log.e("VPN_Debug", "Error updating direct speeds", e)
+        }
+    }
+
+    private fun formatBps(bps: Long): String {
+        return when {
+            bps >= 1024L * 1024L * 1024L -> String.format("%.1f GB/s", bps / (1024.0 * 1024.0 * 1024.0))
+            bps >= 1024L * 1024L -> String.format("%.1f MB/s", bps / (1024.0 * 1024.0))
+            bps >= 1024L -> String.format("%.1f KB/s", bps / 1024.0)
+            else -> String.format("%d B/s", bps)
+        }
+    }
+
     fun updateVPNStatusText(status: String, wasConnectedOnce: Boolean) {
         // Only update if status actually changed
         if (status == lastStatus) {

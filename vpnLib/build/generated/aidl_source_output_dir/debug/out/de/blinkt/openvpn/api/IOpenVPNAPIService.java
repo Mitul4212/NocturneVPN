@@ -88,6 +88,22 @@ public interface IOpenVPNAPIService extends android.os.IInterface
     {
       return null;
     }
+    /**
+     * Same as startVPN(String), but also takes a Bundle with extra parameters,
+     * which will be applied to the created VPNProfile (e.g. allow vpn bypass).
+     */
+    @Override public void startVPNwithExtras(java.lang.String inlineconfig, android.os.Bundle extras) throws android.os.RemoteException
+    {
+    }
+    /**
+     * Same as addNewVPNProfile(String, boolean, String) but giving possibility to pass a Bundle like
+     * in startVPNwithExtras(String, Bundle) to apply e.g. "allow vpn bypass" to profile.
+     * up to now the only extra that can be put is a boolean "de.blinkt.openvpn.api.ALLOW_VPN_BYPASS"
+     */
+    @Override public de.blinkt.openvpn.api.APIVpnProfile addNewVPNProfileWithExtras(java.lang.String name, boolean userEditable, java.lang.String config, android.os.Bundle extras) throws android.os.RemoteException
+    {
+      return null;
+    }
     @Override
     public android.os.IBinder asBinder() {
       return null;
@@ -246,6 +262,31 @@ public interface IOpenVPNAPIService extends android.os.IInterface
           java.lang.String _arg2;
           _arg2 = data.readString();
           de.blinkt.openvpn.api.APIVpnProfile _result = this.addNewVPNProfile(_arg0, _arg1, _arg2);
+          reply.writeNoException();
+          _Parcel.writeTypedObject(reply, _result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+          break;
+        }
+        case TRANSACTION_startVPNwithExtras:
+        {
+          java.lang.String _arg0;
+          _arg0 = data.readString();
+          android.os.Bundle _arg1;
+          _arg1 = _Parcel.readTypedObject(data, android.os.Bundle.CREATOR);
+          this.startVPNwithExtras(_arg0, _arg1);
+          reply.writeNoException();
+          break;
+        }
+        case TRANSACTION_addNewVPNProfileWithExtras:
+        {
+          java.lang.String _arg0;
+          _arg0 = data.readString();
+          boolean _arg1;
+          _arg1 = (0!=data.readInt());
+          java.lang.String _arg2;
+          _arg2 = data.readString();
+          android.os.Bundle _arg3;
+          _arg3 = _Parcel.readTypedObject(data, android.os.Bundle.CREATOR);
+          de.blinkt.openvpn.api.APIVpnProfile _result = this.addNewVPNProfileWithExtras(_arg0, _arg1, _arg2, _arg3);
           reply.writeNoException();
           _Parcel.writeTypedObject(reply, _result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
           break;
@@ -531,6 +572,52 @@ public interface IOpenVPNAPIService extends android.os.IInterface
         }
         return _result;
       }
+      /**
+       * Same as startVPN(String), but also takes a Bundle with extra parameters,
+       * which will be applied to the created VPNProfile (e.g. allow vpn bypass).
+       */
+      @Override public void startVPNwithExtras(java.lang.String inlineconfig, android.os.Bundle extras) throws android.os.RemoteException
+      {
+        android.os.Parcel _data = android.os.Parcel.obtain();
+        android.os.Parcel _reply = android.os.Parcel.obtain();
+        try {
+          _data.writeInterfaceToken(DESCRIPTOR);
+          _data.writeString(inlineconfig);
+          _Parcel.writeTypedObject(_data, extras, 0);
+          boolean _status = mRemote.transact(Stub.TRANSACTION_startVPNwithExtras, _data, _reply, 0);
+          _reply.readException();
+        }
+        finally {
+          _reply.recycle();
+          _data.recycle();
+        }
+      }
+      /**
+       * Same as addNewVPNProfile(String, boolean, String) but giving possibility to pass a Bundle like
+       * in startVPNwithExtras(String, Bundle) to apply e.g. "allow vpn bypass" to profile.
+       * up to now the only extra that can be put is a boolean "de.blinkt.openvpn.api.ALLOW_VPN_BYPASS"
+       */
+      @Override public de.blinkt.openvpn.api.APIVpnProfile addNewVPNProfileWithExtras(java.lang.String name, boolean userEditable, java.lang.String config, android.os.Bundle extras) throws android.os.RemoteException
+      {
+        android.os.Parcel _data = android.os.Parcel.obtain();
+        android.os.Parcel _reply = android.os.Parcel.obtain();
+        de.blinkt.openvpn.api.APIVpnProfile _result;
+        try {
+          _data.writeInterfaceToken(DESCRIPTOR);
+          _data.writeString(name);
+          _data.writeInt(((userEditable)?(1):(0)));
+          _data.writeString(config);
+          _Parcel.writeTypedObject(_data, extras, 0);
+          boolean _status = mRemote.transact(Stub.TRANSACTION_addNewVPNProfileWithExtras, _data, _reply, 0);
+          _reply.readException();
+          _result = _Parcel.readTypedObject(_reply, de.blinkt.openvpn.api.APIVpnProfile.CREATOR);
+        }
+        finally {
+          _reply.recycle();
+          _data.recycle();
+        }
+        return _result;
+      }
     }
     static final int TRANSACTION_getProfiles = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
     static final int TRANSACTION_startProfile = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
@@ -546,6 +633,8 @@ public interface IOpenVPNAPIService extends android.os.IInterface
     static final int TRANSACTION_removeProfile = (android.os.IBinder.FIRST_CALL_TRANSACTION + 11);
     static final int TRANSACTION_protectSocket = (android.os.IBinder.FIRST_CALL_TRANSACTION + 12);
     static final int TRANSACTION_addNewVPNProfile = (android.os.IBinder.FIRST_CALL_TRANSACTION + 13);
+    static final int TRANSACTION_startVPNwithExtras = (android.os.IBinder.FIRST_CALL_TRANSACTION + 14);
+    static final int TRANSACTION_addNewVPNProfileWithExtras = (android.os.IBinder.FIRST_CALL_TRANSACTION + 15);
   }
   public static final java.lang.String DESCRIPTOR = "de.blinkt.openvpn.api.IOpenVPNAPIService";
   public java.util.List<de.blinkt.openvpn.api.APIVpnProfile> getProfiles() throws android.os.RemoteException;
@@ -595,6 +684,17 @@ public interface IOpenVPNAPIService extends android.os.IInterface
   public boolean protectSocket(android.os.ParcelFileDescriptor fd) throws android.os.RemoteException;
   /** Use a profile with all certificates etc. embedded */
   public de.blinkt.openvpn.api.APIVpnProfile addNewVPNProfile(java.lang.String name, boolean userEditable, java.lang.String config) throws android.os.RemoteException;
+  /**
+   * Same as startVPN(String), but also takes a Bundle with extra parameters,
+   * which will be applied to the created VPNProfile (e.g. allow vpn bypass).
+   */
+  public void startVPNwithExtras(java.lang.String inlineconfig, android.os.Bundle extras) throws android.os.RemoteException;
+  /**
+   * Same as addNewVPNProfile(String, boolean, String) but giving possibility to pass a Bundle like
+   * in startVPNwithExtras(String, Bundle) to apply e.g. "allow vpn bypass" to profile.
+   * up to now the only extra that can be put is a boolean "de.blinkt.openvpn.api.ALLOW_VPN_BYPASS"
+   */
+  public de.blinkt.openvpn.api.APIVpnProfile addNewVPNProfileWithExtras(java.lang.String name, boolean userEditable, java.lang.String config, android.os.Bundle extras) throws android.os.RemoteException;
   /** @hide */
   static class _Parcel {
     static private <T> T readTypedObject(

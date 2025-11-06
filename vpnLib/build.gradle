@@ -1,65 +1,42 @@
-apply plugin: 'com.android.library'
-android {
-    namespace 'de.blinkt.openvpn'
-    compileSdkVersion 35
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-    ndkVersion "29.0.13113456"
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+android {
+    compileSdk = 35
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 24
         targetSdkVersion 35
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
-        // Ship keep rules with the AAR so the app applies them when shrinking
-        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
-//            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            // Do not minify the library itself; let the app’s R8 do it using consumer rules
-            minifyEnabled false
-        }
-        debug {
-            minifyEnabled false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
+    namespace 'de.blinkt.openvpn'
     buildFeatures {
         aidl true
         buildConfig true
     }
 }
-
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    implementation 'androidx.activity:activity-ktx:1.7.2' // or higher
-
-    // for ads, and also when you can add this dependency then remove ads comments in this file "ICSOpenVPNApplication.jav"
-//    implementation 'com.google.android.gms:play-services-ads-lite:20.6.0'
-
-
-    testImplementation 'junit:junit:4.13'
-//    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
-
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-}
-
-// Force all Kotlin stdlib to use version 1.8.10 to avoid duplicate classes
-configurations.all {
-    resolutionStrategy {
-        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.10"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10"
-    }
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.security:security-crypto:1.1.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
 }
