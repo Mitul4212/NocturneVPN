@@ -41,10 +41,11 @@
 -keep class com.nocturnevpn.view.managers.VPNManager { *; }
 -keepclassmembers class com.nocturnevpn.view.managers.VPNManager { *; }
 
-# Keep VPNManager methods that use OpenVpnApi
+# Keep VPNManager methods that use new VPN API (ConfigParser, VPNLaunchHelper, ProfileManager)
 -keepclassmembers class com.nocturnevpn.view.managers.VPNManager {
     public void startVpn();
     public void prepareVPN();
+    public void stopVPN();
 }
 
 # Crashlytics
@@ -163,23 +164,16 @@
 -keep class de.blinkt.openvpn.api.IOpenVPNAPIService { *; }
 -keepattributes *Annotation*,InnerClasses,EnclosingMethod,Signature
 
-# Keep OpenVpnApi class - Critical for VPN functionality
--keep class de.blinkt.openvpn.OpenVpnApi { *; }
--keepclassmembers class de.blinkt.openvpn.OpenVpnApi { public *; }
--keepclassmembers class de.blinkt.openvpn.OpenVpnApi { static *; }
-
 # Keep all OpenVPN classes and methods - R8 is very aggressive
+# Note: OpenVpnApi is deprecated - using ConfigParser, VPNLaunchHelper, ProfileManager instead
 -keep class de.blinkt.openvpn.** { *; }
 -keepclassmembers class de.blinkt.openvpn.** { *; }
 
-# Specifically keep OpenVpnApi methods that are called
--keepclassmembers class de.blinkt.openvpn.OpenVpnApi {
-    public static void startVpn(...);
-    public static void startVpnInternal(...);
-}
-
-# Suppress R8 warning for OpenVpnApi
--dontwarn de.blinkt.openvpn.OpenVpnApi
+# Keep new VPN API classes (ConfigParser, VPNLaunchHelper, ProfileManager)
+-keep class de.blinkt.openvpn.core.ConfigParser { *; }
+-keep class de.blinkt.openvpn.core.ConfigParser$ConfigParseError { *; }
+-keep class de.blinkt.openvpn.core.VPNLaunchHelper { *; }
+-keep class de.blinkt.openvpn.core.ProfileManager { *; }
 
 # Keep VPN configuration parsing
 -keep class de.blinkt.openvpn.core.ConfigParser$ConfigParseError { *; }

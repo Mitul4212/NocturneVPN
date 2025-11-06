@@ -7,31 +7,31 @@ import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Handler
 import android.os.Looper
-import android.os.RemoteException
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.QueryPurchasesParams
 import com.nocturnevpn.CheckInternetConnection
 import com.nocturnevpn.SharedPreference
 import com.nocturnevpn.utils.HistoryManager
 import com.nocturnevpn.utils.toast
-import de.blinkt.openvpn.OpenVpnApi
+import de.blinkt.openvpn.core.ConfigParser
 import de.blinkt.openvpn.core.OpenVPNService
-import de.blinkt.openvpn.core.OpenVPNThread
-import java.io.IOException
-import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.Purchase
-import com.android.billingclient.api.QueryPurchasesParams
+import de.blinkt.openvpn.core.ProfileManager
+import de.blinkt.openvpn.core.VPNLaunchHelper
+import de.blinkt.openvpn.core.VpnStatus
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.android.billingclient.api.BillingClientStateListener
-import com.android.billingclient.api.BillingResult
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStreamReader
 
 class VPNManager(
     private val context: Context,
@@ -39,8 +39,6 @@ class VPNManager(
     private val billingClient: BillingClient // Add BillingClient to constructor
 ) {
     private var vpnStart = false
-    private lateinit var vpnThread: OpenVPNThread
-    private lateinit var vpnService: OpenVPNService
     private var connection: CheckInternetConnection? = null
     private var broadcastReceiver: BroadcastReceiver? = null
     private var vpnResultLauncher: ActivityResultLauncher<Intent>? = null
@@ -52,8 +50,6 @@ class VPNManager(
     private val billingClientState = MutableStateFlow(false) // State flow for billing client readiness
 
     init {
-        vpnThread = OpenVPNThread()
-        vpnService = OpenVPNService()
         connection = CheckInternetConnection()
         notificationUpdateHandler = Handler(Looper.getMainLooper())
         historyManager = HistoryManager.getInstance(context)
@@ -92,7 +88,8 @@ class VPNManager(
     fun isVPNStarted(): Boolean = vpnStart
 
     fun checkServiceStatus() {
-        setStatus(OpenVPNService.getStatus())
+        // Status is managed via broadcast receiver and VpnStatus listeners
+        // No need to query directly - status updates come through broadcast receiver
     }
 
     fun prepareVPN() {
@@ -122,9 +119,10 @@ class VPNManager(
                 return
             }
 
-            val conf = selectedServer.getOvpnConfigData()
+            // Get .ovpn config string (already decoded from Base64)
+            val ovpnConfigString = selectedServer.getOvpnConfigData()
 
-            if (conf.isNullOrEmpty()) {
+            if (ovpnConfigString.isNullOrEmpty()) {
                 context.toast("VPN configuration data is missing.")
                 return
             }
@@ -136,8 +134,68 @@ class VPNManager(
             // Track connection start in history
             historyManager?.onConnectionStarted(selectedServer)
 
-            OpenVpnApi.startVpn(context, conf, selectedServer.getCountryShort(), "vpn", "vpn")
+            // Parse .ovpn string to VpnProfile using ConfigParser
+            val configParser = ConfigParser()
+            val inputStreamReader = InputStreamReader(ByteArrayInputStream(ovpnConfigString.toByteArray()))
+            configParser.parseConfig(inputStreamReader)
+            val vpnProfile = configParser.convertProfile()
+
+            // Configure profile
+            vpnProfile.mName = selectedServer.getCountryShort()
+
+            // Validate profile before setting username/password (like old OpenVpnApi did)
+            val profileError = vpnProfile.checkProfile(context)
+            if (profileError != de.blinkt.openvpn.R.string.no_error_found) {
+                val errorMessage = context.getString(profileError)
+                Log.e("VPN_START", "Profile validation failed: $errorMessage")
+                context.toast("VPN configuration error: $errorMessage")
+                historyManager?.onConnectionFailed(selectedServer, "Profile Error: $errorMessage")
+                return
+            }
+
+            Log.d("VPN_START", "Profile validated successfully")
+            Log.d("VPN_START", "Auth type: ${vpnProfile.mAuthenticationType}, Requires userpass: ${vpnProfile.isUserPWAuth()}")
+
+            // Set profile creator
+            vpnProfile.mProfileCreator = context.packageName
+            
+            // Set username/password (matching old OpenVpnApi.startVpn behavior)
+            // Old API always set username/password regardless of auth type
+            // VPN Gate servers might use these even if config doesn't explicitly require them
+            vpnProfile.mUsername = "vpn"
+            vpnProfile.mPassword = "vpn"
+            Log.d("VPN_START", "Set username/password: vpn/vpn (matching old API behavior)")
+            
+            // Fix cipher compatibility: VPN Gate servers often use AES-128-CBC
+            // which is not in OpenVPN's default cipher list. Add it to data-ciphers.
+            if (vpnProfile.mDataCiphers.isNullOrEmpty()) {
+                // If no data-ciphers specified, use default plus AES-128-CBC for compatibility
+                vpnProfile.mDataCiphers = "AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC:AES-128-CBC"
+                Log.d("VPN_START", "Set data-ciphers to include AES-128-CBC for VPN Gate compatibility")
+            } else if (!vpnProfile.mDataCiphers.contains("AES-128-CBC", ignoreCase = true)) {
+                // If data-ciphers exists but doesn't include AES-128-CBC, add it
+                vpnProfile.mDataCiphers = "${vpnProfile.mDataCiphers}:AES-128-CBC"
+                Log.d("VPN_START", "Added AES-128-CBC to existing data-ciphers: ${vpnProfile.mDataCiphers}")
+            } else {
+                Log.d("VPN_START", "Data-ciphers already includes AES-128-CBC: ${vpnProfile.mDataCiphers}")
+            }
+
+            // Set as temporary profile (not saved to disk)
+            ProfileManager.setTemporaryProfile(context, vpnProfile)
+
+            // Log profile details for debugging
+            Log.d("VPN_START", "Profile details:")
+            Log.d("VPN_START", "  UUID: ${vpnProfile.getUUIDString()}")
+            Log.d("VPN_START", "  Name: ${vpnProfile.mName}")
+            Log.d("VPN_START", "  Use Pull: ${vpnProfile.mUsePull}")
+            // Removed mConnections.size to avoid R8 missing class error for Connection
+
+            // Start VPN using VPNLaunchHelper
+            // Parameters: profile, context, startReason (null = manual), replace_running_vpn (true)
+            VPNLaunchHelper.startOpenVpn(vpnProfile, context, null, true)
             vpnStart = true
+            
+            Log.d("VPN_START", "VPNLaunchHelper.startOpenVpn called successfully")
         } catch (exception: IOException) {
             exception.printStackTrace()
             // Track failed connection
@@ -145,7 +203,14 @@ class VPNManager(
             if (selectedServer != null) {
                 historyManager?.onConnectionFailed(selectedServer, "Configuration Error")
             }
-        } catch (exception: RemoteException) {
+        } catch (exception: ConfigParser.ConfigParseError) {
+            exception.printStackTrace()
+            // Track failed connection
+            val selectedServer = sharedPreference.getServer()
+            if (selectedServer != null) {
+                historyManager?.onConnectionFailed(selectedServer, "Configuration Parse Error")
+            }
+        } catch (exception: Exception) {
             exception.printStackTrace()
             // Track failed connection
             val selectedServer = sharedPreference.getServer()
@@ -162,7 +227,18 @@ class VPNManager(
             // Track connection stop in history
             historyManager?.onConnectionDisconnected()
             
-            OpenVPNThread.stop()
+            // Clear connected VPN profile state
+            ProfileManager.setConntectedVpnProfileDisconnected(context)
+            
+            // Stop VPN by sending DISCONNECT intent to OpenVPNService
+            val disconnectIntent = Intent(context, OpenVPNService::class.java)
+            disconnectIntent.action = OpenVPNService.DISCONNECT_VPN
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(disconnectIntent)
+            } else {
+                context.startService(disconnectIntent)
+            }
+            
             vpnStart = false
             stopPeriodicNotificationUpdate() // Stop periodic updates
             
@@ -286,11 +362,12 @@ class VPNManager(
     }
 
     private fun setStatus(connectionState: String?) {
+        Log.d("VPN_START", "setStatus() called with state: $connectionState")
         if (connectionState != null) when (connectionState) {
             "DISCONNECTED" -> {
                 vpnStart = false
                 stopPeriodicNotificationUpdate()
-                OpenVPNService.setDefaultStatus()
+                // Status is already updated via VpnStatus, no need to set default
                 // Track connection stop in history
                 historyManager?.onConnectionDisconnected()
             }
@@ -304,11 +381,32 @@ class VPNManager(
                 // Connection is in progress
                 // History manager already knows about this from onConnectionStarted
             }
-            "AUTH_FAILED", "CONNECTION_FAILED", "TUNNEL_FAILED" -> {
-                // Connection failed during the process
+            "AUTH_FAILED", "CONNECTION_FAILED", "TUNNEL_FAILED", "RECONNECTING" -> {
+                // Connection failed or reconnecting - log OpenVPN messages for debugging
+                Log.e("VPN_START", "=== ENTERED RECONNECTING/FAILURE HANDLER ===")
                 val selectedServer = sharedPreference.getServer()
                 if (selectedServer != null) {
-                    historyManager?.onConnectionFailed(selectedServer, connectionState)
+                    Log.e("VPN_START", "Selected server found: ${selectedServer.getCountryShort()}")
+                } else {
+                    Log.e("VPN_START", "WARNING: Selected server is null!")
+                }
+                
+                if (selectedServer != null) {
+                    try {
+                        // Get last log message (avoiding LogItem references for R8 compatibility)
+                        val lastMessage = VpnStatus.getLastCleanLogMessage(context)
+                        if (lastMessage.isNotEmpty()) {
+                            Log.e("VPN_START", "OpenVPN status during $connectionState: $lastMessage")
+                        }
+                        // Removed log buffer iteration to avoid R8 missing class error for LogItem
+                    } catch (e: Exception) {
+                        Log.e("VPN_START", "Error reading OpenVPN logs", e)
+                        e.printStackTrace()
+                    }
+                    
+                    if (connectionState in listOf("AUTH_FAILED", "CONNECTION_FAILED", "TUNNEL_FAILED")) {
+                        historyManager?.onConnectionFailed(selectedServer, connectionState)
+                    }
                 }
             }
         }

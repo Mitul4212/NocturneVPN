@@ -14,8 +14,8 @@ android {
         applicationId = "com.nocturnevpn"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
-        versionName = "1.0.14"
+        versionCode = 17
+        versionName = "1.0.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

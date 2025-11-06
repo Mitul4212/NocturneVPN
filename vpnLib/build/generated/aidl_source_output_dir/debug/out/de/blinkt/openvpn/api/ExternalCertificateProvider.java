@@ -12,9 +12,11 @@ public interface ExternalCertificateProvider extends android.os.IInterface
   public static class Default implements de.blinkt.openvpn.api.ExternalCertificateProvider
   {
     /**
+     * deprecated use {@link #getSignedDataWithExtra} instead
+     * 
      * Requests signing the data with RSA/ECB/PKCS1PADDING
      * for RSA certficate and with NONEwithECDSA for EC certificates
-     * @parm alias the parameter that
+     * @param alias user certificate identifier
      */
     @Override public byte[] getSignedData(java.lang.String alias, byte[] data) throws android.os.RemoteException
     {
@@ -43,6 +45,37 @@ public interface ExternalCertificateProvider extends android.os.IInterface
      * as the keys for the bundle.
      */
     @Override public android.os.Bundle getCertificateMetaData(java.lang.String alias) throws android.os.RemoteException
+    {
+      return null;
+    }
+    /**
+     * Requests signing the data with RSA/ECB/nopadding, RSA/ECB/PKCS1PADDING or PKCS1PSSPADDING
+     * for RSA certficate and with NONEwithECDSA for EC certificates
+     * @param alias user certificate identifier
+     * @param data the data to be signed
+     * @param extra additional information.
+     * Should contain the following keys:
+     * <ul>
+     * <li>int key "de.blinkt.openvpn.api.RSA_PADDING_TYPE", may be set as:
+     * <ul>
+     * <li>0 - for RSA/ECB/nopadding
+     * <li>1 - for RSA/ECB/PKCS1PADDING
+     * <li>2 - for PKCS1PSSPADDING
+     * </ul>
+     * <li>string key "de.blinkt.openvpn.api.SALTLEN", may be set as:
+     * <ul>
+     * <li>"digest" - use the same salt size as the hash to sign
+     * <li>"max" - use maximum possible saltlen which is '(nbits-1)/8 - hlen - 2'. Here
+     * 'nbits' is the number of bits in the key modulus and 'hlen' is the size in octets of
+     * the hash. See: RFC 8017 sec 8.1.1 and 9.1.1.
+     * </ul>
+     * <li>boolean key "de.blinkt.openvpn.api.NEEDS_DIGEST", indicating that the data should be
+     * hashed before signing or not
+     * <li>string key "de.blinkt.openvpn.api.DIGEST", the short common digest algorithm name to
+     * use (such as SHA256, SHA224, etc.)
+     * </ul>
+     */
+    @Override public byte[] getSignedDataWithExtra(java.lang.String alias, byte[] data, android.os.Bundle extra) throws android.os.RemoteException
     {
       return null;
     }
@@ -123,6 +156,19 @@ public interface ExternalCertificateProvider extends android.os.IInterface
           _Parcel.writeTypedObject(reply, _result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
           break;
         }
+        case TRANSACTION_getSignedDataWithExtra:
+        {
+          java.lang.String _arg0;
+          _arg0 = data.readString();
+          byte[] _arg1;
+          _arg1 = data.createByteArray();
+          android.os.Bundle _arg2;
+          _arg2 = _Parcel.readTypedObject(data, android.os.Bundle.CREATOR);
+          byte[] _result = this.getSignedDataWithExtra(_arg0, _arg1, _arg2);
+          reply.writeNoException();
+          reply.writeByteArray(_result);
+          break;
+        }
         default:
         {
           return super.onTransact(code, data, reply, flags);
@@ -146,9 +192,11 @@ public interface ExternalCertificateProvider extends android.os.IInterface
         return DESCRIPTOR;
       }
       /**
+       * deprecated use {@link #getSignedDataWithExtra} instead
+       * 
        * Requests signing the data with RSA/ECB/PKCS1PADDING
        * for RSA certficate and with NONEwithECDSA for EC certificates
-       * @parm alias the parameter that
+       * @param alias user certificate identifier
        */
       @Override public byte[] getSignedData(java.lang.String alias, byte[] data) throws android.os.RemoteException
       {
@@ -223,16 +271,66 @@ public interface ExternalCertificateProvider extends android.os.IInterface
         }
         return _result;
       }
+      /**
+       * Requests signing the data with RSA/ECB/nopadding, RSA/ECB/PKCS1PADDING or PKCS1PSSPADDING
+       * for RSA certficate and with NONEwithECDSA for EC certificates
+       * @param alias user certificate identifier
+       * @param data the data to be signed
+       * @param extra additional information.
+       * Should contain the following keys:
+       * <ul>
+       * <li>int key "de.blinkt.openvpn.api.RSA_PADDING_TYPE", may be set as:
+       * <ul>
+       * <li>0 - for RSA/ECB/nopadding
+       * <li>1 - for RSA/ECB/PKCS1PADDING
+       * <li>2 - for PKCS1PSSPADDING
+       * </ul>
+       * <li>string key "de.blinkt.openvpn.api.SALTLEN", may be set as:
+       * <ul>
+       * <li>"digest" - use the same salt size as the hash to sign
+       * <li>"max" - use maximum possible saltlen which is '(nbits-1)/8 - hlen - 2'. Here
+       * 'nbits' is the number of bits in the key modulus and 'hlen' is the size in octets of
+       * the hash. See: RFC 8017 sec 8.1.1 and 9.1.1.
+       * </ul>
+       * <li>boolean key "de.blinkt.openvpn.api.NEEDS_DIGEST", indicating that the data should be
+       * hashed before signing or not
+       * <li>string key "de.blinkt.openvpn.api.DIGEST", the short common digest algorithm name to
+       * use (such as SHA256, SHA224, etc.)
+       * </ul>
+       */
+      @Override public byte[] getSignedDataWithExtra(java.lang.String alias, byte[] data, android.os.Bundle extra) throws android.os.RemoteException
+      {
+        android.os.Parcel _data = android.os.Parcel.obtain();
+        android.os.Parcel _reply = android.os.Parcel.obtain();
+        byte[] _result;
+        try {
+          _data.writeInterfaceToken(DESCRIPTOR);
+          _data.writeString(alias);
+          _data.writeByteArray(data);
+          _Parcel.writeTypedObject(_data, extra, 0);
+          boolean _status = mRemote.transact(Stub.TRANSACTION_getSignedDataWithExtra, _data, _reply, 0);
+          _reply.readException();
+          _result = _reply.createByteArray();
+        }
+        finally {
+          _reply.recycle();
+          _data.recycle();
+        }
+        return _result;
+      }
     }
     static final int TRANSACTION_getSignedData = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
     static final int TRANSACTION_getCertificateChain = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
     static final int TRANSACTION_getCertificateMetaData = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
+    static final int TRANSACTION_getSignedDataWithExtra = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
   }
   public static final java.lang.String DESCRIPTOR = "de.blinkt.openvpn.api.ExternalCertificateProvider";
   /**
+   * deprecated use {@link #getSignedDataWithExtra} instead
+   * 
    * Requests signing the data with RSA/ECB/PKCS1PADDING
    * for RSA certficate and with NONEwithECDSA for EC certificates
-   * @parm alias the parameter that
+   * @param alias user certificate identifier
    */
   public byte[] getSignedData(java.lang.String alias, byte[] data) throws android.os.RemoteException;
   /**
@@ -255,6 +353,34 @@ public interface ExternalCertificateProvider extends android.os.IInterface
    * as the keys for the bundle.
    */
   public android.os.Bundle getCertificateMetaData(java.lang.String alias) throws android.os.RemoteException;
+  /**
+   * Requests signing the data with RSA/ECB/nopadding, RSA/ECB/PKCS1PADDING or PKCS1PSSPADDING
+   * for RSA certficate and with NONEwithECDSA for EC certificates
+   * @param alias user certificate identifier
+   * @param data the data to be signed
+   * @param extra additional information.
+   * Should contain the following keys:
+   * <ul>
+   * <li>int key "de.blinkt.openvpn.api.RSA_PADDING_TYPE", may be set as:
+   * <ul>
+   * <li>0 - for RSA/ECB/nopadding
+   * <li>1 - for RSA/ECB/PKCS1PADDING
+   * <li>2 - for PKCS1PSSPADDING
+   * </ul>
+   * <li>string key "de.blinkt.openvpn.api.SALTLEN", may be set as:
+   * <ul>
+   * <li>"digest" - use the same salt size as the hash to sign
+   * <li>"max" - use maximum possible saltlen which is '(nbits-1)/8 - hlen - 2'. Here
+   * 'nbits' is the number of bits in the key modulus and 'hlen' is the size in octets of
+   * the hash. See: RFC 8017 sec 8.1.1 and 9.1.1.
+   * </ul>
+   * <li>boolean key "de.blinkt.openvpn.api.NEEDS_DIGEST", indicating that the data should be
+   * hashed before signing or not
+   * <li>string key "de.blinkt.openvpn.api.DIGEST", the short common digest algorithm name to
+   * use (such as SHA256, SHA224, etc.)
+   * </ul>
+   */
+  public byte[] getSignedDataWithExtra(java.lang.String alias, byte[] data, android.os.Bundle extra) throws android.os.RemoteException;
   /** @hide */
   static class _Parcel {
     static private <T> T readTypedObject(

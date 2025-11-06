@@ -18,7 +18,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
@@ -26,9 +25,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.android.billingclient.api.BillingClient
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
 import com.nocturnevpn.CheckInternetConnection
 import com.nocturnevpn.R
 import com.nocturnevpn.SharedPreference
@@ -52,7 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class HomeFragment : Fragment(), VpnStatus.StateListener {
+class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountListener {
 
     companion object {
         // Removed shouldShowAnimatedBorder as it's now handled by AnimatedBorderManager
@@ -505,6 +501,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
                     }
                     goProButton.setOnClickListener {
                         findNavController().navigate(R.id.action_homeFragment_to_afterPremiumFragment2)
+//                        mContext.toast("Premium feature coming soon")
                     }
                 } else {
                     // Free user or expired subscription
@@ -513,6 +510,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
                     animatedBorderManager.stopAnimatedBorder()
                     goProButton.setOnClickListener {
                         findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+//                        mContext.toast("Premium feature coming soon")
                     }
                 }
             } else {
@@ -531,11 +529,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
                     }
                     goProButton.setOnClickListener {
                         findNavController().navigate(R.id.action_homeFragment_to_afterPremiumFragment2)
+//                        mContext.toast("Premium feature coming soon")
                     }
                 } else {
                     animatedBorderManager.stopAnimatedBorder()
                     goProButton.setOnClickListener {
                         findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+//                        mContext.toast("Premium feature coming soon")
                     }
                 }
             }
@@ -650,6 +650,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         super.onResume()
         Log.d("VPN_Debug", "=== Fragment Resumed ===")
         VpnStatus.addStateListener(this)
+        VpnStatus.addByteCountListener(this)
         vpnManager.registerBroadcastReceiver()
         serverManager.loadSavedServer()
         com.nocturnevpn.utils.RatingDialogManager.maybeShowRatingDialog(requireActivity())
@@ -690,6 +691,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
     override fun onPause() {
         super.onPause()
         VpnStatus.removeStateListener(this)
+        VpnStatus.removeByteCountListener(this)
         proTimerRunnable?.let { proTimerHandler?.removeCallbacks(it) }
         
         // Pause banner ad
@@ -731,17 +733,42 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
         Intent: Intent?
     ) {
         requireActivity().runOnUiThread {
+            // Log state changes for debugging
+            Log.d("VPN_START", "HomeFragment.updateState() called with state: $state, logmessage: $logmessage")
+            
             connectionStatusManager.updateVPNStatusText(state ?: "", wasConnectedOnce)
             vpnManager.updateVPNState(state, wasConnectedOnce)
+            // Remember last state for timer reset logic
+            _lastState = state
+            
+            // Handle RECONNECTING and failure states - capture OpenVPN errors (avoid direct LogItem references)
+            if (state == "RECONNECTING" || state == "AUTH_FAILED" || state == "CONNECTION_FAILED" || state == "TUNNEL_FAILED") {
+                try {
+                    val context = requireContext()
+                    val lastMessage = de.blinkt.openvpn.core.VpnStatus.getLastCleanLogMessage(context)
+                    if (lastMessage.isNotEmpty()) {
+                        Log.e("VPN_START", "OpenVPN error during $state: $lastMessage")
+                    }
+                } catch (e: Exception) {
+                    Log.e("VPN_START", "Error reading OpenVPN logs in HomeFragment", e)
+                    e.printStackTrace()
+                }
+            }
             
             // Handle VPN status changes for globe updates
             when (state) {
                 "CONNECTED" -> {
+                    // Reset and start timer for new session
+                    connectionStartMs = System.currentTimeMillis()
                     wasConnectedOnce = true
                     Log.d("HomeFragment", "VPN Connected - updating globe to show VPN server location")
                     globeManager?.onVPNStatusChanged(true)
                 }
                 "DISCONNECTED" -> {
+                    // Ensure persistent notification is removed on disconnect from any source
+                    try { notificationManager.removeVPNNotification() } catch (_: Exception) {}
+                    // Reset timer on disconnect
+                    connectionStartMs = 0L
                     Log.d("HomeFragment", "VPN Disconnected - updating globe to show real user location")
                     globeManager?.onVPNStatusChanged(false)
                     
@@ -752,15 +779,87 @@ class HomeFragment : Fragment(), VpnStatus.StateListener {
                     }, 2000)
                 }
                 "NOPROCESS" -> {
+                    // Ensure notification is removed when no VPN process remains
+                    try { notificationManager.removeVPNNotification() } catch (_: Exception) {}
+                    // Reset timer when no process
+                    connectionStartMs = 0L
                     Log.d("HomeFragment", "VPN No Process - updating globe to show real user location")
                     globeManager?.onVPNStatusChanged(false)
+                }
+                "VPN_GENERATE_CONFIG", "TCP_CONNECT", "WAIT", "AUTH", "GET_CONFIG" -> {
+                    // During a fresh connection attempt, ensure timer starts from zero until CONNECTED
+                    if (lastStatusWasTerminal()) {
+                        connectionStartMs = 0L
+                    }
                 }
             }
         }
     }
 
+    // Track whether previous status was terminal to decide timer reset during a new attempt
+    private var _lastState: String? = null
+
+    private fun lastStatusWasTerminal(): Boolean {
+        val terminal = _lastState == null || _lastState == "DISCONNECTED" || _lastState == "NOPROCESS"
+        return terminal
+    }
+
     override fun setConnectedVPN(uuid: String?) {
         vpnManager.setConnectedVPN(uuid)
+    }
+
+    // Track connection start time for timer
+    private var connectionStartMs: Long = 0L
+
+    
+
+    // Format mm:ss or hh:mm:ss
+    private fun formatDuration(elapsedMs: Long): String {
+        val totalSec = (elapsedMs / 1000).toInt()
+        val h = totalSec / 3600
+        val m = (totalSec % 3600) / 60
+        val s = totalSec % 60
+        return if (h > 0) String.format("%02d:%02d:%02d", h, m, s) else String.format("%02d:%02d", m, s)
+    }
+
+    private fun formatBpsShort(bps: Long): String {
+        return when {
+            bps >= 1024L * 1024L * 1024L -> String.format("%.1f GB/s", bps / (1024.0 * 1024.0 * 1024.0))
+            bps >= 1024L * 1024L -> String.format("%.1f MB/s", bps / (1024.0 * 1024.0))
+            bps >= 1024L -> String.format("%.1f KB/s", bps / 1024.0)
+            else -> String.format("%d B/s", bps)
+        }
+    }
+
+    override fun updateByteCount(`in`: Long, out: Long, diffIn: Long, diffOut: Long) {
+        requireActivity().runOnUiThread {
+            try {
+                // Initialize start time when first bytes flow
+                if (connectionStartMs == 0L) connectionStartMs = System.currentTimeMillis()
+                val elapsed = System.currentTimeMillis() - connectionStartMs
+                val durationStr = formatDuration(elapsed)
+
+                // OpenVPN reports diffs for the last interval; interval is 2 seconds by default
+                val intervalSec = de.blinkt.openvpn.core.OpenVPNManagement.mBytecountInterval
+                val downBps = if (intervalSec > 0) diffIn / intervalSec else diffIn
+                val upBps = if (intervalSec > 0) diffOut / intervalSec else diffOut
+
+                // Update UI via manager using new direct method
+                connectionStatusManager.updateConnectionSpeeds(durationStr, downBps, upBps)
+
+                // Update persistent notification with current speeds
+                try {
+                    val serverCountry = sharedPreference?.getServer()?.countryLong ?: "Unknown"
+                    val downText = formatBpsShort(downBps)
+                    val upText = formatBpsShort(upBps)
+                    notificationManager.updateVPNNotification(serverCountry, downText, upText)
+                } catch (e: Exception) {
+                    Log.e("HomeFragment", "Error updating VPN notification", e)
+                }
+            } catch (e: Exception) {
+                Log.e("HomeFragment", "Error updating byte count UI", e)
+            }
+        }
     }
     
     /**

@@ -33,6 +33,10 @@ public interface IServiceStatus extends android.os.IInterface
     {
       return null;
     }
+    /** Trigger reloading of a saved profile */
+    @Override public void notifyProfileVersionChanged(java.lang.String uuid, int version) throws android.os.RemoteException
+    {
+    }
     @Override
     public android.os.IBinder asBinder() {
       return null;
@@ -122,6 +126,15 @@ public interface IServiceStatus extends android.os.IInterface
           de.blinkt.openvpn.core.TrafficHistory _result = this.getTrafficHistory();
           reply.writeNoException();
           _Parcel.writeTypedObject(reply, _result, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+          break;
+        }
+        case TRANSACTION_notifyProfileVersionChanged:
+        {
+          java.lang.String _arg0;
+          _arg0 = data.readString();
+          int _arg1;
+          _arg1 = data.readInt();
+          this.notifyProfileVersionChanged(_arg0, _arg1);
           break;
         }
         default:
@@ -238,12 +251,27 @@ public interface IServiceStatus extends android.os.IInterface
         }
         return _result;
       }
+      /** Trigger reloading of a saved profile */
+      @Override public void notifyProfileVersionChanged(java.lang.String uuid, int version) throws android.os.RemoteException
+      {
+        android.os.Parcel _data = android.os.Parcel.obtain();
+        try {
+          _data.writeInterfaceToken(DESCRIPTOR);
+          _data.writeString(uuid);
+          _data.writeInt(version);
+          boolean _status = mRemote.transact(Stub.TRANSACTION_notifyProfileVersionChanged, _data, null, android.os.IBinder.FLAG_ONEWAY);
+        }
+        finally {
+          _data.recycle();
+        }
+      }
     }
     static final int TRANSACTION_registerStatusCallback = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
     static final int TRANSACTION_unregisterStatusCallback = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
     static final int TRANSACTION_getLastConnectedVPN = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
     static final int TRANSACTION_setCachedPassword = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
     static final int TRANSACTION_getTrafficHistory = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
+    static final int TRANSACTION_notifyProfileVersionChanged = (android.os.IBinder.FIRST_CALL_TRANSACTION + 5);
   }
   public static final java.lang.String DESCRIPTOR = "de.blinkt.openvpn.core.IServiceStatus";
   /**
@@ -259,6 +287,8 @@ public interface IServiceStatus extends android.os.IInterface
   public void setCachedPassword(java.lang.String uuid, int type, java.lang.String password) throws android.os.RemoteException;
   /** Gets the traffic history */
   public de.blinkt.openvpn.core.TrafficHistory getTrafficHistory() throws android.os.RemoteException;
+  /** Trigger reloading of a saved profile */
+  public void notifyProfileVersionChanged(java.lang.String uuid, int version) throws android.os.RemoteException;
   /** @hide */
   static class _Parcel {
     static private <T> T readTypedObject(
