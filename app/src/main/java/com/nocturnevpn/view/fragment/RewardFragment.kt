@@ -1,47 +1,43 @@
 package com.nocturnevpn.view.fragment
 
-import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.common.util.CollectionUtils.listOf
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.nocturnevpn.R
 import com.nocturnevpn.adapter.CoinHistoryAdapter
 import com.nocturnevpn.databinding.FragmentRewardBinding
 import com.nocturnevpn.model.CoinHistory
 import com.nocturnevpn.model.HistoryType
-import com.google.android.gms.common.util.CollectionUtils.listOf
-import java.text.SimpleDateFormat
-import java.util.*
-import android.animation.ValueAnimator
+import com.nocturnevpn.utils.AnimatedBorderManager
+import com.nocturnevpn.utils.AuthManager
+import com.nocturnevpn.view.managers.BannerAdManager
 import org.json.JSONArray
 import org.json.JSONObject
-import android.content.SharedPreferences
-import android.widget.ImageView
-import androidx.navigation.fragment.findNavController
-import android.os.Vibrator
-import android.os.VibrationEffect
-import com.nocturnevpn.utils.AnimatedBorderManager
-import com.nocturnevpn.view.managers.BannerAdManager
-import android.util.Log
-import com.nocturnevpn.utils.AuthManager
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 private val KEY_COIN_BALANCE = "coin_balance"
 private val KEY_COIN_HISTORY = "coin_history"
 private val KEY_AD_WATCH_COUNT = "ad_watch_count"
 private val KEY_AD_WATCH_DATE = "ad_watch_date"
-private val KEY_PRO_TIMER_END = "pro_timer_end"
-private val KEY_PRO_TIMER_TYPE = "pro_timer_type"
+// Reward-based temporary premium timer (separate from paid subscription)
+private val KEY_REWARD_TIMER_END = "reward_timer_end"
+private val KEY_REWARD_TIMER_TYPE = "reward_timer_type"
 
 class RewardFragment : Fragment() {
 
@@ -329,9 +325,14 @@ class RewardFragment : Fragment() {
                     btn.isEnabled = false
                     // Premium users skip ad for check-in; free users must watch ad
                     val prefsPremium = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                    val endTime = prefsPremium.getLong(KEY_PRO_TIMER_END, 0L)
-                    val type = prefsPremium.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
-                    val isLocalPremium = endTime > System.currentTimeMillis() && (type == "subscription")
+                    // For daily check-in, treat any active reward timer OR paid subscription as premium
+                    val rewardEnd = prefsPremium.getLong(KEY_REWARD_TIMER_END, 0L)
+                    val rewardType = prefsPremium.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
+                    val subEnd = prefsPremium.getLong("pro_timer_end", 0L)
+                    val subType = prefsPremium.getString("pro_timer_type", "") ?: ""
+                    val hasReward = rewardEnd > System.currentTimeMillis()
+                    val hasSubscription = subEnd > System.currentTimeMillis() && subType == "subscription"
+                    val isLocalPremium = hasReward || hasSubscription
                     val proceedReward: () -> Unit = {
                             wasRewarded = true
                             val reward = if (idx == 6) {
@@ -587,7 +588,7 @@ class RewardFragment : Fragment() {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         var adWatchCount = prefs.getInt(KEY_AD_WATCH_COUNT, 0)
         var adWatchDate = prefs.getString(KEY_AD_WATCH_DATE, "")
-        val adReward = 150
+        val adReward = 250
         val maxAdsPerDay = 5
 
         // Reset count if new day
@@ -626,7 +627,7 @@ class RewardFragment : Fragment() {
             adManager.showRewardedAd(
                 requireActivity(),
                 onRewarded = {
-                    val adReward = 150
+                    val adReward = 250
                     val previousBalance = loadCoinBalance()
                     val newBalance = previousBalance + adReward
                     animateCoinBalance(previousBalance, newBalance)
@@ -675,7 +676,12 @@ class RewardFragment : Fragment() {
             return
         }
         val endTime = System.currentTimeMillis() + durationMillis
-        prefs.edit().putLong(KEY_PRO_TIMER_END, endTime).putString(KEY_PRO_TIMER_TYPE, type).apply()
+        Log.d("NOCTURNE_VPN_REWARD", "useCoinForProTimer: saving end=$endTime type=$type cost=$cost balanceBefore=$currentBalance")
+        prefs.edit().putLong(KEY_REWARD_TIMER_END, endTime).putString(KEY_REWARD_TIMER_TYPE, type).apply()
+        // Read back immediately to verify write
+        val verifyEnd = prefs.getLong(KEY_REWARD_TIMER_END, 0L)
+        val verifyType = prefs.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
+        Log.d("NOCTURNE_VPN_REWARD", "useCoinForProTimer: saved end=$verifyEnd type=$verifyType")
         // Deduct coins and animate
         val newBalance = currentBalance - cost
         animateCoinBalance(currentBalance, newBalance)
@@ -689,6 +695,12 @@ class RewardFragment : Fragment() {
         // Trigger animated border when pro timer is started
         val animatedBorderManager = AnimatedBorderManager.getInstance(requireContext())
         animatedBorderManager.setShouldShowAfterNavigation(true)
+
+        // Notify HomeFragment immediately so it can show timer without waiting for resume
+        try {
+            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(requireContext())
+                .sendBroadcast(android.content.Intent("reward_timer_started"))
+        } catch (_: Exception) { }
         
         Toast.makeText(requireContext(), "Pro timer started!", Toast.LENGTH_SHORT).show()
     }

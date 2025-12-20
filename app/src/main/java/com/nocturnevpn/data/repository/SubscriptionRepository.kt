@@ -1,10 +1,9 @@
 package com.nocturnevpn.data.repository
 
+import android.util.Log
 import com.nocturnevpn.data.api.SubscriptionService
 import com.nocturnevpn.data.model.SubscriptionStatus
 import com.nocturnevpn.data.model.SubscriptionVerificationRequest
-import com.nocturnevpn.data.model.SubscriptionVerificationResponse
-import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -15,7 +14,8 @@ class SubscriptionRepository(private val subscriptionService: SubscriptionServic
 
     companion object {
         private const val TAG = "SubscriptionRepository"
-        private const val BASE_URL = "https://google-play-server.onrender.com/"
+//        private const val BASE_URL = "https://google-play-server.onrender.com/"
+        private const val BASE_URL = "https://google-play-server-rfjj.onrender.com/"
 
         // Retrofit client setup
         private val retrofitClient: Retrofit by lazy {
