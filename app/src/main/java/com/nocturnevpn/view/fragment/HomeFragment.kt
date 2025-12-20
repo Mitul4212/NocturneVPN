@@ -24,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.billingclient.api.BillingClient
 import com.nocturnevpn.CheckInternetConnection
 import com.nocturnevpn.R
@@ -70,13 +71,19 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
     private var sharedPreference: SharedPreference? = null
     var wasConnectedOnce = false
     private var isUserPremium: Boolean = false
-
-
+    
+    
     private val PREFS = "reward_prefs"
+    // Reward timer keys (separate from subscription keys used in SubscriptionSyncManager)
+    private val KEY_REWARD_TIMER_END = "reward_timer_end"
+    private val KEY_REWARD_TIMER_TYPE = "reward_timer_type"
+    // Local subscription cache keys (mirror those in SubscriptionSyncManager)
     private val KEY_PRO_TIMER_END = "pro_timer_end"
     private val KEY_PRO_TIMER_TYPE = "pro_timer_type"
     private var proTimerHandler: Handler? = null
     private var proTimerRunnable: Runnable? = null
+    private var rewardTimerReceiver: android.content.BroadcastReceiver? = null
+    private var hasRewardAccess: Boolean = false
     
     // Animated border manager
     private lateinit var animatedBorderManager: AnimatedBorderManager
@@ -328,7 +335,16 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
         Log.d("NOCTURNE_VPN_PREMIUM_CHECK", "Selected server: IP=${selectedServer.ipAddress}, Country=${selectedServer.countryLong}, isPremium=$isPremiumServer (matched in list: ${matchedServer != null})")
         // --- DEBUG LOGS END ---
 
-        // Check backend-verified subscription status from Firebase
+        // Reward-based access is a separate flag; do not touch subscription flag
+        hasRewardAccess = isRewardProTimerActive()
+        Log.d("NOCTURNE_VPN_REWARD", "handleConnect: rewardAccess=$hasRewardAccess, end=${getRewardTimerEnd()}, type=${getRewardTimerType()}")
+        if (hasRewardAccess) {
+            // For reward timer we allow premium servers and skip subscription checks
+            proceedConnectionFlowAfterPremiumCheck(true)
+            return
+        }
+
+        // Otherwise, check backend-verified subscription status from Firebase
         CoroutineScope(Dispatchers.IO).launch {
             subscriptionSyncManager.restoreSubscriptionFromFirebase(
                 onSuccess = { subscriptionStatus ->
@@ -363,6 +379,24 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
                 }
             )
         }
+    }
+
+    private fun isRewardProTimerActive(): Boolean {
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val endTime = prefs.getLong(KEY_REWARD_TIMER_END, 0L)
+        val timerType = prefs.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
+        // Treat missing type as reward-based for backward compatibility
+        return endTime > System.currentTimeMillis()
+    }
+
+    private fun getRewardTimerEnd(): Long {
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        return prefs.getLong(KEY_REWARD_TIMER_END, 0L)
+    }
+
+    private fun getRewardTimerType(): String {
+        val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
     }
 
     private fun showPremiumBlockDialog() {
@@ -416,11 +450,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
 
     private fun setupProTimer() {
         val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val endTime = prefs.getLong(KEY_PRO_TIMER_END, 0L)
-        val timerType = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+        val endTime = prefs.getLong(KEY_REWARD_TIMER_END, 0L)
+        val timerType = prefs.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
+        hasRewardAccess = endTime > System.currentTimeMillis()
+        Log.d("NOCTURNE_VPN_REWARD", "setupProTimer: rewardAccess=$hasRewardAccess, end=$endTime, type=$timerType")
 
         // This logic now specifically for reward-based pro timer
-        if (endTime > System.currentTimeMillis() && timerType != "subscription") {
+        if (hasRewardAccess) {
             binding?.proTimer?.visibility = View.VISIBLE
             binding?.goProButton?.visibility = View.GONE
             startProTimerCountdown(endTime, timerType)
@@ -445,10 +481,12 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
 
             // First, check for reward-based pro timer (independent of subscription)
             val prefs = requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            val rewardProTimerEnd = prefs.getLong(KEY_PRO_TIMER_END, 0L)
-            val rewardTimerType = prefs.getString(KEY_PRO_TIMER_TYPE, "") ?: ""
+            val rewardProTimerEnd = prefs.getLong(KEY_REWARD_TIMER_END, 0L)
+            val rewardTimerType = prefs.getString(KEY_REWARD_TIMER_TYPE, "") ?: ""
+            hasRewardAccess = rewardProTimerEnd > System.currentTimeMillis()
+            Log.d("NOCTURNE_VPN_REWARD", "updateGoProButtonState: rewardAccess=$hasRewardAccess, end=$rewardProTimerEnd, type=$rewardTimerType")
 
-            if (rewardProTimerEnd > System.currentTimeMillis() && rewardTimerType != "subscription") {
+            if (hasRewardAccess) {
                 proTimer.visibility = View.VISIBLE
                 goProButton.visibility = View.GONE
                 startProTimerCountdown(rewardProTimerEnd, rewardTimerType)
@@ -658,6 +696,7 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
 
         // Re-evaluate Go Pro button state on resume
         updateGoProButtonState()
+        Log.d("NOCTURNE_VPN_REWARD", "onResume: end=${getRewardTimerEnd()}, type=${getRewardTimerType()}")
 
         // Ensure subscription state restored here (source of truth for Home)
         if (com.nocturnevpn.utils.AuthManager.getInstance(requireContext()).isUserSignedIn()) {
@@ -686,6 +725,24 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
                 animatedBorderManager.onFragmentResume(goProButton)
             }
         }
+
+        // Listen for reward timer start events from RewardFragment
+        if (rewardTimerReceiver == null) {
+            rewardTimerReceiver = object : android.content.BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    if (intent?.action == "reward_timer_started") {
+                        Log.d("NOCTURNE_VPN_REWARD", "reward_timer_started broadcast received")
+                        Log.d("NOCTURNE_VPN_REWARD", "broadcast current prefs end=${getRewardTimerEnd()}, type=${getRewardTimerType()}")
+                        setupProTimer()
+                        updateGoProButtonState()
+                    }
+                }
+            }
+        }
+        rewardTimerReceiver?.let {
+            LocalBroadcastManager.getInstance(requireContext())
+                .registerReceiver(it, android.content.IntentFilter("reward_timer_started"))
+        }
     }
 
     override fun onPause() {
@@ -703,6 +760,11 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
         
         // Preserve animated border state when fragment is paused
         animatedBorderManager.onFragmentPause()
+
+        // Stop listening for reward timer events
+        rewardTimerReceiver?.let {
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(it)
+        }
     }
 
     override fun onStop() {

@@ -22,7 +22,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="hide_your_ip_with_n_anonymous_surfing">Hide your ip with \nanonymous surfing</string>
-    <string name="_seven_day_free_trial_then_9_99_month">7-day free trial. Then 9.99 $/month</string>
+    <string name="_seven_day_free_trial_then_9_99_month">7-day free trial. Then $9.99/month.\nCancel anytime in Google Play settings.</string>
     <string name="up_to_1000_mb_s_nbandwidth_to_explore">Up to 1000 Mb/s \nbandwidth to explore</string>
     <string name="enjoy_the_app_nwithout_annoying_ads">Enjoy the app \nwithout annoying ads</string>
     <string name="transfer_traffic_via_nencrypted_tunnel">Transfer traffic via\nencrypted tunnel</string>

@@ -142,11 +142,16 @@ public class ServerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ImageView preImage = serverHolder.itemView.findViewById(R.id.pre_imaage);
             View serverLayout = serverHolder.itemView.findViewById(R.id.serverLayout);
 
-            // --- PREMIUM TIMER CHECK ---
+            // --- PREMIUM ACCESS CHECK ---
             SharedPreferences prefs = serverHolder.itemView.getContext().getSharedPreferences("reward_prefs", Context.MODE_PRIVATE);
-            long proTimerEnd = prefs.getLong("pro_timer_end", 0L);
-            boolean isUserPremium = proTimerEnd > System.currentTimeMillis();
-            // --- END PREMIUM TIMER CHECK ---
+            long rewardEnd = prefs.getLong("reward_timer_end", 0L);
+            String rewardType = prefs.getString("reward_timer_type", "");
+            long subEnd = prefs.getLong("pro_timer_end", 0L);
+            String subType = prefs.getString("pro_timer_type", "");
+            boolean hasReward = rewardEnd > System.currentTimeMillis();
+            boolean hasSubscription = subEnd > System.currentTimeMillis() && "subscription".equals(subType);
+            boolean isUserPremium = hasReward || hasSubscription;
+            // --- END PREMIUM ACCESS CHECK ---
 
             if (server.isPremium() && !isUserPremium) {
                 preImage.setVisibility(View.VISIBLE);

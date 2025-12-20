@@ -700,21 +700,31 @@ public class ChangeServerActivity extends AppCompatActivity {
             sortedByScore.sort((a, b) -> Double.compare(serverScoreMap.get(b), serverScoreMap.get(a)));
             int percentCount = (int) Math.ceil(sortedByScore.size() * 0.2);
             int premiumCount = Math.max(20, percentCount);
-            if (percentCount < 1) premiumCount = 0;
+            if (percentCount < 1) {
+                premiumCount = 0;
+            }
+            // Clamp premiumCount so we never index beyond the list size
+            if (premiumCount > sortedByScore.size()) {
+                premiumCount = sortedByScore.size();
+            }
             for (int i = 0; i < sortedByScore.size(); i++) {
                 Server s = sortedByScore.get(i);
                 s.setPremium(i < premiumCount);
             }
             // Log premium servers
-            StringBuilder premiumLog = new StringBuilder("Premium servers selected: ");
-            for (int i = 0; i < premiumCount; i++) {
-                Server s = sortedByScore.get(i);
-                premiumLog.append(s.getIpAddress())
-                          .append(" (score=")
-                          .append(serverScoreMap.get(s))
-                          .append(") ");
+            if (premiumCount > 0) {
+                StringBuilder premiumLog = new StringBuilder("Premium servers selected: ");
+                for (int i = 0; i < premiumCount; i++) {
+                    Server s = sortedByScore.get(i);
+                    premiumLog.append(s.getIpAddress())
+                              .append(" (score=")
+                              .append(serverScoreMap.get(s))
+                              .append(") ");
+                }
+                Log.d("PremiumSelect", premiumLog.toString());
+            } else {
+                Log.d("PremiumSelect", "No premium servers selected (premiumCount=0)");
             }
-            Log.d("PremiumSelect", premiumLog.toString());
 
             // --- Save updated server list to cache ---
             sharedPreference.saveServerList(serverList);
