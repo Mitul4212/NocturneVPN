@@ -23,8 +23,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.findNavController
 import com.android.billingclient.api.BillingClient
 import com.nocturnevpn.CheckInternetConnection
 import com.nocturnevpn.R
@@ -287,12 +287,13 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
     }
 
     private fun proceedConnectFlow() {
-        if (isUserPremium) {
-            vpnManager.prepareVPN()
-        } else {
-            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
-        }
+//        if (isUserPremium) {
+//            vpnManager.prepareVPN()
+//        } else {
+//            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+//            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+//        }
+        vpnManager.prepareVPN()
     }
 
     private fun handleConnectButtonClick() {
@@ -440,12 +441,14 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
         }
 
         // If we get here, either the server is not premium or the user is premium
-        if (isPremium) {
-            vpnManager.prepareVPN()
-        } else {
-            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
-            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
-        }
+//        if (isPremium) {
+//            vpnManager.prepareVPN()
+//        } else {
+//            val adManager = com.nocturnevpn.view.managers.AdManager.getInstance(requireContext())
+//            adManager.showInterstitialAd(requireActivity()) { vpnManager.prepareVPN() }
+//        }
+        // Start VPN directly (no ads for any user)
+        vpnManager.prepareVPN()
     }
 
     private fun setupProTimer() {
@@ -460,6 +463,8 @@ class HomeFragment : Fragment(), VpnStatus.StateListener, VpnStatus.ByteCountLis
             binding?.proTimer?.visibility = View.VISIBLE
             binding?.goProButton?.visibility = View.GONE
             startProTimerCountdown(endTime, timerType)
+
+
         } else {
             binding?.proTimer?.visibility = View.GONE
             // The visibility of goProButton will be managed by updateGoProButtonState for subscription status
