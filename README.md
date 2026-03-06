@@ -198,7 +198,7 @@ Full license text available in the `LICENSE` file.
 ## 🧑‍💻 Author
 
 Mitul Chovatiya  
-Email: your-email@example.com  
+Email: mitul@ventroxtech.com  
 GitHub: https://github.com/Mitul4212
 
 ---
